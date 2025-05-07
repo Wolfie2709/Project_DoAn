@@ -9,39 +9,47 @@ import { Product } from "@/types";
 import { calculateDiscount } from "@/lib/calculateDiscount";
 
 const SingleProductListView = ({ product }: { product: Product }) => {
-  const { category, discount, id, images, name, price, rating, reviews } =
+  const { productId,
+    productName,
+    description,
+    stock,
+    price,
+    brandID,
+    categoryID,
+    shortDescription,
+    brand,
+    category,
+    discountedPrice,
+    images } =
     product;
 
-  const discountPrice = calculateDiscount(price, discount);
+  // const discountPrice = calculateDiscount(price, discount);
 
   return (
     <Link
-      href={`/shop/${id}`}
+      href={`/shop/${productId}`}
       className="group flex flex-col lg:flex-row lg:items-start items-center justify-center gap-4 relative space-y-4 p-4 md:p-8 border"
     >
       <div className="flex-shrink-0 w-[20rem] h-[18rem] relative rounded-md overflow-hidden bg-gray-200">
-        <Image src={images[0]} alt={name} fill className="object-contain" />
+      {images && images[0] && <Image className="object-contain" src={images[0].imageUrl} alt={images[0].imageUrl} fill />}
       </div>
       <div className="">
-        <p className="text-sm text-sky-500 font-light">{category}</p>
+        <p className="text-sm text-sky-500 font-light">{category?.categoryname}</p>
         <div className="flex items-center justify-between">
-          <h3 className="text-2xl font-bold hover:text-green-500">
-            {name.slice(0, 45)}
-            {name.length > 45 && "..."}
-          </h3>
+        {productName && (<h3 className="text-xl font-fold capitalize hover:text-green-500">
+          {productName.slice(0, 45)}
+          {productName.length > 45 && "..."}
+        </h3>)}
         </div>
-        <RatingReview rating={rating} review={reviews.length} />
+        {/* <RatingReview rating={rating} review={reviews.length} /> */}
         <div className="text-lg font-bold space-x-2 my-4 ">
-          <span className="line-through text-muted-foreground">${price}</span>
+          <span className=" text-muted-foreground">${price}</span>
           <span className="text-xl font-bold text-green-500">
-            ${discountPrice}
+            ${discountedPrice}
           </span>
         </div>
         <div className=" text-sm">
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Quis numquam
-          consequatur, corporis magnam quibusdam quae minima quidem. Quis
-          nostrum laboriosam libero culpa expedita a repellendus, officiis,
-          saepe, deleniti quia reiciendis.
+          {description}
         </div>
         <div
           className="flex flex-col md:flex-row mt-4 items-center gap-2 max-w-96 ml-auto justify-end"

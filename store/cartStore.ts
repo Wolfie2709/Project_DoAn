@@ -36,11 +36,11 @@ const useCartStore = create<CartState>((set) => {
     
     addToCart: (newItem: CartItem): void => {
       set((state) => {
-        const existingItem = state.cartItems.find((item) => item.id === newItem.id);
+        const existingItem = state.cartItems.find((item) => item.productId === newItem.productId);
         return {
           cartItems: existingItem
             ? state.cartItems.map((item) =>
-                item.id === newItem.id ? { ...item, quantity: item.quantity + 1 } : item
+                item.productId === newItem.productId ? { ...item, quantity: item.quantity + 1 } : item
               )
             : [...state.cartItems, { ...newItem}],
         };
@@ -50,7 +50,7 @@ const useCartStore = create<CartState>((set) => {
 
     removeFromCart: (itemId: number): void => {
       set((state) => ({
-        cartItems: state.cartItems.filter((item) => item.id !== itemId),
+        cartItems: state.cartItems.filter((item) => item.productId !== itemId),
       }));
       localStorage.setItem(STORAGE_KEY, JSON.stringify(useCartStore.getState().cartItems));
     },
@@ -58,7 +58,7 @@ const useCartStore = create<CartState>((set) => {
     updateQuantity: (itemId: number, newQuantity: number): void => {
       set((state) => ({
         cartItems: state.cartItems.map((item) =>
-          item.id === itemId ? { ...item, quantity: newQuantity } : item
+          item.productId === itemId ? { ...item, quantity: newQuantity } : item
         ),
       }));
       localStorage.setItem(STORAGE_KEY, JSON.stringify(useCartStore.getState().cartItems));

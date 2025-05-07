@@ -2,6 +2,7 @@
 import { ShoppingBag, X } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { Badge } from "../ui/badge";
+import { Product } from "@/types";
 import {
   Sheet,
   SheetContent,
@@ -28,8 +29,8 @@ const Cart = () => {
   const [isMounted, setIsMounted] = useState(false);
 
   const handleRovomeItemFromCart = (item: CartItem) => {
-    removeFromCart(item.id);
-    showToast("Item Removed from Cart", item?.images[0] as string, item.name);
+    removeFromCart(item.productId);
+    showToast("Item Removed from Cart", item?.images[0].imageUrl, item?.productName ?? "");
   };
 
   useEffect(() => {
@@ -67,20 +68,14 @@ const Cart = () => {
                 {/* cart items here */}
                 {cartItems.map((item) => (
                   <div
-                    key={item.id}
+                    key={item.productId}
                     className="flex items-center justify-start gap-2 p-2
                       mt-2 border-b-2 border-t-gray-500"
                   >
-                    <Image
-                      className="rounded-full object-contain"
-                      src={item?.images && item?.images[0]}
-                      alt="product iamge"
-                      width={70}
-                      height={70}
-                    />
+                    {item.images && item.images[0] && <Image className="rounded-full object-contain" src={item.images[0].imageUrl} alt={item.images[0].imageUrl} width = {70} height = {70} />}
                     <div className="space-y-2">
                       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-2">
-                        <h2>{item.name.slice(0, 50)}...</h2>
+                        <h2>{item?.productName?.slice(0, 50)}...</h2>
                       </div>
 
                       <div className="flex items-center justify-between">

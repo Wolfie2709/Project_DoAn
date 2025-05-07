@@ -4,11 +4,15 @@ import Image from "next/image";
 import React, { useState } from "react";
 
 interface ProductGalleryProps {
-  images: string[];
+  images?: string[];
   isInModal: boolean;
 }
 
 const ProductGallery = ({ images, isInModal }: ProductGalleryProps) => {
+  if(!images )
+  {
+    return <div></div>;
+  }
   const [selectedImage, setSelectedImage] = useState(images[0]);
 
   const handleImageSelection = (image: string) => {

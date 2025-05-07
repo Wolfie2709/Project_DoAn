@@ -106,7 +106,7 @@ const ShopPageContainer = ({
       {listView === true && (
         <div className="max-w-screen-xl mx-auto overflow-hidden py-4 md:py-8 gap-4 lg:gap-6">
           {paginatedData.map((product) => (
-            <SingleProductListView key={product.id} product={product} />
+            <SingleProductListView key={product.productId} product={product} />
           ))}
         </div>
       )}

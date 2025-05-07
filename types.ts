@@ -6,8 +6,107 @@ export type Product = {
   description?: string;
   stock: number;
   price: number;
-  
+  brandID: number;
+  categoryID: number;
+  shortDescription?: string;
+  brand?: Brand;
+  category?: Category;
+  images: Image[];
+  discountedPrice: number;
 };
+
+export type Brand={
+brandID: number;
+brandname: string;
+products: Product;
+}
+
+export type Image={
+  imageID : number;
+  productID : number;
+  mainImage? : boolean;
+  imageUrl: string;
+  product: Product;
+}
+
+export type Category={
+categoryID: number;
+categoryname?: string;
+parentCategoryID: number;
+inverseParentCategory: Category;
+products: Product;
+}
+
+export type OrderDetails={
+orderDetailID: number;
+orderID?: number;
+productID: number;
+amount: number;
+discount: number;
+order: Order;
+product: Product;
+}
+
+export type Employee={
+userID: number;
+position: string;
+doj?: string;
+fullName?: string;
+phoneNumber?: string;
+email?: string;
+birthday?: string;  
+gender?: string;
+address?: string;
+}
+
+export type Order={
+  orderId: number;
+  userId?: number;
+  shippingAddress?: string;
+  orderDate?: string;
+  status?: string;
+  estimatedDate?: string;
+  totalCost?: number;
+  receiverEmail?: string;
+  receiverName?: string;
+  receiverPhoneNumber?: string;
+  note?: string;
+  orderDetails: OrderDetail[];
+  payments: Payment[];
+  user?: User;
+}
+
+export type OrderDetail={
+  orderDetailId: number;
+  orderId?: number;
+  productId?: number;
+  amount?: number;
+  discount?: number;
+  order?: Order;
+  product?: Product;
+}
+
+export type Payment={
+  paymentId: number;
+  orderId?: number;
+  paymentMethod?: string;
+  transactionId?: string;
+  status?: string;
+  order?: Order;
+}
+
+export type User={
+  userId: number;
+  phoneNumber?: string;
+  fullName?: string;
+  email?: string;
+  birthday?: string;
+  gender?: string;
+  address?: string;
+  orders: Order[];
+  reviews: Review[];
+  shoppingCarts: ShoppingCart[];
+}
 
 export type Review = {
   author: string;
@@ -16,6 +115,14 @@ export type Review = {
   rating:number
   date: Date;
 };
+
+export type ShoppingCart={
+  userId: number;
+  productId: number;
+  amount?: number;
+  product: Product;
+  user: User;
+}
 
 export type SearchParams = {
   page: string;
