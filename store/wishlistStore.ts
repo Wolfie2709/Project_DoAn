@@ -32,16 +32,16 @@ const useWishlistStore = create<WishlistState>((set, get) => {
     },
     removeFromWishlist: (itemId: number) => {
       set((state) => ({
-        wishlistItems: state.wishlistItems.filter((item) => item.id !== itemId),
+        wishlistItems: state.wishlistItems.filter((item) => item.productId !== item.productId),
       }));
       if (isLocalStorageAvailable) {
         localStorage.setItem('wishlist-items', JSON.stringify(get().wishlistItems));
       }
     },
-    isInWishlist: (itemId: number) => {
+    isInWishlist: (item.productId: number) => {
       // Access state through the get function
       const { wishlistItems } = get();
-      return wishlistItems.some((item) => item.id === itemId);
+      return wishlistItems.some((item) => item.productId === itemId);
     },
   };
 });
