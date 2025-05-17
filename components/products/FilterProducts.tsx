@@ -8,14 +8,15 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button } from "../ui/button";
 import { colors } from "@/data/products/productColor";
 import { dummyCategories } from "@/data/category/categoryData";
-import { Brand } from "@/types";
+import { Brand, Category } from "@/types";
 
 const FilterProducts = () => {
   // State variables for filters
   const [brands, setBrands] = useState<Brand[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [minValue, setMinValue] = useState(10);
   const [maxValue, setMaxValue] = useState(5000);
-  const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState(0);
   const [selectedColor, setSelectedColor] = useState("");
   const [selectedBrand, setSelectedBrand] = useState(0);
 
@@ -41,24 +42,35 @@ const FilterProducts = () => {
         setBrands([]);
       }
   }
+  const fetchCategories = async () => {
+    try {
+      const res = await fetch(`https://localhost:7240/api/Categories`);
+      const data: Category[] = await res.json();
 
+      setCategories(data);
+    } catch (error) {
+      console.error("Failed to fetch products", error);
+      setBrands([]);
+    }
+  }
   // Update state with initial values
   useEffect(() => {
     fetchBrands();
     setMaxValue(Number(initialPrice));
-    setSelectedCategory(initialCategory as string);
+    fetchCategories();
     setSelectedColor(initialColor as string);
   }, [initialPrice, initialCategory, initialColor, initialBrand]);
 
   // Selection handler functions with search param updates
-  const handleCategorySelection = (category: string) => {
+  const handleCategorySelection = (categoryId: number) => {
     const newSearchParams = new URLSearchParams(searchParams);
-    if (category === selectedCategory) {
+    if (categoryId === selectedBrand) {
       newSearchParams.delete("category");
     } else {
-      newSearchParams.set("category", category);
+      newSearchParams.set("category", categoryId.toString());
+
     }
-    setSelectedCategory(category);
+    setSelectedCategory(categoryId);
     router.push(`${pathname}?${newSearchParams}`);
   };
 
@@ -161,17 +173,17 @@ const FilterProducts = () => {
       <div>
         <h3 className="text-lg font-medium my-2">By Categories</h3>
         <div className="flex items-center justify-start gap-2 flex-wrap">
-          {dummyCategories.map((category) => (
+          {categories.map((category) => (
             <p
-              onClick={() => handleCategorySelection(category.name)}
+              onClick={() => handleCategorySelection(category.categoryId)}
               className={cn(
                 "px-4 py-1 rounded-full bg-slate-200 dark:bg-slate-700 cursor-pointer",
-                category.name === selectedCategory &&
+                category.categoryId === selectedCategory &&
                   "bg-blue-400 dark:bg-blue-700"
               )}
-              key={category.id}
+              key={category.categoryId}
             >
-              {category.name}
+              {category.categoryName}
             </p>
           ))}
         </div>

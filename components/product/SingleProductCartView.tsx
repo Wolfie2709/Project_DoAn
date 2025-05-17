@@ -67,7 +67,7 @@ const SingleProductCartView = ({ product }: { product: Product }) => {
           className="text-sm text-sky-500 font-light -mb-1 hover:opacity-60 "
         >
           {" "}
-          {category?.categoryname}
+          {category?.categoryName}
         </p>
         {productName && (<h3 className="text-xl font-fold capitalize hover:text-green-500">
           {productName.slice(0, 45)}
