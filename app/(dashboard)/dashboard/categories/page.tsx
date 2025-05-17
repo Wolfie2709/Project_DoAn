@@ -1,12 +1,33 @@
+"use client";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { dummyCategories } from "@/data/category/categoryData";
 import { MoreHorizontal } from "lucide-react";
+import { Category } from "@/types";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
+import { useEffect, useState } from "react";
 
 const CategoryPage = () => {
+  // state variable
+  const [categories, setCategories] = useState<Category[]>([]);
 
+  const fetchCategories = async () => {
+      try {
+        const res = await fetch(`https://localhost:7240/api/Categories`);
+        const data: Category[] = await res.json();
+  
+        setCategories(data);
+        // console.log(data)
+      } catch (error) {
+        console.error("Failed to fetch products", error);
+        setCategories([]);
+      }
+    }
+    // Update state with initial values
+    useEffect(() => {
+      fetchCategories();
+    }, []);
 
   return (
     <div className="bg-white dark:bg-gray-800 min-h-screen max-w-screen-xl w-full mx-auto px-4 py-12 m-2 rounded-md">
@@ -23,25 +44,25 @@ const CategoryPage = () => {
           </Link>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {dummyCategories.map((category) => (
+          {categories.map((category) => (
             <div
-              key={category.id}
+              key={category.categoryId}
               className="bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden shadow-md"
             >
               <div className="relative w-full h-[16rem] p-2">
                 <Image
-                  src={category.image}
+                  src={category.images[0] ? category.images[0].imageUrl : ""}
                   fill
-                  alt={category.name}
+                  alt={category.categoryName}
                   className="w-full h-64 object-contain"
                 />
               </div>
               <div className="p-6">
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                  {category.name}
+                  {category.categoryName}
                 </h2>
                 <p className="text-gray-700 dark:text-gray-300">
-                  {category.description}
+                  Description
                 </p>
                 <div className="mt-4 flex space-x-4">
                   

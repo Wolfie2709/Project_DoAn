@@ -35,6 +35,7 @@ categoryName: string;
 parentCategoryID: number;
 inverseParentCategory: Category;
 products: Product;
+images: Image[];
 }
 
 export type OrderDetails={
