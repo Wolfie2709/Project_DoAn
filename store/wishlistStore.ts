@@ -21,7 +21,7 @@ const useWishlistStore = create<WishlistState>((set, get) => {
     wishlistItems: parsedWishlistItems,
     addToWishlist: (newItem: Product) => {
       set((state) => {
-        const existingItem = state.wishlistItems.find((item) => item.id === newItem.id);
+        const existingItem = state.wishlistItems.find((item) => item.productId === newItem.productId);
         return {
           wishlistItems: existingItem ? state.wishlistItems : [...state.wishlistItems, { ...newItem }],
         };
@@ -38,10 +38,10 @@ const useWishlistStore = create<WishlistState>((set, get) => {
         localStorage.setItem('wishlist-items', JSON.stringify(get().wishlistItems));
       }
     },
-    isInWishlist: (item.productId: number) => {
+    isInWishlist: (productId: number) => {
       // Access state through the get function
       const { wishlistItems } = get();
-      return wishlistItems.some((item) => item.productId === itemId);
+      return wishlistItems.some((item) => item.productId === productId);
     },
   };
 });

@@ -3,38 +3,51 @@ import React, { useEffect, useState } from "react";
 import { Separator } from "../ui/separator";
 import { Input } from "../ui/input";
 import { cn } from "@/lib/utils";
-import { brandsData } from "@/data/brands/brandsdata";
 import { Label } from "../ui/label";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button } from "../ui/button";
 import { colors } from "@/data/products/productColor";
 import { dummyCategories } from "@/data/category/categoryData";
+import { Brand } from "@/types";
 
 const FilterProducts = () => {
   // State variables for filters
+  const [brands, setBrands] = useState<Brand[]>([]);
   const [minValue, setMinValue] = useState(10);
   const [maxValue, setMaxValue] = useState(5000);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
-  const [selectedBrand, setSelectedBrand] = useState("");
+  const [selectedBrand, setSelectedBrand] = useState(0);
 
   // Access search params
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
-
+  
   // Get filter values from search params on initial render
   const initialPrice = searchParams.get("max") || "5000";
   const initialCategory = searchParams.get("category");
   const initialColor = searchParams.get("color");
   const initialBrand = searchParams.get("brand");
 
+  const fetchBrands = async() => {
+    try{
+        const res = await fetch(`https://localhost:7240/api/Brands`);
+        const data: Brand[] = await res.json();
+  
+        setBrands(data);
+      } catch (error) {
+        console.error("Failed to fetch products", error);
+        setBrands([]);
+      }
+  }
+
   // Update state with initial values
   useEffect(() => {
+    fetchBrands();
     setMaxValue(Number(initialPrice));
     setSelectedCategory(initialCategory as string);
     setSelectedColor(initialColor as string);
-    setSelectedBrand(initialBrand as string);
   }, [initialPrice, initialCategory, initialColor, initialBrand]);
 
   // Selection handler functions with search param updates
@@ -85,14 +98,15 @@ const FilterProducts = () => {
     router.push(`${pathname}?${newSearchParams}`);
   };
 
-  const handleBrandSelection = (brand: string) => {
+  const handleBrandSelection = (brandId: number) => {
     const newSearchParams = new URLSearchParams(searchParams);
-    if (brand === selectedBrand) {
+    if (brandId === selectedBrand) {
       newSearchParams.delete("brand");
     } else {
-      newSearchParams.set("brand", brand);
+        newSearchParams.set("brand", brandId.toString());
+      
     }
-    setSelectedBrand(brand);
+    setSelectedBrand(brandId);
     router.push(`${pathname}?${newSearchParams}`);
   };
 
@@ -190,16 +204,16 @@ const FilterProducts = () => {
       <div>
         <h3 className="text-lg font-medium my-2">By Brands</h3>
         <div className="flex items-center justify-start gap-2 flex-wrap">
-          {brandsData.map((brand) => (
+          {brands.map((brand) => (
             <p
-              onClick={() => handleBrandSelection(brand)}
+              onClick={() => handleBrandSelection(brand.brandId)}
               className={cn(
                 "px-4 py-1 rounded-full bg-slate-200 dark:bg-slate-700 cursor-pointer",
-                selectedBrand === brand && "bg-blue-400 dark:bg-blue-700"
+                selectedBrand === brand.brandId && "bg-blue-400 dark:bg-blue-700"
               )}
-              key={brand}
+              key={brand.brandId}
             >
-              {brand}
+              {brand.brandName}
             </p>
           ))}
         </div>

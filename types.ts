@@ -16,8 +16,8 @@ export type Product = {
 };
 
 export type Brand={
-brandID: number;
-brandname: string;
+brandId: number;
+brandName: string;
 products: Product;
 }
 

@@ -4,7 +4,7 @@ import { persist, createJSONStorage } from 'zustand/middleware'
 type AuthStore = {
   userName: string
   accessToken: string
-  login: () => void
+  login: (userName: string, accessToken: string) => void
   logout: () => void
 }
 
@@ -14,7 +14,7 @@ export const useBearStore = create<AuthStore>()(
       userName: "",
       accessToken: "",
       login: (userName, accessToken) => set({ userName, accessToken}),
-      logout: () => set({userName: delete().userName})
+      logout: () => set({userName: "",accessToken: ""})
     }),
     
     {

@@ -31,14 +31,14 @@ const ShopPageContainer = ({
     try {
       setLoading(true);
       const query = new URLSearchParams({
-        category: searchParams.category || "",
-        brand: searchParams.brand || "",
+        categoryId: searchParams.category || "",
+        brandId: searchParams.brand || "",
         color: searchParams.color || "",
         min: searchParams.min || "",
         max: searchParams.max || "",
       }).toString();
 
-      const res = await fetch(`https://localhost:7240/api/Products`);
+      const res = await fetch(`https://localhost:7240/api/Products?${query}`);
       const data: Product[] = await res.json();
 
       setFilteredData(data);
