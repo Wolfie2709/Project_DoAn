@@ -12,13 +12,14 @@ const CategoryPage = () => {
   // state variable
   const [categories, setCategories] = useState<Category[]>([]);
 
+  //Call Get api to get all category data
   const fetchCategories = async () => {
       try {
         const res = await fetch(`https://localhost:7240/api/Categories`);
         const data: Category[] = await res.json();
   
         setCategories(data);
-        // console.log(data)
+        console.log(data)
       } catch (error) {
         console.error("Failed to fetch products", error);
         setCategories([]);
@@ -28,6 +29,27 @@ const CategoryPage = () => {
     useEffect(() => {
       fetchCategories();
     }, []);
+
+  //delete a category
+  const deleteCategory = async (id: number) => {
+    const confirmed = confirm("Are you sure you want to delete this category?");
+    if (!confirmed) return;
+
+    try {
+      const res = await fetch(`https://localhost:7240/api/Categories/${id}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        // Refresh lại danh sách
+        await fetchCategories();
+      } else {
+        console.error("Failed to delete category");
+      }
+    } catch (error) {
+      console.error("Error deleting category:", error);
+    }
+  };
 
   return (
     <div className="bg-white dark:bg-gray-800 min-h-screen max-w-screen-xl w-full mx-auto px-4 py-12 m-2 rounded-md">
@@ -74,7 +96,10 @@ const CategoryPage = () => {
                       </div>
                     </PopoverTrigger>
                     <PopoverContent className="text-start">
-                      <button className="w-full text-start hover:bg-slate-200 dark:hover:bg-slate-900 py-2 px-4 rounded-md">
+                      <button
+                        className="w-full text-start hover:bg-slate-200 dark:hover:bg-slate-900 py-2 px-4 rounded-md"
+                        onClick={() => deleteCategory(category.categoryId)}
+                      >
                         Delete Category
                       </button>
                     </PopoverContent>

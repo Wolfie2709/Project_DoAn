@@ -6,6 +6,8 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useRouter } from "next/navigation";
+
 
 // Define the schema for form validation
 const formSchema = z.object({
@@ -19,6 +21,7 @@ type FormData = z.infer<typeof formSchema>;
 
 const CategoryForm: React.FC = () => {
   // Initialize react-hook-form
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -28,8 +31,38 @@ const CategoryForm: React.FC = () => {
   });
 
   // Form submission handler
-  const onSubmit = (data: FormData) => {
-    console.log("Category submitted:", data);
+  const onSubmit = async (data: FormData) => {
+    try {
+      const response = await fetch("https://localhost:7240/api/Categories", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          categoryName: data.name,
+          // Các field còn lại nếu bạn có thêm: parentCategoryId, addedBy, ...
+          parenCategoryId: null,
+          addedBy: 2, 
+          images: [
+            {
+              imageUrl: data.image, // cần map đúng với class Image bên C#
+            }
+          ],
+          // Nếu muốn thêm mô tả, bạn cần cập nhật model để hỗ trợ description
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create category");
+      }
+
+      const result = await response.json();
+      console.log("Category created successfully:", result);
+      // Có thể reset form hoặc chuyển hướng ở đây
+      router.push("/dashboard/categories");
+    } catch (error) {
+      console.error("Error submitting category:", error);
+    }
   };
 
   return (
@@ -65,12 +98,11 @@ const CategoryForm: React.FC = () => {
             Image Upload
           </Label>
           <Input
-            type="file"
+            type="text"
             id="image"
             {...register("image")}
-            className={`mt-1 p-2 w-full rounded-md border ${
-              errors.image ? "border-red-500" : "border-gray-300 dark:border-gray-600"
-            } focus:ring-blue-500 focus:border-blue-500`}
+            className={`mt-1 p-2 w-full rounded-md border ${errors.image ? "border-red-500" : "border-gray-300 dark:border-gray-600"
+              } focus:ring-blue-500 focus:border-blue-500`}
           />
           {errors.image && (
             <span className="text-red-500 text-sm">{errors.image.message}</span>
