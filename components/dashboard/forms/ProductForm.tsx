@@ -113,7 +113,7 @@ const ProductForm = () => {
           </Label>
           <Input
             id="price"
-            type="text"
+            type="number"
             className="mt-1 p-2 block w-full rounded-md border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
             {...register("discount")}
           />

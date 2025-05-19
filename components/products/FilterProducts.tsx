@@ -8,15 +8,24 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button } from "../ui/button";
 import { colors } from "@/data/products/productColor";
 import { dummyCategories } from "@/data/category/categoryData";
+<<<<<<< HEAD
 import { Brand } from "@/types";
 import { Category } from "@/types";
+=======
+import { Brand, Category } from "@/types";
+>>>>>>> 980234cb970b995929a2c12ce18eefb033752fba
 
 const FilterProducts = () => {
   // State variables for filters
   const [brands, setBrands] = useState<Brand[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [minValue, setMinValue] = useState(10);
   const [maxValue, setMaxValue] = useState(5000);
+<<<<<<< HEAD
   const [categories, setCategories] = useState<Category[]>([]);
+=======
+  const [selectedCategory, setSelectedCategory] = useState(0);
+>>>>>>> 980234cb970b995929a2c12ce18eefb033752fba
   const [selectedColor, setSelectedColor] = useState("");
   const [selectedBrand, setSelectedBrand] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState(0);
@@ -43,7 +52,12 @@ const FilterProducts = () => {
         setBrands([]);
       }
   }
+  const fetchCategories = async () => {
+    try {
+      const res = await fetch(`https://localhost:7240/api/Categories`);
+      const data: Category[] = await res.json();
 
+<<<<<<< HEAD
   const fetchCategories = async() => {
     try{
         const res = await fetch(`https://localhost:7240/api/Categories`);
@@ -56,21 +70,41 @@ const FilterProducts = () => {
       }
   }
 
+=======
+      setCategories(data);
+    } catch (error) {
+      console.error("Failed to fetch products", error);
+      setBrands([]);
+    }
+  }
+>>>>>>> 980234cb970b995929a2c12ce18eefb033752fba
   // Update state with initial values
   useEffect(() => {
     fetchBrands();
     fetchCategories();
     setMaxValue(Number(initialPrice));
+<<<<<<< HEAD
+=======
+    fetchCategories();
+>>>>>>> 980234cb970b995929a2c12ce18eefb033752fba
     setSelectedColor(initialColor as string);
   }, [initialPrice, initialCategory, initialColor, initialBrand]);
 
   // Selection handler functions with search param updates
   const handleCategorySelection = (categoryId: number) => {
     const newSearchParams = new URLSearchParams(searchParams);
+<<<<<<< HEAD
     if (categoryId === selectedCategory) {
       newSearchParams.delete("category");
     } else {
       newSearchParams.set("category", categoryId.toString());
+=======
+    if (categoryId === selectedBrand) {
+      newSearchParams.delete("category");
+    } else {
+      newSearchParams.set("category", categoryId.toString());
+
+>>>>>>> 980234cb970b995929a2c12ce18eefb033752fba
     }
     setSelectedCategory(categoryId);
     router.push(`${pathname}?${newSearchParams}`);
