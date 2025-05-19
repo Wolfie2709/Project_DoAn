@@ -8,11 +8,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { FaGoogle } from "react-icons/fa6";
+import { useAuthStore } from "@/store/authStore";
+import { useRouter } from "next/navigation";
 
 // Define Zod schema for form validation
 const signInSchema = z.object({
-  email: z.string().email("Invalid email"),
-  password: z.string().min(6, "Password must be at least 6 characters")
+  userName: z.string(),
+  password: z.string()
 });
 
 type SignInFormData = z.infer<typeof signInSchema>;
@@ -25,9 +27,31 @@ const SignInForm = () => {
   } = useForm<SignInFormData>({
     resolver: zodResolver(signInSchema),
   });
-
-  const onSubmit = (data: SignInFormData) => {
-    console.log(data); // Handle form submission
+  const router = useRouter();
+  const onSubmit = async (data: SignInFormData) => {
+    try {
+      
+      const res = await fetch("https://localhost:7240/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+  
+      if (!res.ok) {
+        throw new Error("Login failed");
+      }
+  
+      const { userName, accessToken } = await res.json();
+  
+      // Store login info in Zustand
+      useAuthStore.getState().login(userName, accessToken);
+  
+      
+      router.push("/shop")
+      // Optionally redirect or update UI here
+    } catch (err) {
+      console.error("Error during login:", err);
+    }
   };
 
   return (
@@ -38,7 +62,7 @@ const SignInForm = () => {
         </h2>
         <div>
           <Button className="w-full p-6 flex items-center justify-center gap-2 text-lg mt-6">
-            <FaGoogle size={25} /> Sign In With Google
+            <FaGoogle size={25} /> Login
           </Button>
           <p className="text-lg font-bold my-2 text-center">OR</p>
         </div>
@@ -48,20 +72,19 @@ const SignInForm = () => {
               htmlFor="email"
               className="block text-sm font-medium text-gray-700 dark:text-gray-300"
             >
-              Email Address
+              Username
             </Label>
             <Input
-              type="email"
-              id="email"
+              id="Username"
               placeholder="you@example.com"
               className={`w-full border ${
-                errors.email ? "border-red-500" : "border-gray-300"
+                errors.userName ? "border-red-500" : "border-gray-300"
               } dark:border-gray-700 rounded-lg px-4 py-2 focus:outline-none`}
-              {...register("email")}
+              {...register("userName")}
             />
-            {errors.email && (
+            {errors.userName && (
               <p className="text-red-500 text-sm mt-1">
-                {errors.email.message}
+                {errors.userName.message}
               </p>
             )}
           </div>

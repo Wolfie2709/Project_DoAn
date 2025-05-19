@@ -30,8 +30,8 @@ export type Image={
 }
 
 export type Category={
-categoryID: number;
-categoryname?: string;
+categoryId: number;
+categoryName: string;
 parentCategoryID: number;
 inverseParentCategory: Category;
 products: Product;
