@@ -8,7 +8,7 @@ type AuthStore = {
   logout: () => void
 }
 
-export const useBearStore = create<AuthStore>()(
+export const useAuthStore = create<AuthStore>()(
   persist(
     (set, get) => ({
       userName: "",
