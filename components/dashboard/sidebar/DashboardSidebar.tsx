@@ -50,7 +50,7 @@ const DashboardSidebar = () => {
     },
     {
       link: "/dashboard/blogs",
-      label: "Blogs",
+      label: "Brands",
       icon: <Book size={20} />,
       isActive: pathname.includes("dashboard/blogs"),
     },

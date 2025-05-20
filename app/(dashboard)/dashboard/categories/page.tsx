@@ -1,6 +1,5 @@
 "use client";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { dummyCategories } from "@/data/category/categoryData";
 import { MoreHorizontal } from "lucide-react";
 import { Category } from "@/types";
 import Image from "next/image";
@@ -30,7 +29,7 @@ const CategoryPage = () => {
       fetchCategories();
     }, []);
 
-  //delete a category
+  //Call api to delete a category
   const deleteCategory = async (id: number) => {
     const confirmed = confirm("Are you sure you want to delete this category?");
     if (!confirmed) return;

@@ -18,6 +18,7 @@ export type Product = {
 export type Brand={
 brandId: number;
 brandName: string;
+images: Image[];
 products: Product;
 }
 
