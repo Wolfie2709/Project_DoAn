@@ -3,21 +3,25 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import React from "react";
-import { useForm, } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { FaGoogle } from "react-icons/fa6";
 import { Button } from "../ui/button";
-import { useAuthStore } from "@/store/authStore";
 import { useRouter } from "next/navigation";
 
-// Define Zod schema for form validation
-const signUpSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Invalid email"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  confirmPassword: z.string().min(6, "Password must be at least 6 characters")
-});
+// Zod schema for form validation
+const signUpSchema = z
+  .object({
+    name: z.string().min(2, "Name must be at least 2 characters"),
+    email: z.string().email("Invalid email"),
+    password: z.string().min(6, "Password must be at least 6 characters"),
+    confirmPassword: z.string().min(6, "Password must be at least 6 characters"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
 
 type SignUpFormData = z.infer<typeof signUpSchema>;
 
@@ -26,13 +30,46 @@ const SignUpForm = () => {
     register,
     handleSubmit,
     formState: { errors },
-    getValues,
   } = useForm<SignUpFormData>({
     resolver: zodResolver(signUpSchema),
   });
 
-  const onSubmit = (data: SignUpFormData) => {
-    console.log(data); // Handle form submission
+  const router = useRouter();
+
+  const onSubmit = async (data: SignUpFormData) => {
+    try {
+      const response = await fetch("https://localhost:7240/api/Customers", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          fullName: data.name,
+          email: data.email,
+          cUsername: data.email,
+          cPasswordHash: data.password,
+          phoneNumber: "",
+          birthday: null,
+          gender: null,
+          address: "",
+          isActive: true,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          lastLogin: null,
+          failedLoginAttempts: 0,
+          lockoutEndTime: null,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create customer");
+      }
+
+      router.push("/login");
+    } catch (error) {
+      console.error("Sign-up error:", error);
+      alert("Sign-up failed. Please try again.");
+    }
   };
 
   return (
@@ -49,92 +86,56 @@ const SignUpForm = () => {
         </div>
         <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
           <div>
-            <Label
-              htmlFor="name"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
+            <Label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               Full Name
             </Label>
             <Input
               type="text"
               id="name"
               placeholder="shohag miah"
-              className={`w-full border ${
-                errors.name ? "border-red-500" : "border-gray-300"
-              } dark:border-gray-700 rounded-lg px-4 py-2 focus:outline-none`}
+              className={`w-full border ${errors.name ? "border-red-500" : "border-gray-300"} dark:border-gray-700 rounded-lg px-4 py-2 focus:outline-none`}
               {...register("name")}
             />
-            {errors.name && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.name.message}
-              </p>
-            )}
+            {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>}
           </div>
           <div>
-            <Label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
+            <Label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               Email Address
             </Label>
             <Input
               type="email"
-              placeholder="shohag@gmail.com"
               id="email"
-              className={`w-full border ${
-                errors.email ? "border-red-500" : "border-gray-300"
-              } dark:border-gray-700 rounded-lg px-4 py-2 focus:outline-none`}
+              placeholder="shohag@gmail.com"
+              className={`w-full border ${errors.email ? "border-red-500" : "border-gray-300"} dark:border-gray-700 rounded-lg px-4 py-2 focus:outline-none`}
               {...register("email")}
             />
-            {errors.email && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.email.message}
-              </p>
-            )}
+            {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>}
           </div>
           <div>
-            <Label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
+            <Label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               Password
             </Label>
             <Input
               type="password"
               id="password"
               placeholder="******"
-              className={`w-full border ${
-                errors.password ? "border-red-500" : "border-gray-300"
-              } dark:border-gray-700 rounded-lg px-4 py-2 focus:outline-none`}
+              className={`w-full border ${errors.password ? "border-red-500" : "border-gray-300"} dark:border-gray-700 rounded-lg px-4 py-2 focus:outline-none`}
               {...register("password")}
             />
-            {errors.password && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.password.message}
-              </p>
-            )}
+            {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>}
           </div>
           <div>
-            <Label
-              htmlFor="confirmPassword"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
+            <Label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               Confirm Password
             </Label>
             <Input
               type="password"
               id="confirmPassword"
               placeholder="******"
-              className={`w-full border ${
-                errors.confirmPassword ? "border-red-500" : "border-gray-300"
-              } dark:border-gray-700 rounded-lg px-4 py-2 focus:outline-none`}
+              className={`w-full border ${errors.confirmPassword ? "border-red-500" : "border-gray-300"} dark:border-gray-700 rounded-lg px-4 py-2 focus:outline-none`}
               {...register("confirmPassword")}
             />
-            {errors.confirmPassword && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.confirmPassword.message}
-              </p>
-            )}
+            {errors.confirmPassword && <p className="text-red-500 text-sm mt-1">{errors.confirmPassword.message}</p>}
           </div>
           <Button
             type="submit"
