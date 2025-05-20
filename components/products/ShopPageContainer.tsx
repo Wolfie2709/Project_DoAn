@@ -37,10 +37,10 @@ const ShopPageContainer = ({
         min: searchParams.min || "",
         max: searchParams.max || "",
       }).toString();
-
+  
       const res = await fetch(`https://localhost:7240/api/Products?${query}`);
       const data: Product[] = await res.json();
-
+  
       setFilteredData(data);
       setCurrentPage(1);
     } catch (error) {
@@ -50,7 +50,7 @@ const ShopPageContainer = ({
       setLoading(false);
     }
   };
-
+  
   useEffect(() => {
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
