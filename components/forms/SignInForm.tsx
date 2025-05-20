@@ -41,10 +41,10 @@ const SignInForm = () => {
         throw new Error("Login failed");
       }
   
-      const { userName, accessToken } = await res.json();
-  
-      // Store login info in Zustand
-      useAuthStore.getState().login(userName, accessToken);
+      const { userName, accessToken, customer } = await res.json(); // make sure your backend returns 'customer'
+
+      useAuthStore.getState().login(userName, accessToken, customer);
+      
   
       
       router.push("/shop")

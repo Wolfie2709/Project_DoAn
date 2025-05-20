@@ -11,6 +11,7 @@ import { Separator } from "../ui/separator";
 import UserAvatar from "./UserAvatar";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { Customer } from "@/types";
 
 const AccountPopover = () => {
   const pathname = usePathname();

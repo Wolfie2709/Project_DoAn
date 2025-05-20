@@ -75,7 +75,7 @@ const SingleProductCartView = ({ product }: { product: Product }) => {
         </h3>)}
         {/* <RatingReview rating={rating} review={reviews.length} /> */}
         <div className="text-lg font-bold space-x-3 ">
-          <span className="line-through text-muted-foreground">${price}</span>
+          <span className=" font-bold text-white-600">${price}</span>
           <span className="text-xl font-bold text-green-500">
           </span>
         </div>
