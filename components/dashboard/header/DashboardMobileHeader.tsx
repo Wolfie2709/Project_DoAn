@@ -64,10 +64,10 @@ const DashboardMobileHeader = () => {
       isActive: pathname.includes("dashboard/blogs"),
     },
     {
-      link: "/dashboard/customers",
-      label: "Customers",
+      link: "/dashboard/employees",
+      label: "employees",
       icon: <Users size={20} />,
-      isActive: pathname.includes("dashboard/customers"),
+      isActive: pathname.includes("dashboard/employees"),
     },
   ];
 

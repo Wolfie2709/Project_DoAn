@@ -1,37 +1,40 @@
-import SearchCustomer from "@/components/dashboard/customer/SearchCustomer";
+"use client";
+import SearchEmployee from "@/components/dashboard/employee/SearchEmployee";
 import Loader from "@/components/others/Loader";
 import Pagination from "@/components/others/Pagination";
 import Image from "next/image";
 import React, { Suspense, useState } from "react";
+import { Employee } from "@/types";
+import { useEffect } from "react";
 
-const CustomersPage = () => {
+const EmployeePage = () => {
   // Dummy data for demonstration
-  const dummyCustomers = [
-    {
-      id: 1,
-      name: "John Doe",
-      email: "john@example.com",
-      phone: "1234567890",
-      address: "123 Main St, Anytown, USA",
-      image: "/images/people/person.jpg",
-    },
-    {
-      id: 2,
-      name: "Jane Smith",
-      email: "jane@example.com",
-      phone: "9876543210",
-      address: "456 Elm St, Othertown, USA",
-      image: "/images/people/person.jpg",
-    },
-  ];
+
+  const [Employees, setEmployees] = useState<Employee[]>([]);
+
+  const fetchEmployees = async() => {
+      try{
+          const res = await fetch(`https://localhost:7240/api/Employees`);
+          const data: Employee[] = await res.json();
+    
+          setEmployees(data);
+        } catch (error) {
+          console.error("Failed to fetch employees", error);
+          setEmployees([]);
+        }
+    }
+
+    useEffect(() => {
+        fetchEmployees();
+});
 
   return (
     <div className="max-w-screen-xl w-full p-4 my-4 mx-auto dark:bg-slate-900 rounded-md">
       <div className="flex items-center justify-between gap-2 mb-6">
         <h2 className="text-2xl font-semibold text-gray-900 dark:text-white ">
-          Customers
+          Employees
         </h2>
-        <SearchCustomer />
+        <SearchEmployee />
       </div>
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y dark:text-slate-100 divide-gray-200 dark:divide-gray-700 border">
@@ -53,13 +56,13 @@ const CustomersPage = () => {
                 scope="col"
                 className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
               >
-                Email
+                Position
               </th>
               <th
                 scope="col"
                 className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
               >
-                Phone
+                Date of Joining
               </th>
               <th
                 scope="col"
@@ -71,36 +74,60 @@ const CustomersPage = () => {
                 scope="col"
                 className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
               >
-                Image
+                Email
+              </th>
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Phone number
+              </th>
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Birthday
+              </th>
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Gender
               </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-900 dark:divide-gray-700">
-            {dummyCustomers.map((customer) => (
-              <tr key={customer.id}>
+            {Employees.map((employee) => (
+              <tr key={employee.employeeId}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
-                  {customer.id}
+                  {employee.employeeId}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium ">
-                  {customer.name}
+                  {employee.fullName}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm ">
-                  {customer.email}
+                  {employee.position}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm ">
-                  {customer.phone}
+                  {employee.doj}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
-                  {customer.address}
+                  {employee.address}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
-                  <Image
-                    width={40}
-                    height={40}
-                    src={customer.image}
-                    alt={customer.name}
-                    className="h-10 w-10 rounded-full"
-                  />
+                  {employee.email}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  {employee.phoneNumber}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  {employee.birthday}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  {employee.gender}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  {employee.lastLogin}
                 </td>
               </tr>
             ))}
@@ -108,10 +135,10 @@ const CustomersPage = () => {
         </table>
       </div>
       <Suspense fallback={<Loader />}>
-        <Pagination totalPages={5} currentPage={1} pageName="customerpage" />
+        <Pagination totalPages={5} currentPage={1} pageName="employeepage" />
       </Suspense>
     </div>
   );
 };
 
-export default CustomersPage;
+export default EmployeePage;

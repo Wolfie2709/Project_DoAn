@@ -30,7 +30,7 @@ const DashboardPageOne = () => {
         />
         <StatisticsCard
           iconColor="bg-violet-500"
-          title="Customers"
+          title="Employees"
           value="500"
           icon={Users}
         />
