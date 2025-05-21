@@ -1,25 +1,28 @@
-import { create } from 'zustand'
-import { persist, createJSONStorage } from 'zustand/middleware'
+import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import { Customer } from '@/types'; // adjust path as needed
 
 type AuthStore = {
-  userName: string
-  accessToken: string
-  login: (userName: string, accessToken: string) => void
-  logout: () => void
-}
+  userName: string;
+  accessToken: string;
+  customer: Customer | null;
+  login: (userName: string, accessToken: string, customer: Customer) => void;
+  logout: () => void;
+};
 
 export const useAuthStore = create<AuthStore>()(
   persist(
     (set, get) => ({
       userName: "",
       accessToken: "",
-      login: (userName, accessToken) => set({ userName, accessToken}),
-      logout: () => set({userName: "",accessToken: ""})
+      customer: null,
+      login: (userName, accessToken, customer) =>
+        set({ userName, accessToken, customer }),
+      logout: () => set({ userName: "", accessToken: "", customer: null }),
     }),
-    
     {
-      name: 'food-storage', // name of the item in the storage (must be unique)
-      storage: createJSONStorage(() => sessionStorage), // (optional) by default, 'localStorage' is used
-    },
-  ),
-)
+      name: 'food-storage',
+      storage: createJSONStorage(() => sessionStorage),
+    }
+  )
+);

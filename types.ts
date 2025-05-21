@@ -18,6 +18,7 @@ export type Product = {
 export type Brand={
 brandId: number;
 brandName: string;
+images: Image[];
 products: Product;
 }
 
@@ -76,7 +77,7 @@ export type Order={
   note?: string;
   orderDetails: OrderDetail[];
   payments: Payment[];
-  user?: User;
+  customer: Customer;
 }
 
 export type OrderDetail={
@@ -98,14 +99,16 @@ export type Payment={
   order?: Order;
 }
 
-export type User={
-  userId: number;
+export type Customer={
+  customerId: number;
   phoneNumber?: string;
   fullName?: string;
   email?: string;
   birthday?: string;
   gender?: string;
   address?: string;
+  userName?: string;
+  password?: string;
   orders: Order[];
   reviews: Review[];
   shoppingCarts: ShoppingCart[];
@@ -124,7 +127,7 @@ export type ShoppingCart={
   productId: number;
   amount?: number;
   product: Product;
-  user: User;
+  customer: Customer;
 }
 
 export type SearchParams = {
