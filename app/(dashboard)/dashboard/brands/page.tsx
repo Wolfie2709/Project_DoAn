@@ -1,8 +1,8 @@
 "use client";
-import BrandActions from "@/components/dashboard/blog/BrandActions";
+import BrandActions from "@/components/dashboard/brand/BrandActions";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { MoreHorizontal } from "lucide-react";
-import SearchBrands from "@/components/dashboard/blog/SearchBrands";
+import SearchBrands from "@/components/dashboard/brand/SearchBrands";
 import Loader from "@/components/others/Loader";
 import Pagination from "@/components/others/Pagination";
 import { blogPosts } from "@/data/blog/blogData";
@@ -64,7 +64,7 @@ const BrandPage = () => {
             Browse Brands
           </h1>
           <Link
-            href={"/dashboard/blogs/add-brand"}
+            href={"/dashboard/brands/add-brand"}
             className="py-2 px-6 rounded-md bg-blue-500 hover:opacity-60 text-white"
           >
             Add Brand

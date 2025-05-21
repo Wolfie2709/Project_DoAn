@@ -60,7 +60,7 @@ const AddBrandForm: React.FC = () => {
       const result = await response.json();
       console.log("Brand created successfully:", result);
       // Có thể reset form hoặc chuyển hướng ở đây
-      router.push("/dashboard/blogs");
+      router.push("/dashboard/brands");
     } catch (error) {
       console.error("Error submitting Brand:", error);
     }
