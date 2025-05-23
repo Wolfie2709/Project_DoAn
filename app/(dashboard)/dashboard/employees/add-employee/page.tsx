@@ -1,4 +1,4 @@
-import AddEmployeeForm from '@/components/dashboard/forms/BlogForm'
+import AddEmployeeForm from '@/components/dashboard/forms/EmployeeForm'
 import BreadcrumbComponent from '@/components/others/Breadcrumb'
 import React from 'react'
 
