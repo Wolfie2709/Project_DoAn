@@ -6,6 +6,8 @@ import Image from "next/image";
 import React, { Suspense, useState } from "react";
 import { Employee } from "@/types";
 import { useEffect } from "react";
+import Link from "next/link";
+import EmployeeActions from "@/components/dashboard/employee/EmployeeAction";
 
 const EmployeePage = () => {
   // Dummy data for demonstration
@@ -25,8 +27,27 @@ const EmployeePage = () => {
     }
 
     useEffect(() => {
-        fetchEmployees();
-});
+  fetchEmployees();
+}, []);
+
+const deleteEmployee = async (id: number) => {
+    const confirmed = confirm("Are you sure you want to delete this employee?");
+    if (!confirmed) return;
+
+    try {
+      const res = await fetch(`https://localhost:7240/api/Employees/${id}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        await fetchEmployees();
+      } else {
+        console.error("Failed to delete employee");
+      }
+    } catch (error) {
+      console.error("Error deleting employee:", error);
+    }
+  };
 
   return (
     <div className="max-w-screen-xl w-full p-4 my-4 mx-auto dark:bg-slate-900 rounded-md">
@@ -35,6 +56,14 @@ const EmployeePage = () => {
           Employees
         </h2>
         <SearchEmployee />
+      </div>
+       <div className="flex justify-end my-4">
+        <Link
+          href={"/dashboard/employees/add-employee"}
+          className="py-2 px-6 rounded-md bg-blue-500 hover:opacity-60 text-white"
+        >
+          Add Employee
+        </Link>
       </div>
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y dark:text-slate-100 divide-gray-200 dark:divide-gray-700 border">
@@ -94,6 +123,15 @@ const EmployeePage = () => {
               >
                 Gender
               </th>
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Last Login
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-900 dark:divide-gray-700">
@@ -128,6 +166,12 @@ const EmployeePage = () => {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
                   {employee.lastLogin}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  <EmployeeActions
+                    employeeId={employee.employeeId}
+                    onDelete={() => deleteEmployee(employee.employeeId)}
+                  />
                 </td>
               </tr>
             ))}

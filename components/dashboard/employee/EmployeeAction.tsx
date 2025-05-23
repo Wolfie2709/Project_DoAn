@@ -8,7 +8,12 @@ import {
 import { MoreHorizontal } from "lucide-react";
 import Link from "next/link";
 
-const EmployeeActions = () => {
+interface EmployeeActionsProps {
+  employeeId: number;
+  onDelete: () => void;
+}
+
+const EmployeeActions: React.FC<EmployeeActionsProps> = ({ employeeId, onDelete }) => {
   return (
     <div>
       <Popover>
@@ -18,19 +23,22 @@ const EmployeeActions = () => {
           </div>
         </PopoverTrigger>
         <PopoverContent className="text-start">
-        <Link
-            href={`/dashboard/employees/id`}
-            className="py-2 px-4 rounded-md w-full  block hover:bg-slate-200 dark:hover:bg-slate-900"
+          <Link
+            href={`/dashboard/employees/${employeeId}`}
+            className="py-2 px-4 rounded-md w-full block hover:bg-slate-200 dark:hover:bg-slate-900"
           >
             View Employee
           </Link>
           <Link
-            href={`/dashboard/employees/id`}
-            className="py-2 px-4 rounded-md w-full  block hover:bg-slate-200 dark:hover:bg-slate-900"
+            href={`/dashboard/employees/update/${employeeId}`}
+            className="py-2 px-4 rounded-md w-full block hover:bg-slate-200 dark:hover:bg-slate-900"
           >
             Update Employee
           </Link>
-          <button className="w-full text-start hover:bg-slate-200 dark:hover:bg-slate-900 py-2 px-4 rounded-md">
+          <button
+            onClick={onDelete}
+            className="w-full text-start hover:bg-slate-200 dark:hover:bg-slate-900 py-2 px-4 rounded-md"
+          >
             Delete Employee
           </button>
         </PopoverContent>
