@@ -62,12 +62,12 @@ const EditEmployeeForm: React.FC<EditEmployeeFormProps> = ({ employee, onSubmitE
           <Input
             id="name"
             type="text"
-            className="mt-1 p-2 block w-full rounded-md border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
             {...register("name")}
+            className="mt-1 p-2 block w-full rounded-md border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
           />
-          {errors.name && (
-            <span className="text-red-500">{errors.name.message}</span>
-          )}
+            {errors.name && (
+              <span className="text-red-500">{errors.name.message}</span>
+            )}
         </div>
 
         <div>
@@ -131,7 +131,7 @@ const EditEmployeeForm: React.FC<EditEmployeeFormProps> = ({ employee, onSubmitE
 
         <div>
           <Label
-            htmlFor="Gender"
+            htmlFor="gender"
             className="block text-sm font-medium text-gray-700 dark:text-white"
           >
             Gender
@@ -154,7 +154,7 @@ const EditEmployeeForm: React.FC<EditEmployeeFormProps> = ({ employee, onSubmitE
 
         <div>
           <Label
-            htmlFor="Address"
+            htmlFor="address"
             className="block text-sm font-medium text-gray-700 dark:text-white"
           >
             Address
@@ -171,7 +171,7 @@ const EditEmployeeForm: React.FC<EditEmployeeFormProps> = ({ employee, onSubmitE
 
         <div>
           <Label
-            htmlFor="Doj"
+            htmlFor="doj"
             className="block text-sm font-medium text-gray-700 dark:text-white"
           >
             Date of joining
@@ -188,7 +188,7 @@ const EditEmployeeForm: React.FC<EditEmployeeFormProps> = ({ employee, onSubmitE
         </div>
         <div>
           <Label
-            htmlFor="Phonenumber"
+            htmlFor="phonenumber"
             className="block text-sm font-medium text-gray-700 dark:text-white"
           >
             Phone number
