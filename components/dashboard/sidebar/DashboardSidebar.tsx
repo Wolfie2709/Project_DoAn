@@ -49,16 +49,16 @@ const DashboardSidebar = () => {
       isActive: pathname.includes("dashboard/banners"),
     },
     {
-      link: "/dashboard/blogs",
-      label: "Blogs",
+      link: "/dashboard/brands",
+      label: "Brands",
       icon: <Book size={20} />,
-      isActive: pathname.includes("dashboard/blogs"),
+      isActive: pathname.includes("dashboard/brands"),
     },
     {
-      link: "/dashboard/customers",
-      label: "Customers",
+      link: "/dashboard/employees",
+      label: "Employees",
       icon: <Users size={20} />,
-      isActive: pathname.includes("dashboard/customers"),
+      isActive: pathname.includes("dashboard/employees"),
     },
   ];
 

@@ -160,28 +160,6 @@ const ProductForm = () => {
 
         <div>
           <Label
-            htmlFor="type"
-            className="block text-sm font-medium text-gray-700 dark:text-white"
-          >
-            Product Type
-          </Label>
-          <select
-            id="type"
-            className="mt-1 p-2 block w-full dark:bg-slate-950 rounded-md border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
-            {...register("type")}
-          >
-            <option value="featured">Featured</option>
-            <option value="top-rated">Top Rated</option>
-            <option value="most-popular">Most Popular</option>
-            <option value="new-arrivals">New Arrivals</option>
-          </select>
-          {errors.type && (
-            <span className="text-red-500">{errors.type.message}</span>
-          )}
-        </div>
-
-        <div>
-          <Label
             htmlFor="description"
             className="block text-sm font-medium text-gray-700 dark:text-white"
           >
@@ -194,24 +172,6 @@ const ProductForm = () => {
           />
           {errors.description && (
             <span className="text-red-500">{errors.description.message}</span>
-          )}
-        </div>
-
-
-        <div>
-          <Label
-            htmlFor="description"
-            className="block text-sm font-medium text-gray-700 dark:text-white"
-          >
-            Available Colors
-          </Label>
-          <Input
-            id="description"
-            className="mt-1 p-2 block border dark:bg-slate-950 w-full rounded-md border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
-            {...register("color")}
-          />
-          {errors.color && (
-            <span className="text-red-500">{errors.color.message}</span>
           )}
         </div>
 

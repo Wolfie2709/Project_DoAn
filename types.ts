@@ -18,6 +18,7 @@ export type Product = {
 export type Brand={
 brandId: number;
 brandName: string;
+images: Image[];
 products: Product;
 }
 
@@ -49,7 +50,8 @@ product: Product;
 }
 
 export type Employee={
-userID: number;
+employeeId: number;
+addedBy: number;
 position: string;
 doj?: string;
 fullName?: string;
@@ -58,6 +60,7 @@ email?: string;
 birthday?: string;  
 gender?: string;
 address?: string;
+lastLogin: string;
 }
 
 export type Order={
