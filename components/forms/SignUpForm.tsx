@@ -15,7 +15,7 @@ const signUpSchema = z
   .object({
     name: z.string().min(2, "Name must be at least 2 characters"),
     email: z.string().email("Invalid email"),
-    username: z.string().min(7, "Username must be at least 6 characters"),
+    userName: z.string().min(7, "Username must be at least 6 characters"),
     password: z.string().min(6, "Password must be at least 6 characters"),
     confirmPassword: z.string().min(6, "Password must be at least 6 characters"),
   })
@@ -47,7 +47,7 @@ const SignUpForm = () => {
         body: JSON.stringify({
           fullName: data.name,
           email: data.email,
-          cUsername: data.username,
+          cUsername: data.userName,
           cPasswordHash: data.password,
           phoneNumber: "",
           birthday: null,
@@ -101,8 +101,8 @@ const SignUpForm = () => {
           </div>
           <div>
             <Label htmlFor="username">Username</Label>
-            <Input id="username" {...register("username")} placeholder="e.g. tuan01" />
-            {errors.username && <p className="text-red-500 text-sm">{errors.username.message}</p>}
+            <Input id="username" {...register("userName")} placeholder="e.g. tuan01" />
+            {errors.userName && <p className="text-red-500 text-sm">{errors.userName.message}</p>}
           </div>
           <div>
             <Label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
