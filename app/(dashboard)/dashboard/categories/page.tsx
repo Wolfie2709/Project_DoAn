@@ -16,8 +16,11 @@ const CategoryPage = () => {
       try {
         const res = await fetch(`https://localhost:7240/api/Categories`);
         const data: Category[] = await res.json();
-  
-        setCategories(data);
+        
+        // Lọc các category có activeStatus là true
+        const activeCategories = data.filter(category => category.activeStatus === true);
+
+        setCategories(activeCategories);
         console.log(data)
       } catch (error) {
         console.error("Failed to fetch products", error);
@@ -95,6 +98,18 @@ const CategoryPage = () => {
                       </div>
                     </PopoverTrigger>
                     <PopoverContent className="text-start">
+                      <Link
+                        href={`/dashboard/categories/id`}
+                        className="w-full text-start hover:bg-slate-200 dark:hover:bg-slate-900 py-2 px-4 rounded-md"
+                      >
+                        Add Image
+                      </Link>
+                      <Link
+                        href={`/dashboard/categories/id`}
+                        className="w-full text-start hover:bg-slate-200 dark:hover:bg-slate-900 py-2 px-4 rounded-md"
+                      >
+                        Update Category
+                      </Link>
                       <button
                         className="w-full text-start hover:bg-slate-200 dark:hover:bg-slate-900 py-2 px-4 rounded-md"
                         onClick={() => deleteCategory(category.categoryId)}

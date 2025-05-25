@@ -23,7 +23,10 @@ const BrandPage = () => {
           const res = await fetch(`https://localhost:7240/api/Brands`);
           const data: Brand[] = await res.json();
     
-          setBrands(data);
+          // Lọc các Brand có activeStatus là true
+          const activeBrands = data.filter(brand => brand.activeStatus === true);
+
+          setBrands(activeBrands);
           console.log(data)
         } catch (error) {
           console.error("Failed to fetch products", error);
