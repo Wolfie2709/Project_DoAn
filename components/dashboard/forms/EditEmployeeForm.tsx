@@ -9,13 +9,13 @@ import { Label } from "@/components/ui/label";
 
 // Form validation schema
 const employeeSchema = z.object({
-  name: z.string().min(1, "Name is required"),
+  fullName: z.string().min(1, "Name is required"),
   position: z.enum(["Admin", "Manager", "Employee"]),
   birthday: z.string().min(1, "Birthday is required"),
   email: z.string().min(1, "Email is required"),
   gender: z.enum(["Male", "Female", "Others"]),
   address: z.string().min(1, "Address is required"),
-  phonenumber: z.string().min(1, "Phone number is required"),
+  phoneNumber: z.string().min(1, "Phone number is required"),
   doj: z.string().min(1, "Date of joining is required"),
 });
 
@@ -62,11 +62,11 @@ const EditEmployeeForm: React.FC<EditEmployeeFormProps> = ({ employee, onSubmitE
           <Input
             id="name"
             type="text"
-            {...register("name")}
+            {...register("fullName")}
             className="mt-1 p-2 block w-full rounded-md border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
           />
-            {errors.name && (
-              <span className="text-red-500">{errors.name.message}</span>
+            {errors.fullName && (
+              <span className="text-red-500">{errors.fullName.message}</span>
             )}
         </div>
 
@@ -188,19 +188,19 @@ const EditEmployeeForm: React.FC<EditEmployeeFormProps> = ({ employee, onSubmitE
         </div>
         <div>
           <Label
-            htmlFor="phonenumber"
+            htmlFor="phoneNumber"
             className="block text-sm font-medium text-gray-700 dark:text-white"
           >
             Phone number
           </Label>
           <Input
-            id="phonenumber"
+            id="phoneNumber"
             type="text"
             className="mt-1 p-2 block border bg-white dark:bg-slate-950 rounded-md w-full  border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
-            {...register("phonenumber")}
+            {...register("phoneNumber")}
           />
-          {errors.phonenumber && (
-            <span className="text-red-500">{errors.phonenumber.message}</span>
+          {errors.phoneNumber && (
+            <span className="text-red-500">{errors.phoneNumber.message}</span>
           )}
         </div>
         <Button
