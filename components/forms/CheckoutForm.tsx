@@ -11,17 +11,20 @@ import { useAuthStore } from "@/store/authStore";
 // Zod schema
 const schema = z.object({
   firstName: z.string().min(3, "First Name is required"),
-  lastName: z.string().min(3, "Last Name is required"),
-  address: z.string().min(5, "Address is required"),
+  lastName: z.string().min(1),
+  home_address: z.string().min(5, "Address is required"),
   phone: z.string().min(8, "Phone is required"),
   city: z.string().min(3, "City is required"),
   zip: z.string().min(5, "ZIP Code is required"),
   country: z.string().min(2, "Country is required"),
 });
+type CheckoutFormData = z.infer<typeof schema>;
 
-type FormData = z.infer<typeof schema>;
+type CheckoutFormProps = {
+  onSubmitForm: (data: CheckoutFormData) => void;
+};
 
-const CheckoutForm: React.FC = () => {
+const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmitForm }) => {
   const { customer } = useAuthStore();
 
   const {
@@ -29,7 +32,7 @@ const CheckoutForm: React.FC = () => {
     handleSubmit,
     setValue,
     formState: { errors },
-  } = useForm<FormData>({
+  } = useForm<CheckoutFormData>({
     resolver: zodResolver(schema),
   });
 
@@ -38,24 +41,27 @@ const CheckoutForm: React.FC = () => {
       const fullName = customer.fullName?.split(" ") || [];
       const firstName = fullName[0] || "";
       const lastName = fullName.slice(1).join(" ") || "";
+      const address = customer.address?.split(",") || [];
+      const home_address = address[0] || "";
+      const city = address[1] || "";
+      const zip = address[2] || "";
+      const country = address[3] || "";
 
       setValue("firstName", firstName);
       setValue("lastName", lastName);
-      setValue("address", customer.address || "");
+      setValue("home_address", home_address);
+      setValue("city", city);
+      setValue("zip", zip);
+      setValue("country", country);
       setValue("phone", customer.phoneNumber || "");
-      // These can stay empty or use fallback defaults
-      setValue("city", "");
-      setValue("zip", "");
-      setValue("country", "");
     }
   }, [customer, setValue]);
 
-  const onSubmit: SubmitHandler<FormData> = (data) => {
-    console.log("Submitted:", data);
-    // send data to API or handle however you want
+  const onSubmit: SubmitHandler<CheckoutFormData> = (data) => {
+    onSubmitForm(data); // send up to parent
   };
 
-  return (
+return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       {/* Form fields — no need to disable anything */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -75,10 +81,10 @@ const CheckoutForm: React.FC = () => {
         </div>
       </div>
       <div>
-        <Label htmlFor="address">Address</Label>
-        <Input id="address" {...register("address")} />
-        {errors.address && (
-          <span className="text-red-500">{errors.address.message}</span>
+        <Label htmlFor="home_address">Home Address</Label>
+        <Input id="home_address" {...register("home_address")} />
+        {errors.home_address && (
+          <span className="text-red-500">{errors.home_address.message}</span>
         )}
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

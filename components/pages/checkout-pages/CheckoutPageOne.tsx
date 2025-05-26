@@ -1,10 +1,58 @@
-import OrderSummaryForCheckout from "@/components/carts/OrderSummaryForCheckout";
+'use client'
 import CheckoutForm from "@/components/forms/CheckoutForm";
+import OrderSummaryForCheckout from "@/components/carts/OrderSummaryForCheckout";
 import CouponCodeForm from "@/components/forms/CouponCodeForm";
 import { Separator } from "@/components/ui/separator";
 import React from "react";
+import { useAuthStore } from "@/store/authStore";
+import useCartStore from "@/store/cartStore";
 
 const CheckoutPageOne = () => {
+  const { customer } = useAuthStore();
+  const { getTotalAmount, cartItems } = useCartStore();
+
+  const handleFormSubmit = async (data: any) => {
+    if (!customer) return;
+
+    const order = {
+      customerId: customer.customerId,
+      shippingAddress: `${data.home_address}, ${data.city}, ${data.zip}, ${data.country}`,
+      phone: data.phone,
+      paymentMethod: "Cash",
+      orderDate: new Date().toISOString(),
+    };
+
+    const orderDetails = cartItems.map((item: any) => ({
+      productId: item.productId,
+      quantity: item.quantity,
+      price: item.price,
+    }));
+
+    try {
+      const res = await fetch("https://localhost:7240/api/Orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(order),
+      });
+
+      if (!res.ok) throw new Error("Order creation failed");
+      const createdOrder = await res.json();
+
+      // Create order details
+      await Promise.all(orderDetails.map(detail =>
+        fetch("https://localhost:7240/api/OrderDetails", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...detail, orderId: createdOrder.orderId }),
+        })
+      ));
+
+      alert("Order placed successfully!");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to place order");
+    }
+  };
   return (
     <section className="px-4 py-4 lg:px-16  bg-white dark:bg-gray-800">
       <div className="max-w-screen-xl mx-auto">
@@ -22,7 +70,10 @@ const CheckoutPageOne = () => {
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
                 Shipping Address
               </h2>
-              <CheckoutForm />
+              <CheckoutForm onSubmitForm={(data) => {
+                  // handle the submitted form data
+                  console.log("Form submitted:", data);
+                }} />
             </div>
               <CouponCodeForm />
           </div>

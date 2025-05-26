@@ -8,6 +8,7 @@ type AuthStore = {
   customer: Customer | null;
   login: (userName: string, accessToken: string, customer: Customer) => void;
   logout: () => void;
+  setCustomer: (customer: Customer) => void; 
 };
 
 export const useAuthStore = create<AuthStore>()(
@@ -19,6 +20,7 @@ export const useAuthStore = create<AuthStore>()(
       login: (userName, accessToken, customer) =>
         set({ userName, accessToken, customer }),
       logout: () => set({ userName: "", accessToken: "", customer: null }),
+      setCustomer: (customer) => set({ customer }), 
     }),
     {
       name: 'food-storage',
