@@ -99,14 +99,14 @@ const CategoryPage = () => {
                     </PopoverTrigger>
                     <PopoverContent className="text-start">
                       <Link
-                        href={`/dashboard/categories/id`}
-                        className="w-full text-start hover:bg-slate-200 dark:hover:bg-slate-900 py-2 px-4 rounded-md"
+                        href={`/dashboard/categories/addImage/${category.categoryId}`}
+                        className="py-2 px-4 rounded-md w-full block hover:bg-slate-200 dark:hover:bg-slate-900"
                       >
                         Add Image
                       </Link>
                       <Link
-                        href={`/dashboard/categories/id`}
-                        className="w-full text-start hover:bg-slate-200 dark:hover:bg-slate-900 py-2 px-4 rounded-md"
+                        href={`/dashboard/categories/update/${category.categoryId}`}
+                        className="py-2 px-4 rounded-md w-full block hover:bg-slate-200 dark:hover:bg-slate-900"
                       >
                         Update Category
                       </Link>
