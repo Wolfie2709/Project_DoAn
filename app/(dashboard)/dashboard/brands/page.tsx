@@ -104,6 +104,18 @@ const BrandPage = () => {
                       </div>
                     </PopoverTrigger>
                     <PopoverContent className="text-start">
+                      <Link
+                        href={`/dashboard/brands/addImage/${brand.brandId}`}
+                        className="py-2 px-4 rounded-md w-full block hover:bg-slate-200 dark:hover:bg-slate-900"
+                      >
+                        Add Image
+                      </Link>
+                      <Link
+                        href={`/dashboard/brands/update/${brand.brandId}`}
+                        className="py-2 px-4 rounded-md w-full block hover:bg-slate-200 dark:hover:bg-slate-900"
+                      >
+                        Update Brand
+                      </Link>
                       <button
                         className="w-full text-start hover:bg-slate-200 dark:hover:bg-slate-900 py-2 px-4 rounded-md"
                         onClick={() => deleteBrand(brand.brandId)}
