@@ -61,7 +61,11 @@ const OrderSummaryForCheckout = () => {
             ${formatPrice(getTotalAmount())}
           </span>
         </div>
-        <Button className="text-xl mt-6 bg-blue-500 dark:bg-blue-600 text-white py-6 px-12 hover:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none rounded-full hover:ring-2">
+        <Button
+          form="checkout-form"
+          type="submit"
+          className="text-xl mt-6 bg-blue-500 dark:bg-blue-600 text-white py-6 px-12 hover:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none rounded-full hover:ring-2"
+        >
           Place Order
         </Button>
       </div>

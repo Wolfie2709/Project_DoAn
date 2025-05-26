@@ -14,10 +14,12 @@ import { useRouter } from "next/navigation";
 const signUpSchema = z
   .object({
     name: z.string().min(2, "Name must be at least 2 characters"),
+    gender: z.enum(["Male", "Female", "Other"]),
     email: z.string().email("Invalid email"),
     userName: z.string().min(7, "Username must be at least 6 characters"),
     password: z.string().min(6, "Password must be at least 6 characters"),
     confirmPassword: z.string().min(6, "Password must be at least 6 characters"),
+    address: z.string().min(10, "Address must be 'street name, city, country, zip code'")
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",
@@ -51,8 +53,8 @@ const SignUpForm = () => {
           cPasswordHash: data.password,
           phoneNumber: "",
           birthday: null,
-          gender: null,
-          address: "",
+          gender: data.gender,
+          address: data.address,
           isActive: true,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
@@ -66,7 +68,7 @@ const SignUpForm = () => {
         throw new Error("Failed to create customer");
       }
 
-      router.push("/login");
+      router.push("/sign-in");
     } catch (error) {
       console.error("Sign-up error:", error);
       alert("Sign-up failed. Please try again.");
@@ -116,6 +118,39 @@ const SignUpForm = () => {
               {...register("email")}
             />
             {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>}
+          </div>
+          <div>
+          <Label
+            htmlFor="gender"
+            className="block text-sm font-medium text-gray-700 dark:text-white"
+          >
+            Gender
+          </Label>
+          <select
+            id="position"
+            className="mt-1 p-2 block w-full dark:bg-slate-950 rounded-md border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+            {...register("gender")}
+          >
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+          </select>
+          {errors.gender && (
+            <span className="text-red-500">{errors.gender.message}</span>
+          )}
+          </div>
+          <div>
+            <Label htmlFor="address" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Address
+            </Label>
+            <Input
+              type="text"
+              id="address"
+              placeholder="street name, city, country, zip code"
+              className={`w-full border ${errors.name ? "border-red-500" : "border-gray-300"} dark:border-gray-700 rounded-lg px-4 py-2 focus:outline-none`}
+              {...register("address")}
+            />
+            {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address?.message}</p>}
           </div>
           <div>
             <Label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
