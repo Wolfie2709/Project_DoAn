@@ -16,27 +16,37 @@ const BrandPage = () => {
 
   //Fetch api to get all brands
   const [brands, setBrands] = useState<Brand[]>([]);
+  const [filteredBrands, setFilteredBrands] = useState<Brand[]>([])
   
     //Call Get api to get all brand data
-    const fetchBrands = async () => {
-        try {
-          const res = await fetch(`https://localhost:7240/api/Brands`);
-          const data: Brand[] = await res.json();
-    
-          // Lọc các Brand có activeStatus là true
-          const activeBrands = data.filter(brand => brand.activeStatus === true);
+  const fetchBrands = async () => {
+    try {
+      const res = await fetch(`https://localhost:7240/api/Brands`)
+      const data: Brand[] = await res.json()
+      const activeBrands = data.filter(brand => brand.activeStatus === true)
 
-          setBrands(activeBrands);
-          console.log(data)
-        } catch (error) {
-          console.error("Failed to fetch products", error);
-          setBrands([]);
-        }
-      }
-      // Update state with initial values
-      useEffect(() => {
-        fetchBrands();
-      }, []);
+      setBrands(activeBrands)
+      setFilteredBrands(activeBrands) // Dùng để hiển thị ban đầu
+    } catch (error) {
+      console.error("Failed to fetch products", error)
+      setBrands([])
+      setFilteredBrands([])
+    }
+  }
+
+  useEffect(() => {
+    fetchBrands()
+  }, [])
+
+  // Tìm kiếm theo tên
+  const handleSearch = (query: string) => {
+    const lowerQuery = query.toLowerCase()
+    const results = brands.filter(brand =>
+      brand.brandName.toLowerCase().includes(lowerQuery)
+      // Nếu lowerQuery là rỗng => là true cho mọi chuỗi => lấy về mọi brands
+    )
+    setFilteredBrands(results)
+  }
     
   //Call api to delete a brand
   const deleteBrand = async (id: number) => {
@@ -66,6 +76,7 @@ const BrandPage = () => {
           <h1 className="text-xl font-bold text-gray-900 dark:text-white">
             Browse Brands
           </h1>
+          <SearchBrands onSearch={handleSearch} />
           <Link
             href={"/dashboard/brands/add-brand"}
             className="py-2 px-6 rounded-md bg-blue-500 hover:opacity-60 text-white"
@@ -74,7 +85,7 @@ const BrandPage = () => {
           </Link>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {brands.map((brand) => (
+          {filteredBrands.map((brand) => (
             <div
               key={brand.brandId}
               className="bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden shadow-md"
