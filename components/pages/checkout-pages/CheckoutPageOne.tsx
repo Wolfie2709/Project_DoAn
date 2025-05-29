@@ -6,6 +6,7 @@ import { Separator } from "@/components/ui/separator";
 import React from "react";
 import { useAuthStore } from "@/store/authStore";
 import useCartStore from "@/store/cartStore";
+import { Button } from "@/components/ui/button";
 
 const CheckoutPageOne = () => {
   const { customer } = useAuthStore();
@@ -80,6 +81,13 @@ const CheckoutPageOne = () => {
           {/* Order Summary */}
           <OrderSummaryForCheckout />
         </div>
+        <Button
+          form="CheckoutForm"
+          type="submit"
+          className="text-xl mt-6 bg-blue-500 dark:bg-blue-600 text-white py-6 px-12 hover:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none rounded-full hover:ring-2"
+        >
+          Place Order
+        </Button>
       </div>
     </section>
   );

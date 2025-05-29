@@ -21,7 +21,7 @@ export default function UpdateBrandPage() {
   const router = useRouter();
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [imageId, setImageId] = useState<number | null>(null);
-
+  // const [token, setToken] = useState<string | null>(null);
 
   const {
     register,
@@ -32,10 +32,33 @@ export default function UpdateBrandPage() {
     resolver: zodResolver(formSchema),
   });
 
+  function getAccessTokenFromSession(): string | null {
+    const storedData = sessionStorage.getItem("food-storage");
+    if (!storedData) return null;
+
+    try {
+      const parsed = JSON.parse(storedData);
+      return parsed.state?.accessToken ?? null;
+    } catch (error) {
+      console.error("Failed to parse session data:", error);
+      return null;
+    }
+  }
+  
   useEffect(() => {
     const fetchBrand = async () => {
       try {
-        const res = await fetch(`https://localhost:7240/api/Brands/${id}`);
+        const tokenFromSession = getAccessTokenFromSession();
+        if(tokenFromSession == null){
+          // Cần chỉnh lấy role manager
+          alert("Khong phai la manager")
+          router.push('/dashboard/brands')
+        }
+        const res = await fetch(`https://localhost:7240/api/Brands/${id}`, {
+          headers: {
+            'Authorization': `Bearer ${tokenFromSession}` //Thêm Authorization header
+          }
+        });
         const data = await res.json();
 
         setValue('name', data.brandName || '');
@@ -56,10 +79,13 @@ export default function UpdateBrandPage() {
 
   const onSubmit = async (data: FormData) => {
     try {
+      const tokenFromSession = getAccessTokenFromSession();
+
       const response = await fetch(`https://localhost:7240/api/Brands/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${tokenFromSession}`, // Thêm Authorization header
         },
         body: JSON.stringify({
           brandId: Number(id),
