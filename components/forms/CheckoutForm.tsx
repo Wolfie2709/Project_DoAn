@@ -59,6 +59,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmitForm }) => {
 
   const onSubmit: SubmitHandler<CheckoutFormData> = (data) => {
     onSubmitForm(data); // send up to parent
+    router.push("/complete-checkout")
   };
 
 return (
