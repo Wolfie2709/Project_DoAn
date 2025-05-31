@@ -5,7 +5,8 @@ import { MoreHorizontal } from "lucide-react";
 import SearchBrands from "@/components/dashboard/brand/SearchBrands";
 import Loader from "@/components/others/Loader";
 import Pagination from "@/components/others/Pagination";
-import { Brand } from "@/types"
+import { Brand } from "@/types";
+import { Response } from "@/types"
 import Image from "next/image";
 import Link from "next/link";
 import React, { Suspense } from "react";
@@ -15,6 +16,7 @@ import { useRouter, useSearchParams, usePathname } from "next/navigation";
 const BrandPage = () => {
   const [brands, setBrands] = useState<Brand[]>([]);
   const [filteredBrands, setFilteredBrands] = useState<Brand[]>([]);
+  const [response, setResponse] = useState<Response>();
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -42,9 +44,49 @@ const BrandPage = () => {
     }
   };
 
+  //get response
+  const getResponse = async () => {
+    try{
+      //lay value tu session storage
+      const storedData = sessionStorage.getItem("food-storage");
+      if(storedData == null){
+        throw new Error("Ban chua dang nhap")
+      }
+      // console.log(storedData)
+
+      //lay ra noi dung ben trong storedData
+      const parsed = JSON.parse(storedData);
+      if(parsed == null){
+        throw new Error("Ban chua dang nhap: loi o parsed")
+      }
+      // console.log(parsed)
+
+      //Lay ra response
+      const responseData = parsed.state;
+      
+      if(responseData == null){
+        throw new Error("Ban chua dang nhap: loi o response")
+      }
+      setResponse(responseData);
+
+      if(responseData.employee == null){
+        throw new Error("Ban khong phai la employee")
+      }
+    }catch(error){
+      alert(error);
+      router.push("/dashboard")
+    }
+  }
+
   useEffect(() => {
+    getResponse();
     fetchBrands();
   }, []);
+  
+  useEffect(()=>{
+    if(!response) return;
+    console.log(response);
+  }, [response]);
 
   // Handle search input
   const handleSearch = (query: string) => {
