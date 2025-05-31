@@ -7,6 +7,7 @@ import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { useAuthStore } from "@/store/authStore";
+import router from "next/navigation";
 
 // Zod schema
 const schema = z.object({
