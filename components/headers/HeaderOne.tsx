@@ -72,6 +72,8 @@ const HeaderOne = () => {
             <AccountPopover />
             <Cart />
             <MobileHeader />
+            <SignInBtn/>
+            <SignUpBtn/>
           </div>
           <div>
             <SignInBtn />

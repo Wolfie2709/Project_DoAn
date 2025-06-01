@@ -20,6 +20,7 @@ brandId: number;
 brandName: string;
 images: Image[];
 products: Product;
+activeStatus: boolean;
 }
 
 export type Image={
@@ -37,6 +38,7 @@ parentCategoryID: number;
 inverseParentCategory: Category;
 products: Product;
 images: Image[];
+activeStatus: boolean;
 }
 
 export type OrderDetails={
@@ -144,3 +146,10 @@ export type CartItem = Product & {
   selectedColor: string;
   quantity: number;
 };
+
+export type Response = {
+  userName?: string;
+  accessToken?: string;
+  customer?: Customer;
+  employee?: Employee;
+}

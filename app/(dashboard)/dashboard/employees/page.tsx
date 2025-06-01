@@ -91,18 +91,6 @@ const deleteEmployee = async (id: number) => {
                 scope="col"
                 className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
               >
-                Date of Joining
-              </th>
-              <th
-                scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
-                Address
-              </th>
-              <th
-                scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
                 Email
               </th>
               <th
@@ -110,18 +98,6 @@ const deleteEmployee = async (id: number) => {
                 className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
               >
                 Phone number
-              </th>
-              <th
-                scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
-                Birthday
-              </th>
-              <th
-                scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
-                Gender
               </th>
               <th
                 scope="col"
@@ -146,23 +122,11 @@ const deleteEmployee = async (id: number) => {
                 <td className="px-6 py-4 whitespace-nowrap text-sm ">
                   {employee.position}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm ">
-                  {employee.doj}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm">
-                  {employee.address}
-                </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
                   {employee.email}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
                   {employee.phoneNumber}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm">
-                  {employee.birthday}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm">
-                  {employee.gender}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
                   {employee.lastLogin}

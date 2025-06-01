@@ -7,53 +7,38 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-// Define the schema for form validation
 const employeeSchema = z.object({
+  image: z
+    .any()
+    .refine((file) => file instanceof File, "Image is required"),
   name: z.string().min(1, "Name is required"),
   position: z.enum(["Admin", "Manager", "Employee"]),
   birthday: z.string().min(1, "Birthday is required"),
   email: z.string().min(1, "Email is required"),
   gender: z.string().min(1, "Gender is required"),
   address: z.string().min(1, "Address is required"),
-  phonenumber: z.string().min(1, "Phone number is required"),
+  phoneNumber: z.string().min(1, "Phone number is required"),
   doj: z.string().min(1, "Doj is required"),
 });
 
 type EmployeeFormData = z.infer<typeof employeeSchema>;
 
 const EmployeeForm = () => {
-  const [formData, setFormData] = useState<EmployeeFormData>({
-    name: "",
-    position: "Admin",
-    birthday: "",
-    email: "",
-    gender: "",
-    address: "",
-    phonenumber: "",
-    doj: '',
-  });
+  const [preview, setPreview] = useState<string | null>(null);
 
   const {
     handleSubmit,
     register,
     formState: { errors, isSubmitting },
+    setValue,
   } = useForm<EmployeeFormData>({
     resolver: zodResolver(employeeSchema),
   });
 
   const onSubmit = (data: EmployeeFormData) => {
     console.log(data);
-    // Add logic to handle form submission (e.g., API call to add product)
-    setFormData({
-    name: "",
-    position: "Admin",
-    birthday: "",
-    email: "",
-    gender: "",
-    address: "",
-    phonenumber: "",
-    doj: "",
-    });
+    // Reset preview and form here if needed
+    setPreview(null);
   };
 
   return (
@@ -61,7 +46,42 @@ const EmployeeForm = () => {
       <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
         Add New Employee
       </h2>
-      <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="grid grid-cols-1 lg:grid-cols-2 gap-4"
+      >
+        {/* ✅ Image Upload Input */}
+        <div>
+          <Label
+            htmlFor="image"
+            className="block text-sm font-medium text-gray-700 dark:text-white"
+          >
+            Employee Image
+          </Label>
+          <input
+            id="image"
+            type="file"
+            accept="image/*"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                setValue("image", file); // register file with RHF
+                setPreview(URL.createObjectURL(file)); // set preview
+              }
+            }}
+            className="mt-1 p-2 block w-full text-gray-800 dark:text-white bg-white dark:bg-slate-950 rounded-md border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+          />
+          {errors.image && (
+            <span className="text-red-500">{errors.image.message}</span>
+          )}
+          {preview && (
+            <img
+              src={preview}
+              alt="Preview"
+              className="mt-2 w-32 h-32 object-cover rounded-md border"
+            />
+          )}
+        </div>
         <div>
           <Label
             htmlFor="name"
@@ -80,7 +100,7 @@ const EmployeeForm = () => {
           )}
         </div>
 
-        <div>
+         <div>
           <Label
             htmlFor="position"
             className="block text-sm font-medium text-gray-700 dark:text-white"
@@ -118,7 +138,6 @@ const EmployeeForm = () => {
             <span className="text-red-500">{errors.birthday.message}</span>
           )}
         </div>
-
         <div>
           <Label
             htmlFor="Email"
@@ -201,17 +220,17 @@ const EmployeeForm = () => {
           <textarea
             id=""
             className="mt-1 p-2 block border bg-white dark:bg-slate-950 rounded-md w-full  border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
-            {...register("phonenumber")}
+            {...register("phoneNumber")}
           />
-          {errors.phonenumber && (
-            <span className="text-red-500">{errors.phonenumber.message}</span>
+          {errors.phoneNumber && (
+            <span className="text-red-500">{errors.phoneNumber.message}</span>
           )}
         </div>
         <Button
-            type="submit"
-            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg"
+          type="submit"
+          className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg"
         >
-            Add Employee
+          Add Employee
         </Button>
       </form>
     </div>
