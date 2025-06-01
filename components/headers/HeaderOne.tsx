@@ -75,7 +75,6 @@ const HeaderOne = () => {
             <SignInBtn/>
             <SignUpBtn/>
           </div>
-            <SignUpBtn />
         </div>
       </div>
       <Separator />
