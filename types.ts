@@ -144,3 +144,10 @@ export type CartItem = Product & {
   selectedColor: string;
   quantity: number;
 };
+
+export type Response = {
+  userName?: string;
+  accessToken?: string;
+  customer?: Customer;
+  employee?: Employee;
+}

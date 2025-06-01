@@ -43,11 +43,14 @@ const SignInForm = () => {
   
       const { userName, accessToken, customer } = await res.json(); // make sure your backend returns 'customer'
 
-      useAuthStore.getState().login(userName, accessToken, customer);
+      useAuthStore.getState().login(userName, accessToken, customer, employee);
       
-  
-      
-      router.push("/shop")
+    if (employee) {
+      router.push("/dashboard");
+    } else if (customer) {
+      router.push("/");
+    }
+    
       // Optionally redirect or update UI here
     } catch (err) {
       console.error("Error during login:", err);
