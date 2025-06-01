@@ -41,7 +41,7 @@ const SignInForm = () => {
         throw new Error("Login failed");
       }
   
-      const { userName, accessToken, customer } = await res.json(); // make sure your backend returns 'customer'
+      const { userName, accessToken, customer, employee } = await res.json(); // make sure your backend returns 'customer'
 
       useAuthStore.getState().login(userName, accessToken, customer, employee);
       
