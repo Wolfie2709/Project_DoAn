@@ -2,11 +2,11 @@
 import { Input } from '@/components/ui/input'
 import React from 'react'
 
-interface SearchBrandsProps {
+interface SearchCategoriesProps {
   onSearch: (query: string) => void
 }
 
-const SearchBrands: React.FC<SearchBrandsProps> = ({ onSearch }) => {
+const SearchCategories: React.FC<SearchCategoriesProps> = ({ onSearch }) => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onSearch(e.target.value)
   }
@@ -14,7 +14,7 @@ const SearchBrands: React.FC<SearchBrandsProps> = ({ onSearch }) => {
   return (
     <div>
       <Input
-        placeholder='Search Brand by name'
+        placeholder='Search Category by name'
         className='p-5 rounded-md w-full lg:w-96'
         onChange={handleInputChange}
       />
@@ -22,4 +22,4 @@ const SearchBrands: React.FC<SearchBrandsProps> = ({ onSearch }) => {
   )
 }
 
-export default SearchBrands
+export default SearchCategories

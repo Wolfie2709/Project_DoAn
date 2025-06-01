@@ -12,7 +12,7 @@ import { useRouter } from "next/navigation";
 // Define the schema for form validation
 const formSchema = z.object({
   name: z.string().min(1, "Category name is required"),
-  image: z.string().url({ message: "Invalid URL format" }),
+  // image: z.string().url({ message: "Invalid URL format" }),
   description: z.string().min(1, "Description is required"),
 });
 
@@ -42,12 +42,7 @@ const CategoryForm: React.FC = () => {
           categoryName: data.name,
           // Các field còn lại nếu bạn có thêm: parentCategoryId, addedBy, ...
           parenCategoryId: null,
-          addedBy: 2, 
-          images: [
-            {
-              imageUrl: data.image, // cần map đúng với class Image bên C#
-            }
-          ],
+          addedBy: 2,
           // Nếu muốn thêm mô tả, bạn cần cập nhật model để hỗ trợ description
         }),
       });
@@ -88,24 +83,6 @@ const CategoryForm: React.FC = () => {
           />
           {errors.name && (
             <span className="text-red-500 text-sm">{errors.name.message}</span>
-          )}
-        </div>
-        <div className="space-y-2">
-          <Label
-            htmlFor="image"
-            className="block text-sm font-medium text-gray-700 dark:text-white"
-          >
-            Image Upload
-          </Label>
-          <Input
-            type="text"
-            id="image"
-            {...register("image")}
-            className={`mt-1 p-2 w-full rounded-md border ${errors.image ? "border-red-500" : "border-gray-300 dark:border-gray-600"
-              } focus:ring-blue-500 focus:border-blue-500`}
-          />
-          {errors.image && (
-            <span className="text-red-500 text-sm">{errors.image.message}</span>
           )}
         </div>
         <div className="space-y-2">
