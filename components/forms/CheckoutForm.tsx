@@ -7,7 +7,6 @@ import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { useAuthStore } from "@/store/authStore";
-import { useRouter } from "next/navigation";
 
 // Zod schema
 const schema = z.object({
@@ -27,7 +26,7 @@ type CheckoutFormProps = {
 
 const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmitForm }) => {
   const { customer } = useAuthStore();
-  const router = useRouter();
+
   const {
     register,
     handleSubmit,
@@ -57,15 +56,13 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmitForm }) => {
       setValue("phone", customer.phoneNumber || "");
     }
   }, [customer, setValue]);
- 
 
   const onSubmit: SubmitHandler<CheckoutFormData> = (data) => {
     onSubmitForm(data); // send up to parent
-    router.push("/complete-checkout")
   };
 
-return (
-    <form id="CheckoutForm" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       {/* Form fields — no need to disable anything */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div>

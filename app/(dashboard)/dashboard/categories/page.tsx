@@ -4,66 +4,30 @@ import { MoreHorizontal } from "lucide-react";
 import { Category } from "@/types";
 import Image from "next/image";
 import Link from "next/link";
-import React, { Suspense } from "react";
+import React from "react";
 import { useEffect, useState } from "react";
-import SearchCategories from "@/components/dashboard/category/SearchCategories";
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import Pagination from "@/components/others/Pagination";
-import Loader from "@/components/others/Loader";
 
 const CategoryPage = () => {
   // state variable
   const [categories, setCategories] = useState<Category[]>([]);
-  const [filteredCategories, setFilteredCategories] = useState<Category[]>([]);
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const pathname = usePathname();
-
-  const currentPage = parseInt(searchParams.get("categorypage") || "1", 10);
-  const itemsPerPage = 6;
-  const totalPages = Math.ceil(filteredCategories.length / itemsPerPage);
-  const paginatedCategories = filteredCategories.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
 
   //Call Get api to get all category data
   const fetchCategories = async () => {
       try {
         const res = await fetch(`https://localhost:7240/api/Categories`);
         const data: Category[] = await res.json();
-        
-        // Lọc các category có activeStatus là true
-        const activeCategories = data.filter(category => category.activeStatus === true);
-
-        setCategories(activeCategories);
-        setFilteredCategories(activeCategories);
+  
+        setCategories(data);
         console.log(data)
       } catch (error) {
         console.error("Failed to fetch products", error);
         setCategories([]);
-        setFilteredCategories([]);
       }
-  }
+    }
     // Update state with initial values
-  useEffect(() => {
-    fetchCategories();
-  }, []);
-
-  // Tìm kiếm theo tên
-  const handleSearch = (query: string) => {
-    const lowerQuery = query.toLowerCase()
-    const results = categories.filter(category =>
-      category.categoryName.toLowerCase().includes(lowerQuery)
-      // Nếu lowerQuery là rỗng => là true cho mọi chuỗi => lấy về mọi brands
-    )
-    setFilteredCategories(results);
-
-    // Reset to page 1 after search
-    const params = new URLSearchParams(searchParams);
-    params.set("categorypage", "1");
-    router.replace(`${pathname}?${params}`);
-  }
+    useEffect(() => {
+      fetchCategories();
+    }, []);
 
   //Call api to delete a category
   const deleteCategory = async (id: number) => {
@@ -93,7 +57,6 @@ const CategoryPage = () => {
           <h1 className="text-xl font-bold text-gray-900 dark:text-white">
             Browse Categories
           </h1>
-          <SearchCategories onSearch={handleSearch}/>
           <Link
             href={"/dashboard/categories/add-category"}
             className="py-2 px-6 rounded-md bg-blue-500 hover:opacity-60 text-white"
@@ -102,7 +65,7 @@ const CategoryPage = () => {
           </Link>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {paginatedCategories.map((category) => (
+          {categories.map((category) => (
             <div
               key={category.categoryId}
               className="bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden shadow-md"
@@ -132,18 +95,6 @@ const CategoryPage = () => {
                       </div>
                     </PopoverTrigger>
                     <PopoverContent className="text-start">
-                      <Link
-                        href={`/dashboard/categories/addImage/${category.categoryId}`}
-                        className="py-2 px-4 rounded-md w-full block hover:bg-slate-200 dark:hover:bg-slate-900"
-                      >
-                        Add Image
-                      </Link>
-                      <Link
-                        href={`/dashboard/categories/update/${category.categoryId}`}
-                        className="py-2 px-4 rounded-md w-full block hover:bg-slate-200 dark:hover:bg-slate-900"
-                      >
-                        Update Category
-                      </Link>
                       <button
                         className="w-full text-start hover:bg-slate-200 dark:hover:bg-slate-900 py-2 px-4 rounded-md"
                         onClick={() => deleteCategory(category.categoryId)}
@@ -158,13 +109,6 @@ const CategoryPage = () => {
             </div>
           ))}
         </div>
-        <Suspense fallback={<Loader />}>
-          <Pagination
-            totalPages={totalPages}
-            currentPage={currentPage}
-            pageName="categorypage"
-          />
-        </Suspense>
       </div>
     </div>
   );

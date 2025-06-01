@@ -20,7 +20,6 @@ brandId: number;
 brandName: string;
 images: Image[];
 products: Product;
-activeStatus: boolean;
 }
 
 export type Image={
@@ -38,7 +37,6 @@ parentCategoryID: number;
 inverseParentCategory: Category;
 products: Product;
 images: Image[];
-activeStatus: boolean;
 }
 
 export type OrderDetails={
