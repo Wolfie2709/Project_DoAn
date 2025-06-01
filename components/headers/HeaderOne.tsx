@@ -75,14 +75,7 @@ const HeaderOne = () => {
             <SignInBtn/>
             <SignUpBtn/>
           </div>
-          <div>
-            <SignInBtn />
             <SignUpBtn />
-          </div>
-          <div>
-            <SignInBtn />
-            <SignUpBtn />
-          </div>
         </div>
       </div>
       <Separator />
