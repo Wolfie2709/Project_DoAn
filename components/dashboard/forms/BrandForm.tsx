@@ -7,12 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from 'react';
+import { Response } from "@/types"
 
 // Define the schema for form validation
 // Define the schema for form validation
 const formSchema = z.object({
   name: z.string().min(1, "Category name is required"),
-  // image: z.string().url({ message: "Invalid URL format" }),
+  image: z.string().url({ message: "Invalid URL format" }),
   description: z.string().min(1, "Description is required"),
 });
 
@@ -20,6 +22,7 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 const AddBrandForm: React.FC = () => {
+  const [response, setResponse] = useState<Response>();
   // Initialize react-hook-form
     const router = useRouter();
 
@@ -32,8 +35,60 @@ const AddBrandForm: React.FC = () => {
     resolver: zodResolver(formSchema),
   });
 
+  //Ham lay get response
+  const getResponse = () => {
+    try {
+      //lay value tu session storage
+      const storedData = sessionStorage.getItem("food-storage");
+      if (storedData == null) {
+        throw new Error("Ban chua dang nhap")
+      }
+
+      //lay ra noi dung ben trong storedData
+      const parsed = JSON.parse(storedData);
+      if (parsed == null) {
+        throw new Error("Ban chua dang nhap: loi o parsed")
+      }
+
+      //Lay ra response
+      const responseData = parsed.state;
+      if (responseData == null) {
+        throw new Error("Ban chua dang nhap: loi o response")
+      }
+
+      if (responseData.employee == null) {
+        throw new Error("Ban khong phai la employee")
+      }
+      setResponse(responseData);
+    } catch (error) {
+      alert(error);
+      router.push("/dashboard")
+    }
+  }
+
+  // useEffect để lấy response từ session
+  useEffect(() => {
+    getResponse();
+  }, []);
+
+  useEffect(() => {
+    if (!response || !response.accessToken) return;
+
+    //prevent clerk from access update view
+    try {
+      if (response.employee?.position != "Manager") {
+        throw new Error("Ban khong co quyen truy cap")
+      }
+    } catch (error) {
+      alert(error)
+      router.push("/dashboard/brands")
+    }
+  }, [response])
+
   // Form submission handler
   const onSubmit = async (data: FormData) => {
+    if (!response || !response.accessToken) return;
+    var whichEmployee = response.employee?.employeeId;
     try {
       const response = await fetch("https://localhost:7240/api/Brands", {
         method: "POST",
@@ -43,7 +98,12 @@ const AddBrandForm: React.FC = () => {
         body: JSON.stringify({
           brandName: data.name,
           // Các field còn lại nếu bạn có thêm: parentCategoryId, addedBy, ...
-          addedBy: 2,
+          addedBy: whichEmployee,
+          // images: [
+          //   {
+          //     imageUrl: data.image, // cần map đúng với class Image bên C#
+          //   }
+          // ],
           // Nếu muốn thêm mô tả, bạn cần cập nhật model để hỗ trợ description
         }),
       });
