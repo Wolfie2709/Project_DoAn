@@ -9,18 +9,36 @@ import { formatPrice } from "@/lib/formatPrice";
 import Link from 'next/link';
 import { useAuthStore } from '@/store/authStore';
 import { Label } from "../ui/label";
+import { Customer } from "@/types";
 
 
 const FinalConfirmationForm = () => {
   const [isMounted, setIsMounted] = useState(false);
-  const customer = useAuthStore((state) => state.customer);
+  const { getTotalPrice, getTax, getShippingFee, getTotalAmount, cartItems} = useCartStore();
+  const { customer } = useAuthStore();
 
+  const handleFormSubmit = async (data: any) => {
+    const order = JSON.parse(localStorage.getItem("latestOrder") || "{}");
+    try {
+      const res = await fetch("https://localhost:7240/api/Orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(order),
+      });
+
+      if (!res.ok) throw new Error("Order creation failed");
+      const createdOrder = await res.json();
+      
+      alert("Order placed successfully!");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to place order");
+    }
+  }
+  
   useEffect(() => {
     setIsMounted(true);
   }, []);
-
-  const { getTotalPrice, getTax, getShippingFee, getTotalAmount } =
-    useCartStore();
 
   if (!isMounted) {
     return <Loader />;
@@ -106,8 +124,11 @@ const FinalConfirmationForm = () => {
             <option value="bank_transfer">Bank Transfer</option>
         </select>
         </div>
-        <Button>
-
+        <Button
+        onClick={handleFormSubmit}
+          className="text-xl mt-6 bg-blue-500 dark:bg-blue-600 text-white py-6 px-12 hover:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none rounded-full hover:ring-2"
+        >
+          Place Order
         </Button>
       </div>
     </div>

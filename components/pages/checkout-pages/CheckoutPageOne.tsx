@@ -7,8 +7,10 @@ import React from "react";
 import { useAuthStore } from "@/store/authStore";
 import useCartStore from "@/store/cartStore";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 const CheckoutPageOne = () => {
+  const router = useRouter();
   const { customer } = useAuthStore();
   const { getTotalAmount, cartItems } = useCartStore();
 
@@ -21,38 +23,18 @@ const CheckoutPageOne = () => {
       phone: data.phone,
       paymentMethod: "Cash",
       orderDate: new Date().toISOString(),
+      orderDetails: cartItems.map((item: any) => ({
+        productId: item.productId,
+        quantity: item.quantity,
+        price: item.price,
+      }))
     };
-
-    const orderDetails = cartItems.map((item: any) => ({
-      productId: item.productId,
-      quantity: item.quantity,
-      price: item.price,
-    }));
-
-    try {
-      const res = await fetch("https://localhost:7240/api/Orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(order),
-      });
-
-      if (!res.ok) throw new Error("Order creation failed");
-      const createdOrder = await res.json();
-
-      // Create order details
-      await Promise.all(orderDetails.map(detail =>
-        fetch("https://localhost:7240/api/OrderDetails", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...detail, orderId: createdOrder.orderId }),
-        })
-      ));
-
-      alert("Order placed successfully!");
-    } catch (err) {
-      console.error(err);
-      alert("Failed to place order");
+    
+    if (typeof window !== "undefined") {
+      localStorage.setItem("latestOrder", JSON.stringify(order));
     }
+    router.push("/complete-checkout")
+    
   };
   return (
     <section className="px-4 py-4 lg:px-16  bg-white dark:bg-gray-800">
@@ -82,8 +64,7 @@ const CheckoutPageOne = () => {
           <OrderSummaryForCheckout />
         </div>
         <Button
-          form="CheckoutForm"
-          type="submit"
+        onClick={handleFormSubmit}
           className="text-xl mt-6 bg-blue-500 dark:bg-blue-600 text-white py-6 px-12 hover:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none rounded-full hover:ring-2"
         >
           Place Order
