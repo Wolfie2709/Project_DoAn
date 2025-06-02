@@ -14,7 +14,7 @@ import { Response } from "@/types"
 // Define the schema for form validation
 const formSchema = z.object({
   name: z.string().min(1, "Category name is required"),
-  image: z.string().url({ message: "Invalid URL format" }),
+  // image: z.string().url({ message: "Invalid URL format" }),
   description: z.string().min(1, "Description is required"),
 });
 
