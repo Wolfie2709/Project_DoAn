@@ -53,10 +53,7 @@ const CheckoutPageOne = () => {
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
                 Shipping Address
               </h2>
-              <CheckoutForm onSubmitForm={(data) => {
-                  // handle the submitted form data
-                  console.log("Form submitted:", data);
-                }} />
+              <CheckoutForm onSubmitForm={handleFormSubmit} />
             </div>
               <CouponCodeForm />
           </div>
