@@ -20,10 +20,10 @@ const ProductDetails = ({ product }: { product: Product }) => {
     <div className="space-y-2 mt-2">
       {/* Category */}
       <Link
-        href={`/shop?category=${product?.category?.categoryname}`}
+        href={`/shop?category=${product?.category?.categoryName}`}
         className="bg-lime-500 py-1 px-4 rounded-full w-fit"
       >
-        {product?.category?.categoryname}
+        {product?.category?.categoryName}
       </Link>
       {/* Product Name */}
       <h2 className="text-2xl md:text-3xl font-bold capitalize">

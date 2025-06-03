@@ -45,22 +45,40 @@ const ProductForm = () => {
     resolver: zodResolver(productSchema),
   });
 
-  const onSubmit = (data: ProductFormData) => {
-    console.log(data);
-    // Add logic to handle form submission (e.g., API call to add product)
-    setFormData({
-      name: "",
-      price: "",
-      category: "",
-      brand: "",
-      type: "featured",
-      description: "",
-      aboutItem: '',
-      images: [],
-      color: [],
-      discount: undefined,
+const onSubmit = async (data: ProductFormData) => {
+  try {
+    const formData = new FormData();
+
+    // Append fields
+    formData.append("productName", data.name);
+    formData.append("price", data.price.toString());
+    formData.append("description", data.description);
+    formData.append("shortDescription", data.aboutItem || "");
+    formData.append("brandId", "1"); // Hardcode tạm, bạn nên truyền đúng brandId
+    formData.append("categoryId", "1"); // Hardcode tạm, bạn nên truyền đúng categoryId
+    formData.append("stock", "100"); // Nếu muốn mặc định
+    formData.append("createdAt", new Date().toISOString());
+
+    // Append images
+    data.images.forEach((file) => {
+      formData.append("Images", file); // "Images" là tên property trong model
     });
-  };
+
+    const response = await fetch("https://localhost:7240/api/Products", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to create product");
+    }
+
+    alert("Product created successfully!");
+  } catch (error) {
+    console.error("Create error:", error);
+    alert("Error creating product.");
+  }
+};
 
   return (
     <div className="max-w-screen-xl mx-auto w-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 my-4">

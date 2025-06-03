@@ -34,7 +34,7 @@ const SingleProductListView = ({ product }: { product: Product }) => {
       {images && images[0] && <Image className="object-contain" src={images[0].imageUrl} alt={images[0].imageUrl} fill />}
       </div>
       <div className="">
-        <p className="text-sm text-sky-500 font-light">{category?.categoryname}</p>
+        <p className="text-sm text-sky-500 font-light">{category?.categoryName}</p>
         <div className="flex items-center justify-between">
         {productName && (<h3 className="text-xl font-fold capitalize hover:text-green-500">
           {productName.slice(0, 45)}
