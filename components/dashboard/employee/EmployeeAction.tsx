@@ -13,7 +13,7 @@ interface EmployeeActionsProps {
   onDelete: () => void;
 }
 
-const EmployeeActions: React.FC<EmployeeActionsProps> = ({ employeeId, onDelete }) => {
+const EmployeeActions: React.FC<EmployeeActionsProps> = ({ employeeId, onDelete}) => {
   return (
     <div>
       <Popover>

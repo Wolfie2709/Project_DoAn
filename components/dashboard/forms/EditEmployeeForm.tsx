@@ -19,7 +19,7 @@ const employeeSchema = z.object({
   doj: z.string().min(1, "Date of joining is required"),
 });
 
-export type EmployeeFormData = z.infer<typeof employeeSchema>;
+export type EmployeeFormData = z.infer<typeof employeeSchema> & { id?: number };
 
 type EditEmployeeFormProps = {
   employee: EmployeeFormData;
@@ -42,9 +42,9 @@ const EditEmployeeForm: React.FC<EditEmployeeFormProps> = ({ employee, onSubmitE
   }, [employee, reset]);
 
   const onSubmit = (data: EmployeeFormData) => {
-    console.log("Edited Data:", data);
-    onSubmitEdit(data); 
-  };
+  const updatedEmployee = { ...data, id: employee.id };
+  onSubmitEdit(updatedEmployee);
+};
 
   return (
     <div className="max-w-screen-xl mx-auto w-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 my-4">
@@ -79,7 +79,6 @@ const EditEmployeeForm: React.FC<EditEmployeeFormProps> = ({ employee, onSubmitE
           </Label>
           <select
             id="position"
-            defaultValue={employee.position}
             className="mt-1 p-2 block w-full dark:bg-slate-950 rounded-md border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
             {...register("position")}
           >
@@ -138,7 +137,6 @@ const EditEmployeeForm: React.FC<EditEmployeeFormProps> = ({ employee, onSubmitE
           </Label>
           <select
             id="gender"
-              defaultValue={employee.gender}
             className="mt-1 p-2 block w-full dark:bg-slate-950 rounded-md border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
             {...register("gender")}
           >
