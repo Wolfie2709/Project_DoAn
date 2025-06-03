@@ -8,7 +8,6 @@ import ProductHeader from "@/components/dashboard/product/ProductHeader";
 import Loader from "@/components/others/Loader";
 import Pagination from "@/components/others/Pagination";
 import { Product } from "@/types";
-import Link from "next/link";
 
 // Component
 const ProductsPage = () => {
