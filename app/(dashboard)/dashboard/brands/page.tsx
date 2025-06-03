@@ -66,6 +66,7 @@ const BrandPage = () => {
     getResponse();
   }, []);
 
+  //Kiem tra truy cap hop le
   useEffect(() => {
     if (!response || !response.accessToken) return;
 
@@ -106,6 +107,48 @@ const BrandPage = () => {
     fetchBrands();
   }, [response]);
 
+  //function for onclick to filter true
+  const filterTrue = async () => {
+    if (!response || !response.accessToken) return null;
+    try {
+      const res = await fetch("https://localhost:7240/api/Brands");
+      const data: Brand[] = await res.json();
+      const activeBrands = data.filter((brand) => brand.activeStatus === true);
+
+      setBrands(activeBrands);
+      setFilteredBrands(activeBrands);
+
+      // Reset page
+      const params = new URLSearchParams(searchParams);
+      params.set("brandpage", "1");
+      router.replace(`${pathname}?${params}`);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  
+  //function for onclick to filter false
+  const filterFalse = async () => {
+    if (!response || !response.accessToken) return null;
+    try {
+      const res = await fetch("https://localhost:7240/api/Brands");
+      const data: Brand[] = await res.json();
+      const unactiveBrands = data.filter((brand) => brand.activeStatus === false);
+
+      setBrands(unactiveBrands);
+      setFilteredBrands(unactiveBrands);
+
+      // Reset lại phân trang về trang 1
+      const params = new URLSearchParams(searchParams);
+      params.set("brandpage", "1");
+      router.replace(`${pathname}?${params}`);
+
+      console.log("Filtered inactive brands:", unactiveBrands);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  
 
   // Handle search input
   const handleSearch = (query: string) => {
@@ -159,10 +202,10 @@ const BrandPage = () => {
         >
           Add Brand
         </Link>
-        <Button>
+        <Button onClick={filterTrue}>
           Active
         </Button>
-        <Button>
+        <Button onClick={filterFalse}>
           Trash
         </Button>
       </div>
