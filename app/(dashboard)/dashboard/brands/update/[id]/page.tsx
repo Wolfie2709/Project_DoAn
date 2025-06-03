@@ -90,7 +90,7 @@ export default function UpdateBrandPage() {
     const fetchBrand = async () => {
       try {
         // console.log(response.accessToken)
-        const res = await fetch(`https://localhost:7240/api/Brands/${id}`, {
+        const res = await fetch(`https://localhost:7240/api/Brands/dashboard/${id}`, {
           headers: {
             'Authorization': `Bearer ${response?.accessToken}` //Thêm Authorization header
           }
