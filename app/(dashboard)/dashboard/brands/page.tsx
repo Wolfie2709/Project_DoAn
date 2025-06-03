@@ -11,6 +11,8 @@ import Link from "next/link";
 import React, { Suspense } from "react";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { Response } from "@/types"
+import { Button } from "@/components/ui/button";
 
 const BrandPage = () => {
   const [brands, setBrands] = useState<Brand[]>([]);
@@ -28,8 +30,65 @@ const BrandPage = () => {
     currentPage * itemsPerPage
   );
 
-  // Fetch brand data
+  //Ham lay get response
+  const getResponse = () => {
+    try {
+      //lay value tu session storage
+      const storedData = sessionStorage.getItem("food-storage");
+      if (storedData == null) {
+        throw new Error("Ban chua dang nhap")
+      }
+
+      //lay ra noi dung ben trong storedData
+      const parsed = JSON.parse(storedData);
+      if (parsed == null) {
+        throw new Error("Ban chua dang nhap: loi o parsed")
+      }
+
+      //Lay ra response
+      const responseData = parsed.state;
+      if (responseData == null) {
+        throw new Error("Ban chua dang nhap: loi o response")
+      }
+
+      if (responseData.employee == null) {
+        throw new Error("Ban khong phai la employee")
+      }
+      setResponse(responseData);
+    } catch (error) {
+      alert(error);
+      router.push("/dashboard")
+    }
+  }
+
+  // useEffect để lấy response từ session
+  useEffect(() => {
+    getResponse();
+  }, []);
+
+  useEffect(() => {
+    if (!response || !response.accessToken) return;
+
+    //prevent clerk from access update view
+    try {
+      if (response.employee == null) {
+        throw new Error("Ban khong co quyen truy cap")
+      }
+    } catch (error) {
+      alert(error)
+      router.push("/dashboard/brands")
+    }
+  }, [response])
+
+  useEffect(() => {
+    if (!response) return;
+    console.log(response);
+  }, [response]);
+
+  // Fetch brand data where ActiveStatus is true
   const fetchBrands = async () => {
+    if (!response || !response.accessToken) return null;
+
     try {
       const res = await fetch("https://localhost:7240/api/Brands");
       const data: Brand[] = await res.json();
@@ -43,49 +102,10 @@ const BrandPage = () => {
     }
   };
 
-  //get response
-  const getResponse = async () => {
-    try{
-      //lay value tu session storage
-      const storedData = sessionStorage.getItem("food-storage");
-      if(storedData == null){
-        throw new Error("Ban chua dang nhap")
-      }
-      // console.log(storedData)
-
-      //lay ra noi dung ben trong storedData
-      const parsed = JSON.parse(storedData);
-      if(parsed == null){
-        throw new Error("Ban chua dang nhap: loi o parsed")
-      }
-      // console.log(parsed)
-
-      //Lay ra response
-      const responseData = parsed.state;
-      
-      if(responseData == null){
-        throw new Error("Ban chua dang nhap: loi o response")
-      }
-      setResponse(responseData);
-
-      if(responseData.employee == null){
-        throw new Error("Ban khong phai la employee")
-      }
-    }catch(error){
-      alert(error);
-      router.push("/dashboard")
-    }
-  }
-
   useEffect(() => {
-    getResponse();
     fetchBrands();
-  }, []);
-  
-  useEffect(()=>{
-    if(!response) return;
-    console.log(response);
   }, [response]);
+
 
   // Handle search input
   const handleSearch = (query: string) => {
@@ -103,6 +123,11 @@ const BrandPage = () => {
 
   // Handle deletion
   const deleteBrand = async (id: number) => {
+    if(!response || !response.accessToken) return;
+    if (response.employee?.position != "Manager"){
+      alert("Ban khong co quyen truy cap")
+      return;
+    }
     const confirmed = confirm("Are you sure you want to delete this brand?");
     if (!confirmed) return;
 
@@ -134,6 +159,12 @@ const BrandPage = () => {
         >
           Add Brand
         </Link>
+        <Button>
+          Active
+        </Button>
+        <Button>
+          Trash
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
