@@ -24,6 +24,12 @@ const EmployeeActions: React.FC<EmployeeActionsProps> = ({ employeeId, onDelete}
         </PopoverTrigger>
         <PopoverContent className="text-start">
           <Link
+            href={`/dashboard/employees/add-image/${employeeId}`}
+            className="py-2 px-4 rounded-md w-full block hover:bg-slate-200 dark:hover:bg-slate-900"
+          >
+            Add Image
+          </Link>
+          <Link
             href={`/dashboard/employees/view-employee/${employeeId}`}
             className="py-2 px-4 rounded-md w-full block hover:bg-slate-200 dark:hover:bg-slate-900"
           >
