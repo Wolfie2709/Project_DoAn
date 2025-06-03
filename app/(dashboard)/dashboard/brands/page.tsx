@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { Response } from "@/types"
 import { Button } from "@/components/ui/button";
+import { Trash } from "lucide-react";
 
 const BrandPage = () => {
   const [brands, setBrands] = useState<Brand[]>([]);
@@ -166,7 +167,7 @@ const BrandPage = () => {
           href={"/dashboard/brands/brand-trashbin"}
           className="py-2 px-6 rounded-md bg-blue-500 hover:opacity-60 text-white"
         >
-          Brand Trashbin
+          <Trash />
         </Link>
       </div>
 

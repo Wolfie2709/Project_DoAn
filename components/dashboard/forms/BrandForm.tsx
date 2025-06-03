@@ -99,12 +99,6 @@ const AddBrandForm: React.FC = () => {
           brandName: data.name,
           // Các field còn lại nếu bạn có thêm: parentCategoryId, addedBy, ...
           addedBy: whichEmployee,
-          // images: [
-          //   {
-          //     imageUrl: data.image, // cần map đúng với class Image bên C#
-          //   }
-          // ],
-          // Nếu muốn thêm mô tả, bạn cần cập nhật model để hỗ trợ description
         }),
       });
 

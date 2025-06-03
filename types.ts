@@ -63,6 +63,7 @@ birthday?: string;
 gender?: string;
 address?: string;
 lastLogin: string;
+isDeletedStatus?: boolean;
 }
 
 export type Order={
