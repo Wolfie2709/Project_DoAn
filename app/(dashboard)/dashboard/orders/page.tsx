@@ -1,48 +1,51 @@
+"use client";
 import OrderActions from "@/components/dashboard/order/OrderActions";
 import OrderSearch from "@/components/dashboard/order/OrderSearch";
 import Loader from "@/components/others/Loader";
 import Pagination from "@/components/others/Pagination";
 import React, { Suspense } from "react";
+import { Order } from "@/types";
+import { useEffect, useState } from "react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 
 const OrdersPage = () => {
-  // dummy data for orders
-  const orders = [
-    {
-      id: 1,
-      orderNumber: "ORD123456",
-      customerName: "John Doe",
-      date: "2024-04-01",
-      status: "Shipped",
-    },
-    {
-      id: 2,
-      orderNumber: "ORD123457",
-      customerName: "Jane Smith",
-      date: "2024-04-02",
-      status: "Pending",
-    },
-    {
-      id: 3,
-      orderNumber: "ORD123458",
-      customerName: "Alice Johnson",
-      date: "2024-04-03",
-      status: "Delivered",
-    },
-    {
-      id: 4,
-      orderNumber: "ORD123459",
-      customerName: "Bob Williams",
-      date: "2024-04-04",
-      status: "Shipped",
-    },
-    {
-      id: 5,
-      orderNumber: "ORD123460",
-      customerName: "Emily Brown",
-      date: "2024-04-05",
-      status: "Pending",
-    },
-  ];
+  // Lay api fetch all order with customer
+  const [orders, setOrders] = useState<Order[]>([]);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  //Pagination
+  const currentPage = parseInt(searchParams.get("orderpage") || "1", 10);
+  const itemsPerPage = 3;
+  const totalPages = Math.ceil(orders.length / itemsPerPage);
+  const paginatedOrders = orders.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  //lay api get all order
+  // Fetch brand data where ActiveStatus is true
+  const fetchOrders = async () => {
+    // if (!response || !response.accessToken) return null;
+
+    try {
+      const res = await fetch("https://localhost:7240/api/Orders/with-customer");
+      const data: Order[] = await res.json();
+      setOrders(data);
+      // setFilteredBrands(activeBrands);
+    } catch (error) {
+      console.error("Failed to fetch brands", error);
+      setOrders([]);
+      // setFilteredBrands([]);
+    }
+  };
+
+  useEffect(() => {
+    fetchOrders();
+  }, [])
+
+  // console.log(orders)
 
   return (
     <div className="max-w-screen-xl mx-auto w-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 my-4 ">
@@ -74,15 +77,15 @@ const OrdersPage = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 dark:divide-gray-700 ">
-            {orders.map((order) => (
-              <tr key={order.id} className="bg-white dark:bg-gray-800">
+            {paginatedOrders.map((order) => (
+              <tr key={order.orderId} className="bg-white dark:bg-gray-800">
                 <td className="px-6 py-4 whitespace-nowrap">
-                  {order.orderNumber}
+                  {order.orderId}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  {order.customerName}
+                  {order.customer.fullName}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">{order.date}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{order.estimatedDate}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span
                     className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
@@ -105,7 +108,11 @@ const OrdersPage = () => {
         </table>
         {/* replace these data with your acctuall data */}
         <Suspense fallback={<Loader />}>
-          <Pagination currentPage={1} pageName="orderpage" totalPages={10} />
+          <Pagination
+            totalPages={totalPages}
+            currentPage={currentPage}
+            pageName="orderpage"
+          />
         </Suspense>
       </div>
     </div>
