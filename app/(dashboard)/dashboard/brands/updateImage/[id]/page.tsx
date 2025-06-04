@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { Response } from "@/types"
 
 export default function UpdateImagePage() {
   const { id } = useParams();
@@ -12,9 +13,66 @@ export default function UpdateImagePage() {
 
   const [imageUrl, setImageUrl] = useState('');
   const [originalImage, setOriginalImage] = useState<any>(null);
+  const [response, setResponse] = useState<Response>();
+
+  //Ham lay get response
+  const getResponse = () => {
+    try {
+      //lay value tu session storage
+      const storedData = sessionStorage.getItem("food-storage");
+      if (storedData == null) {
+        throw new Error("Ban chua dang nhap")
+      }
+
+      //lay ra noi dung ben trong storedData
+      const parsed = JSON.parse(storedData);
+      if (parsed == null) {
+        throw new Error("Ban chua dang nhap: loi o parsed")
+      }
+
+      //Lay ra response
+      const responseData = parsed.state;
+      if (responseData == null) {
+        throw new Error("Ban chua dang nhap: loi o response")
+      }
+
+      if (responseData.employee == null) {
+        throw new Error("Ban khong phai la employee")
+      }
+      setResponse(responseData);
+    } catch (error) {
+      alert(error);
+      router.push("/dashboard")
+    }
+  }
+
+  // useEffect để lấy response từ session
+  useEffect(() => {
+    getResponse();
+  }, []);
+
+  useEffect(() => {
+    if (!response || !response.accessToken) return;
+
+    //prevent clerk from access update view
+    try {
+      if (response.employee?.position != "Manager") {
+        throw new Error("Ban khong co quyen truy cap")
+      }
+    } catch (error) {
+      alert(error)
+      router.push("/dashboard/brands")
+    }
+  }, [response])
 
   useEffect(() => {
     const fetchImage = async () => {
+      if (!response || !response.accessToken) return;
+      if (response.employee?.position != "Manager") {
+        alert("Ban khong co quyen truy cap")
+        return;
+      }
+
       try {
         const res = await fetch(`https://localhost:7240/api/Images/${id}`);
         const data = await res.json();
@@ -25,9 +83,14 @@ export default function UpdateImagePage() {
       }
     };
     fetchImage();
-  }, [id]);
+  }, [id, response]);
 
   const handleUpdate = async () => {
+    if (!response?.accessToken) throw new Error("Không có token đăng nhập");
+    if (response.employee?.position != "Manager") {
+      alert("Ban khong co quyen truy cap");
+      throw new Error("Position khong hop le");
+    }
     try {
       const updatedImage = {
         ...originalImage, // giữ lại các thông tin không thay đổi
@@ -36,13 +99,16 @@ export default function UpdateImagePage() {
 
       const res = await fetch(`https://localhost:7240/api/Images/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${response.accessToken}`, // Thêm Authorization header
+        },
         body: JSON.stringify(updatedImage),
       });
 
       if (!res.ok) throw new Error('Failed to update image');
       alert('Image updated successfully');
-      router.push('/dashboard/categories'); // hoặc trở lại trang trước
+      router.push('/dashboard/brands'); // hoặc trở lại trang trước
     } catch (error) {
       console.error('Error updating image:', error);
     }

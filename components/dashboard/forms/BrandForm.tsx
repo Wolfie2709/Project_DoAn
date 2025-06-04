@@ -90,10 +90,11 @@ const AddBrandForm: React.FC = () => {
     if (!response || !response.accessToken) return;
     var whichEmployee = response.employee?.employeeId;
     try {
-      const response = await fetch("https://localhost:7240/api/Brands", {
+      const fetchResponse = await fetch("https://localhost:7240/api/Brands", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          'Authorization': `Bearer ${response.accessToken}`, // Thêm Authorization header
         },
         body: JSON.stringify({
           brandName: data.name,
@@ -102,11 +103,11 @@ const AddBrandForm: React.FC = () => {
         }),
       });
 
-      if (!response.ok) {
+      if (!fetchResponse.ok) {
         throw new Error("Failed to create brand");
       }
 
-      const result = await response.json();
+      const result = await fetchResponse.json();
       console.log("Brand created successfully:", result);
       // Có thể reset form hoặc chuyển hướng ở đây
       router.push("/dashboard/brands");

@@ -8,6 +8,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import React from 'react';
+import { useEffect, useState } from "react";
+import { Response } from "@/types"
 
 const schema = z.object({
   imageUrl: z.string().url({ message: 'Image URL is not valid' }),
@@ -16,6 +18,7 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 export default function AddImagePage() {
+  const [response, setResponse] = useState<Response>();
   const { id } = useParams(); // brandId từ URL
   const router = useRouter();
 
@@ -27,12 +30,69 @@ export default function AddImagePage() {
     resolver: zodResolver(schema),
   });
 
-  const onSubmit = async (data: FormData) => {
+  //Ham lay get response
+  const getResponse = () => {
     try {
-      const response = await fetch('https://localhost:7240/api/Images', {
+      //lay value tu session storage
+      const storedData = sessionStorage.getItem("food-storage");
+      if (storedData == null) {
+        throw new Error("Ban chua dang nhap")
+      }
+
+      //lay ra noi dung ben trong storedData
+      const parsed = JSON.parse(storedData);
+      if (parsed == null) {
+        throw new Error("Ban chua dang nhap: loi o parsed")
+      }
+
+      //Lay ra response
+      const responseData = parsed.state;
+      if (responseData == null) {
+        throw new Error("Ban chua dang nhap: loi o response")
+      }
+
+      if (responseData.employee == null) {
+        throw new Error("Ban khong phai la employee")
+      }
+      setResponse(responseData);
+    } catch (error) {
+      alert(error);
+      router.push("/dashboard")
+    }
+  }
+
+  // useEffect để lấy response từ session
+  useEffect(() => {
+    getResponse();
+  }, []);
+
+  useEffect(() => {
+    if (!response || !response.accessToken) return;
+
+    //prevent clerk from access update view
+    try {
+      if (response.employee?.position != "Manager") {
+        throw new Error("Ban khong co quyen truy cap")
+      }
+    } catch (error) {
+      alert(error)
+      router.push("/dashboard/brands")
+    }
+  }, [response])
+
+  const onSubmit = async (data: FormData) => {
+    if (!response?.accessToken) throw new Error("Không có token đăng nhập");
+    if (response.employee?.position != "Manager") {
+      alert("Ban khong co quyen truy cap");
+      throw new Error("Position khong hop le");
+    }
+
+    try {
+      const fetchResponse = await fetch('https://localhost:7240/api/Images', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${response.accessToken}`, // Thêm Authorization header
         },
         body: JSON.stringify({
           imageUrl: data.imageUrl,
@@ -41,7 +101,7 @@ export default function AddImagePage() {
         }),
       });
 
-      if (!response.ok) {
+      if (!fetchResponse.ok) {
         throw new Error('Failed to add image');
       }
 
