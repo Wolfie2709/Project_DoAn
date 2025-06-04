@@ -17,6 +17,8 @@ const employeeSchema = z.object({
   address: z.string().min(1, "Address is required"),
   phoneNumber: z.string().min(1, "Phone number is required"),
   doj: z.string().refine((val) => !isNaN(Date.parse(val)), "Invalid date"),
+  EUsername: z.string().min(4, "Username must be at least 4 characters"),
+  EPasswordHash: z.string().min(6, "Password must be at least 6 characters"),
 });
 
 export type EmployeeFormData = z.infer<typeof employeeSchema> & { id?: number };
@@ -65,17 +67,21 @@ const EditEmployeeForm: React.FC<EditEmployeeFormProps> = ({ employee, onSubmitE
   }, []);
 
   useEffect(() => {
-    if (!response?.accessToken) return;
-    try {
-      const position = response.employee?.position;
-      if (position !== "Manager" && position !== "Admin") {
-        throw new Error("Bạn không có quyền truy cập");
-      }
-    } catch (error) {
-      alert(error);
-      router.push("/dashboard/employees");
+  if (!response?.accessToken) return;
+  try {
+    const isSelfOrManagerOrAdmin =
+      response?.employee?.position === "Admin" ||
+      response?.employee?.position === "Manager" ||
+      response?.employee?.employeeId === employee.id;
+
+    if (!isSelfOrManagerOrAdmin) {
+      throw new Error("Bạn không có quyền truy cập");
     }
-  }, [response]);
+  } catch (error) {
+    alert(error);
+    router.push("/dashboard/employees");
+  }
+}, [response, employee]);
 
   const onSubmit = (data: EmployeeFormData) => {
     if (!response?.accessToken) return;
@@ -95,6 +101,31 @@ const EditEmployeeForm: React.FC<EditEmployeeFormProps> = ({ employee, onSubmitE
       </h2>
       <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div>
+          <div>
+            <Label htmlFor="EUsername" className="block text-sm font-medium text-gray-700 dark:text-white">
+              Username
+            </Label>
+            <Input
+              id="EUsername"
+              type="text"
+              className="mt-1 p-2 block w-full rounded-md border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+              {...register("EUsername")}
+            />
+            {errors.EUsername && <span className="text-red-500">{errors.EUsername.message}</span>}
+          </div>
+
+          <div>
+            <Label htmlFor="EPasswordHash" className="block text-sm font-medium text-gray-700 dark:text-white">
+              Password
+            </Label>
+            <Input
+              id="EPasswordHash"
+              type="password"
+              className="mt-1 p-2 block w-full rounded-md border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+              {...register("EPasswordHash")}
+            />
+            {errors.EPasswordHash && <span className="text-red-500">{errors.EPasswordHash.message}</span>}
+          </div>
             <Label
               htmlFor="name"
               className="block text-sm font-medium text-gray-700 dark:text-white"
@@ -142,7 +173,7 @@ const EditEmployeeForm: React.FC<EditEmployeeFormProps> = ({ employee, onSubmitE
             </Label>
             <Input
               id="birthday"
-              type="birthday"
+              type="date"
               className="mt-1 p-2 block w-full rounded-md border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
               {...register("birthday")}
             />
@@ -213,7 +244,7 @@ const EditEmployeeForm: React.FC<EditEmployeeFormProps> = ({ employee, onSubmitE
             >
               Date of joining
             </Label>
-            <textarea
+            <Input
               id="doj"
               className="mt-1 p-2 block border bg-white dark:bg-slate-950 rounded-md w-full  border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
               {...register("doj")}
@@ -229,8 +260,9 @@ const EditEmployeeForm: React.FC<EditEmployeeFormProps> = ({ employee, onSubmitE
             >
               Phone number
             </Label>
-            <textarea
+            <Input
               id="phonenumber"
+              type ="tel"
               className="mt-1 p-2 block border bg-white dark:bg-slate-950 rounded-md w-full  border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
               {...register("phoneNumber")}
             />

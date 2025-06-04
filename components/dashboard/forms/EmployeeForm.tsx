@@ -18,6 +18,9 @@ const employeeSchema = z.object({
   address: z.string().min(1, "Address is required"),
   phoneNumber: z.string().min(1, "Phone number is required"),
   doj: z.string().refine((val) => !isNaN(Date.parse(val)), "Invalid date"),
+  EUsername: z.string().min(4, "Username must be at least 4 characters"),
+  EPasswordHash: z.string().min(6, "Password must be at least 6 characters"),
+  
 });
 
 type EmployeeFormData = z.infer<typeof employeeSchema>;
@@ -82,6 +85,8 @@ const EmployeeForm = () => {
       phoneNumber: data.phoneNumber,
       doj: data.doj,
       addedBy: response.employee?.employeeId, 
+      EUsername: data.EUsername,
+      EPasswordHash: data.EPasswordHash,
     };
 
     try {
@@ -115,6 +120,41 @@ const EmployeeForm = () => {
         onSubmit={handleSubmit(onSubmit)}
         className="grid grid-cols-1 lg:grid-cols-2 gap-4"
       >
+        <div>
+          <Label
+            htmlFor="EUsername"
+            className="block text-sm font-medium text-gray-700 dark:text-white"
+          >
+            Username
+          </Label>
+          <Input
+            id="EUsername"
+            type="text"
+            className="mt-1 p-2 block w-full rounded-md border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+            {...register("EUsername")}
+          />
+          {errors.EUsername && (
+            <span className="text-red-500">{errors.EUsername.message}</span>
+          )}
+        </div>
+
+        <div>
+          <Label
+            htmlFor="EPasswordHash"
+            className="block text-sm font-medium text-gray-700 dark:text-white"
+          >
+            Password
+          </Label>
+          <Input
+            id="EPasswordHash"
+            type="password"
+            className="mt-1 p-2 block w-full rounded-md border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+            {...register("EPasswordHash")}
+          />
+          {errors.EPasswordHash && (
+            <span className="text-red-500">{errors.EPasswordHash.message}</span>
+          )}
+        </div>
         <div>
           <Label
             htmlFor="name"
