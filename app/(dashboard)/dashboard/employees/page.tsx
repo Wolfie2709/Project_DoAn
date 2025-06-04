@@ -26,11 +26,7 @@ const EmployeePage = () => {
         }
     }
 
-    useEffect(() => {
-  fetchEmployees();
-}, []);
-
-const deleteEmployee = async (id: number) => {
+  const deleteEmployee = async (id: number) => {
     const confirmed = confirm("Are you sure you want to delete this employee?");
     if (!confirmed) return;
 
@@ -48,6 +44,10 @@ const deleteEmployee = async (id: number) => {
       console.error("Error deleting employee:", error);
     }
   };
+
+    useEffect(() => {
+  fetchEmployees();
+}, []);
 
   return (
     <div className="max-w-screen-xl w-full p-4 my-4 mx-auto dark:bg-slate-900 rounded-md">

@@ -26,10 +26,6 @@ const ViewEmployeePage = async ({ params }: { params: { id: string } }) => {
         <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-md">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300"></label>
-              <p className="text-gray-800 dark:text-white">{employee.imageUrl}</p>
-            </div>
-            <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Id</label>
               <p className="text-gray-800 dark:text-white">{employee.employeeId}</p>
             </div>

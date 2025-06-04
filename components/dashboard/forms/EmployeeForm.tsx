@@ -1,46 +1,111 @@
+
 "use client";
-import React, { useState } from "react";
-import { optional, z } from "zod";
+import React, { useEffect, useState } from "react";
+import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 const employeeSchema = z.object({
-  image: z
-    .any()
-    .refine((file) => file instanceof File, "Image is required"),
-  name: z.string().min(1, "Name is required"),
+  fullName: z.string().min(1, "Name is required"),
   position: z.enum(["Admin", "Manager", "Employee"]),
-  birthday: z.string().min(1, "Birthday is required"),
-  email: z.string().min(1, "Email is required"),
-  gender: z.string().min(1, "Gender is required"),
+  birthday: z.string().refine((val) => !isNaN(Date.parse(val)), "Invalid date"),
+  email: z.string().email("Invalid email"),
+  gender: z.enum(["male", "female", "others"]),
   address: z.string().min(1, "Address is required"),
   phoneNumber: z.string().min(1, "Phone number is required"),
-  doj: z.string().min(1, "Doj is required"),
+  doj: z.string().refine((val) => !isNaN(Date.parse(val)), "Invalid date"),
 });
 
 type EmployeeFormData = z.infer<typeof employeeSchema>;
 
 const EmployeeForm = () => {
   const [preview, setPreview] = useState<string | null>(null);
+  const [response, setResponse] = useState<any>();
+  const router = useRouter();
 
   const {
     handleSubmit,
     register,
-    formState: { errors, isSubmitting },
+    formState: { errors },
     setValue,
   } = useForm<EmployeeFormData>({
     resolver: zodResolver(employeeSchema),
   });
 
-  const onSubmit = (data: EmployeeFormData) => {
-    console.log(data);
-    // Reset preview and form here if needed
-    setPreview(null);
+  //  Fetch session storage and verify access
+  const getResponse = () => {
+    try {
+      const storedData = sessionStorage.getItem("food-storage");
+      if (!storedData) throw new Error("Bạn chưa đăng nhập");
+
+      const parsed = JSON.parse(storedData);
+      if (!parsed?.state?.employee) throw new Error("Bạn không phải là employee");
+
+      setResponse(parsed.state);
+    } catch (error) {
+      alert(error);
+      router.push("/dashboard");
+    }
   };
 
+  useEffect(() => {
+    getResponse();
+  }, []);
+
+  useEffect(() => {
+  if (!response?.accessToken) return;
+  try {
+    const position = response.employee?.position;
+    if (position !== "Manager" && position !== "Admin") {
+      throw new Error("Bạn không có quyền truy cập");
+    }
+  } catch (error) {
+    alert(error);
+    router.push("/dashboard/employees");
+  }
+}, [response]);
+
+  const onSubmit = async (data: EmployeeFormData) => {
+    if (!response?.accessToken) return;
+
+    const formData = {
+      fullName: data.fullName,
+      position: data.position,
+      birthday: data.birthday,
+      email: data.email,
+      gender: data.gender,
+      address: data.address,
+      phoneNumber: data.phoneNumber,
+      doj: data.doj,
+      addedBy: response.employee?.employeeId, 
+    };
+
+    try {
+      const res = await fetch("https://localhost:7240/api/Employees", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          // "Authorization": `Bearer ${response.accessToken}`, // if needed
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(`Failed to add employee: ${errText}`);
+      }
+
+      const result = await res.json();
+      console.log("Employee added:", result);
+      router.push("/dashboard/employees");
+    } catch (error) {
+      console.error("Error adding employee:", error);
+    }
+  };
   return (
     <div className="max-w-screen-xl mx-auto w-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 my-4">
       <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
@@ -50,38 +115,6 @@ const EmployeeForm = () => {
         onSubmit={handleSubmit(onSubmit)}
         className="grid grid-cols-1 lg:grid-cols-2 gap-4"
       >
-        {/* ✅ Image Upload Input */}
-        <div>
-          <Label
-            htmlFor="image"
-            className="block text-sm font-medium text-gray-700 dark:text-white"
-          >
-            Employee Image
-          </Label>
-          <input
-            id="image"
-            type="file"
-            accept="image/*"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) {
-                setValue("image", file); // register file with RHF
-                setPreview(URL.createObjectURL(file)); // set preview
-              }
-            }}
-            className="mt-1 p-2 block w-full text-gray-800 dark:text-white bg-white dark:bg-slate-950 rounded-md border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
-          />
-          {errors.image && (
-            <span className="text-red-500">{errors.image.message}</span>
-          )}
-          {preview && (
-            <img
-              src={preview}
-              alt="Preview"
-              className="mt-2 w-32 h-32 object-cover rounded-md border"
-            />
-          )}
-        </div>
         <div>
           <Label
             htmlFor="name"
@@ -90,13 +123,13 @@ const EmployeeForm = () => {
             Employee Name
           </Label>
           <Input
-            id="name"
+            id="fullName"
             type="text"
             className="mt-1 p-2 block w-full rounded-md border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
-            {...register("name")}
+            {...register("fullName")}
           />
-          {errors.name && (
-            <span className="text-red-500">{errors.name.message}</span>
+          {errors.fullName && (
+            <span className="text-red-500">{errors.fullName.message}</span>
           )}
         </div>
 
@@ -130,7 +163,7 @@ const EmployeeForm = () => {
           </Label>
           <Input
             id="birthday"
-            type="string"
+            type="birthday"
             className="mt-1 p-2 block w-full rounded-md border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
             {...register("birthday")}
           />
@@ -147,7 +180,7 @@ const EmployeeForm = () => {
           </Label>
           <Input
             id="email"
-            type="text"
+            type="email"
             className="mt-1 p-2 block w-full rounded-md border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
             {...register("email")}
           />
@@ -202,7 +235,7 @@ const EmployeeForm = () => {
             Date of joining
           </Label>
           <textarea
-            id=""
+            id="doj"
             className="mt-1 p-2 block border bg-white dark:bg-slate-950 rounded-md w-full  border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
             {...register("doj")}
           />
@@ -218,7 +251,7 @@ const EmployeeForm = () => {
             Phone number
           </Label>
           <textarea
-            id=""
+            id="phonenumber"
             className="mt-1 p-2 block border bg-white dark:bg-slate-950 rounded-md w-full  border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
             {...register("phoneNumber")}
           />
