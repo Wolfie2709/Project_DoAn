@@ -11,7 +11,6 @@ import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import Pagination from "@/components/others/Pagination";
 import Loader from "@/components/others/Loader";
 import { Response } from "@/types";
-import { Trash } from "lucide-react";
 
 const CategoryPage = () => {
   // state variable
@@ -90,11 +89,10 @@ const CategoryPage = () => {
       const data: Category[] = await res.json();
 
       // Lọc các category có activeStatus là true
-      const activeCategories = data.filter(category => category.activeStatus === true);
+      const activeCategories = data.filter(category => category.activeStatus === false);
 
       setCategories(activeCategories);
       setFilteredCategories(activeCategories);
-      console.log(data)
     } catch (error) {
       console.error("Failed to fetch products", error);
       setCategories([]);
@@ -132,7 +130,7 @@ const CategoryPage = () => {
     if (!confirmed) return;
 
     try {
-      const res = await fetch(`https://localhost:7240/api/Categories/softdelete/${id}`, {
+      const res = await fetch(`https://localhost:7240/api/Categories/harddelete/${id}`, {
         method: "DELETE",
         headers: {
           'Authorization': `Bearer ${response.accessToken}`, // Thêm Authorization header
@@ -150,6 +148,34 @@ const CategoryPage = () => {
     }
   };
 
+  //Handle Restore
+  const restoreCategory = async (id: number) => {
+    if (!response || !response.accessToken) return;
+    if (response.employee?.position != "Manager") {
+      alert("Ban khong co quyen truy cap")
+      return;
+    }
+    const confirmed = confirm("Are you sure you want to restore this brand?");
+    if (!confirmed) return;
+
+    try {
+      const res = await fetch(`https://localhost:7240/api/Categories/restore/${id}`, {
+        method: "PUT",
+        headers: {
+          'Authorization': `Bearer ${response.accessToken}`, // Thêm Authorization header
+        }
+      });
+
+      if (res.ok) {
+        await fetchCategories();
+      } else {
+        console.error("Failed to delete brand");
+      }
+    } catch (error) {
+      console.error("Error deleting brand:", error);
+    }
+  };
+
   return (
     <div className="bg-white dark:bg-gray-800 min-h-screen max-w-screen-xl w-full mx-auto px-4 py-12 m-2 rounded-md">
       <div >
@@ -159,17 +185,12 @@ const CategoryPage = () => {
           </h1>
           <SearchCategories onSearch={handleSearch} />
           <Link
-            href={"/dashboard/categories/add-category"}
+            href={"/dashboard/categories"}
             className="py-2 px-6 rounded-md bg-blue-500 hover:opacity-60 text-white"
           >
-            Add Category
+            Active
           </Link>
-          <Link
-            href={"/dashboard/categories/category-trashbin"}
-            className="py-2 px-6 rounded-md bg-blue-500 hover:opacity-60 text-white"
-          >
-            <Trash />
-          </Link>
+          
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {paginatedCategories.map((category) => (
@@ -202,23 +223,17 @@ const CategoryPage = () => {
                       </div>
                     </PopoverTrigger>
                     <PopoverContent className="text-start">
-                      <Link
-                        href={`/dashboard/categories/addImage/${category.categoryId}`}
-                        className="py-2 px-4 rounded-md w-full block hover:bg-slate-200 dark:hover:bg-slate-900"
-                      >
-                        Add Image
-                      </Link>
-                      <Link
-                        href={`/dashboard/categories/update/${category.categoryId}`}
-                        className="py-2 px-4 rounded-md w-full block hover:bg-slate-200 dark:hover:bg-slate-900"
-                      >
-                        Update Category
-                      </Link>
                       <button
                         className="w-full text-start hover:bg-slate-200 dark:hover:bg-slate-900 py-2 px-4 rounded-md"
                         onClick={() => deleteCategory(category.categoryId)}
                       >
                         Delete Category
+                      </button>
+                      <button
+                        className="w-full text-start hover:bg-slate-200 dark:hover:bg-slate-900 py-2 px-4 rounded-md"
+                        onClick={() => restoreCategory(category.categoryId)}
+                      >
+                        Restore Brand
                       </button>
                     </PopoverContent>
                   </Popover>

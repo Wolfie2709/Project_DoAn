@@ -86,8 +86,8 @@ export default function UpdateBrandPage() {
   
   //Lay ra brand theo id
   useEffect(() => {
-    if(!response || !response.accessToken) return;
     const fetchBrand = async () => {
+      if(!response || !response.accessToken) return;
       try {
         // console.log(response.accessToken)
         const res = await fetch(`https://localhost:7240/api/Brands/dashboard/${id}`, {

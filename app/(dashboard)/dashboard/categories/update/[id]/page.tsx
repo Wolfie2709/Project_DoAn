@@ -8,6 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { Response } from "@/types"
 
 const formSchema = z.object({
   name: z.string().min(1, 'Category name is required'),
@@ -21,7 +22,7 @@ export default function UpdateCategoryPage() {
   const router = useRouter();
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [imageId, setImageId] = useState<number | null>(null);
-
+  const [response, setResponse] = useState<Response>();
 
   const {
     register,
@@ -32,10 +33,65 @@ export default function UpdateCategoryPage() {
     resolver: zodResolver(formSchema),
   });
 
+  //Ham lay get response
+  const getResponse = () => {
+    try {
+      //lay value tu session storage
+      const storedData = sessionStorage.getItem("food-storage");
+      if (storedData == null) {
+        throw new Error("Ban chua dang nhap")
+      }
+
+      //lay ra noi dung ben trong storedData
+      const parsed = JSON.parse(storedData);
+      if (parsed == null) {
+        throw new Error("Ban chua dang nhap: loi o parsed")
+      }
+
+      //Lay ra response
+      const responseData = parsed.state;
+      if (responseData == null) {
+        throw new Error("Ban chua dang nhap: loi o response")
+      }
+
+      if (responseData.employee == null) {
+        throw new Error("Ban khong phai la employee")
+      }
+      setResponse(responseData);
+    } catch (error) {
+      alert(error);
+      router.push("/dashboard")
+    }
+  }
+
+  // useEffect để lấy response từ session
+  useEffect(() => {
+    getResponse();
+  }, []);
+
+  useEffect(() => {
+    if (!response || !response.accessToken) return;
+
+    //prevent clerk from access update view
+    try {
+      if (response.employee?.position != "Manager") {
+        throw new Error("Ban khong co quyen truy cap")
+      }
+    } catch (error) {
+      alert(error)
+      router.push("/dashboard/categories")
+    }
+  }, [response])
+
   useEffect(() => {
     const fetchCategory = async () => {
+      if (!response || !response.accessToken) return;
       try {
-        const res = await fetch(`https://localhost:7240/api/Categories/${id}`);
+        const res = await fetch(`https://localhost:7240/api/Categories/dashboard/${id}`, {
+          headers: {
+            'Authorization': `Bearer ${response?.accessToken}` //Thêm Authorization header
+          }
+        });
         const data = await res.json();
 
         setValue('name', data.categoryName || '');
@@ -52,14 +108,21 @@ export default function UpdateCategoryPage() {
     };
 
     fetchCategory();
-  }, [id, setValue]);
+  }, [response, id, setValue]);
 
   const onSubmit = async (data: FormData) => {
     try {
-      const response = await fetch(`https://localhost:7240/api/Categories/${id}`, {
+      if (!response?.accessToken) throw new Error("Không có token đăng nhập");
+      if (response.employee?.position != "Manager") {
+        alert("Ban khong co quyen truy cap");
+        throw new Error("Position khong hop le");
+      }
+
+      const responsePut = await fetch(`https://localhost:7240/api/Categories/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${response.accessToken}`, // Thêm Authorization header
         },
         body: JSON.stringify({
           categoryId: Number(id),
@@ -68,7 +131,7 @@ export default function UpdateCategoryPage() {
         }),
       });
 
-      if (!response.ok) throw new Error('Failed to update category');
+      if (!responsePut.ok) throw new Error('Failed to update category');
       router.push('/dashboard/categories');
     } catch (error) {
       console.error('Error updating category:', error);
@@ -78,7 +141,7 @@ export default function UpdateCategoryPage() {
   return (
     <div className="bg-white dark:bg-gray-800 min-h-screen max-w-screen-xl w-full mx-auto px-4 py-12 m-2 rounded-md">
       <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Update Category</h2>
-      
+
       {imageUrl && (
         <div
           className="mb-6 cursor-pointer"
