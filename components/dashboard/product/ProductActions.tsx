@@ -12,19 +12,23 @@ type ProductActionsProps = {
   onDelete: () => void;
 };
 
-const ProductActions = ({ productId, onDeleted }: { productId: number; onDeleted: () => void }) => {
+const ProductActions = ({ productId }: { productId: number }) => {
   const handleDelete = async () => {
-    if (confirm("Are you sure you want to delete this product?")) {
+    if (!confirm("Are you sure to delete this product?")) return;
+
+    try {
       const res = await fetch(`https://localhost:7240/api/Products/${productId}`, {
         method: "DELETE",
       });
 
       if (res.ok) {
-        alert("Product deleted");
-        onDeleted(); // callback to reload list
+        alert("Product deleted successfully");
+        window.location.reload(); // hoặc gọi hàm refetchData
       } else {
         alert("Failed to delete product");
       }
+    } catch (error) {
+      console.error("Delete error", error);
     }
   };
 
@@ -35,23 +39,10 @@ const ProductActions = ({ productId, onDeleted }: { productId: number; onDeleted
           <MoreHorizontal />
         </div>
       </PopoverTrigger>
-      <PopoverContent className="text-start">
-        <Link
-          href={`/dashboard/products/${productId}`}
-          className="py-2 px-4 block hover:bg-slate-200 dark:hover:bg-slate-900"
-        >
-          View Product
-        </Link>
-        <Link
-          href={`/dashboard/products/edit/${productId}`}
-          className="py-2 px-4 block hover:bg-slate-200 dark:hover:bg-slate-900"
-        >
-          Update Product
-        </Link>
-        <button
-          onClick={handleDelete}
-          className="w-full text-start hover:bg-slate-200 dark:hover:bg-slate-900 py-2 px-4 rounded-md"
-        >
+      <PopoverContent>
+        <Link href={`/dashboard/products/${productId}`}>View Product</Link>
+        <Link href={`/dashboard/products/edit/${productId}`}>Update Product</Link>
+        <button onClick={handleDelete} className="w-full text-start hover:bg-slate-200 dark:hover:bg-slate-900 py-2 px-4 rounded-md">
           Delete Product
         </button>
       </PopoverContent>
