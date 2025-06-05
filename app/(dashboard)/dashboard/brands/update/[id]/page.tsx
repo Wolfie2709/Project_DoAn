@@ -8,6 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { Response } from "@/types"
 
 const formSchema = z.object({
   name: z.string().min(1, 'Brand name is required'),
@@ -21,7 +22,7 @@ export default function UpdateBrandPage() {
   const router = useRouter();
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [imageId, setImageId] = useState<number | null>(null);
-
+  const [response, setResponse] = useState<Response>();
 
   const {
     register,
@@ -32,15 +33,73 @@ export default function UpdateBrandPage() {
     resolver: zodResolver(formSchema),
   });
 
+  //Ham lay get response
+  const getResponse = () => {
+    try {
+      //lay value tu session storage
+      const storedData = sessionStorage.getItem("food-storage");
+      if (storedData == null) {
+        throw new Error("Ban chua dang nhap")
+      }
+      
+      //lay ra noi dung ben trong storedData
+      const parsed = JSON.parse(storedData);
+      if (parsed == null) {
+        throw new Error("Ban chua dang nhap: loi o parsed")
+      }
+      
+      //Lay ra response
+      const responseData = parsed.state;
+      if (responseData == null) {
+        throw new Error("Ban chua dang nhap: loi o response")
+      }
+      
+      if (responseData.employee == null) {
+        throw new Error("Ban khong phai la employee")
+      }
+      setResponse(responseData);
+    } catch (error) {
+      alert(error);
+      router.push("/dashboard")
+    }
+  }
+
+  // useEffect để lấy response từ session
   useEffect(() => {
+    getResponse();
+  }, []);
+
+  useEffect(() =>{
+    if (!response || !response.accessToken) return;
+
+    //prevent clerk from access update view
+    try{
+      if (response.employee?.position != "Manager") {
+        throw new Error("Ban khong co quyen truy cap")
+      }
+    }catch(error){
+      alert(error)
+      router.push("/dashboard/brands")
+    }
+  }, [response])
+
+  
+  //Lay ra brand theo id
+  useEffect(() => {
+    if(!response || !response.accessToken) return;
     const fetchBrand = async () => {
       try {
-        const res = await fetch(`https://localhost:7240/api/Brands/${id}`);
+        // console.log(response.accessToken)
+        const res = await fetch(`https://localhost:7240/api/Brands/dashboard/${id}`, {
+          headers: {
+            'Authorization': `Bearer ${response?.accessToken}` //Thêm Authorization header
+          }
+        });
         const data = await res.json();
-
+        
         setValue('name', data.brandName || '');
         setValue('description', data.description || '');
-
+        
         if (data.images != null) {
           setImageUrl(data.images[0].imageUrl);
           setImageId(data.images[0].imageId); // Gán imageId
@@ -50,16 +109,25 @@ export default function UpdateBrandPage() {
         console.error('Failed to fetch brand:', error);
       }
     };
-
+    
     fetchBrand();
-  }, [id, setValue]);
+  }, [response, id, setValue]);
 
+  //Ham cap nhat khi nhan nut
   const onSubmit = async (data: FormData) => {
     try {
-      const response = await fetch(`https://localhost:7240/api/Brands/${id}`, {
+      if (!response?.accessToken) throw new Error("Không có token đăng nhập");
+      if(response.employee?.position != "Manager"){
+        alert("Ban khong co quyen truy cap");
+        throw new Error("Position khong hop le");
+      }
+
+      console.log(response.accessToken, response.employee.position)
+      const responsePut = await fetch(`https://localhost:7240/api/Brands/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${response.accessToken}`, // Thêm Authorization header
         },
         body: JSON.stringify({
           brandId: Number(id),
@@ -68,7 +136,7 @@ export default function UpdateBrandPage() {
         }),
       });
 
-      if (!response.ok) throw new Error('Failed to update brand');
+      if (!responsePut.ok) throw new Error('Failed to update brand');
       router.push('/dashboard/brands');
     } catch (error) {
       console.error('Error updating brand:', error);

@@ -1,11 +1,11 @@
 "use client";
-import BrandActions from "@/components/dashboard/brand/BrandActions";
+import EmployeeActions from "@/components/dashboard/employee/EmployeeAction";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { MoreHorizontal } from "lucide-react";
-import SearchBrands from "@/components/dashboard/brand/SearchBrands";
+import SearchEmployees from "@/components/dashboard/employee/SearchEmployee";
 import Loader from "@/components/others/Loader";
 import Pagination from "@/components/others/Pagination";
-import { Brand } from "@/types"
+import { Employee } from "@/types"
 import Image from "next/image";
 import Link from "next/link";
 import React, { Suspense } from "react";
@@ -13,20 +13,19 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { Response } from "@/types"
 import { Button } from "@/components/ui/button";
-import { Trash } from "lucide-react";
 
-const BrandPage = () => {
-  const [brands, setBrands] = useState<Brand[]>([]);
-  const [filteredBrands, setFilteredBrands] = useState<Brand[]>([]);
+const EmployeePage = () => {
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>([]);
   const [response, setResponse] = useState<Response>();
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
 
-  const currentPage = parseInt(searchParams.get("brandpage") || "1", 10);
+  const currentPage = parseInt(searchParams.get("employeepage") || "1", 10);
   const itemsPerPage = 6;
-  const totalPages = Math.ceil(filteredBrands.length / itemsPerPage);
-  const paginatedBrands = filteredBrands.slice(
+  const totalPages = Math.ceil(filteredEmployees.length / itemsPerPage);
+  const paginatedEmployees = filteredEmployees.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -78,7 +77,7 @@ const BrandPage = () => {
       }
     } catch (error) {
       alert(error)
-      router.push("/dashboard/brands")
+      router.push("/dashboard/employees")
     }
   }, [response])
 
@@ -87,53 +86,53 @@ const BrandPage = () => {
     console.log(response);
   }, [response]);
 
-  // Fetch brand data where ActiveStatus is true
-  const fetchBrands = async () => {
+  // Fetch employee data where ActiveStatus is false
+  const fetchEmployees = async () => {
     if (!response || !response.accessToken) return null;
 
     try {
-      const res = await fetch("https://localhost:7240/api/Brands");
-      const data: Brand[] = await res.json();
-      const activeBrands = data.filter((brand) => brand.activeStatus === true);
-      setBrands(activeBrands);
-      setFilteredBrands(activeBrands);
+      const res = await fetch("https://localhost:7240/api/Employees");
+      const data: Employee[] = await res.json();
+      const activeEmployees = data.filter((employee) => employee.isDeletedStatus === true);
+      setEmployees(activeEmployees);
+      setFilteredEmployees(activeEmployees);
     } catch (error) {
-      console.error("Failed to fetch brands", error);
-      setBrands([]);
-      setFilteredBrands([]);
+      console.error("Failed to fetch employees", error);
+      setEmployees([]);
+      setFilteredEmployees([]);
     }
   };
 
   useEffect(() => {
-    fetchBrands();
+    fetchEmployees();
   }, [response]);
 
   // Handle search input
   const handleSearch = (query: string) => {
     const lowerQuery = query.toLowerCase();
-    const results = brands.filter((brand) =>
-      brand.brandName.toLowerCase().includes(lowerQuery)
+    const results = employees.filter((employee) =>
+      employee.fullName?.toLowerCase().includes(lowerQuery)
     );
-    setFilteredBrands(results);
+    setFilteredEmployees(results);
 
     // Reset to page 1 after search
     const params = new URLSearchParams(searchParams);
-    params.set("brandpage", "1");
+    params.set("employeepage", "1");
     router.replace(`${pathname}?${params}`);
   };
 
-  // Handle deletion (soft delete)
-  const deleteBrand = async (id: number) => {
-    if(!response || !response.accessToken) return;
-    if (response.employee?.position != "Manager"){
+  // Handle hard deletion
+  const deleteEmployee = async (id: number) => {
+    if (!response || !response.accessToken) return;
+    if (response.employee?.position != "Manager") {
       alert("Ban khong co quyen truy cap")
       return;
     }
-    const confirmed = confirm("Are you sure you want to delete this brand?");
+    const confirmed = confirm("Are you sure you want to delete this employee?");
     if (!confirmed) return;
 
     try {
-      const res = await fetch(`https://localhost:7240/api/Brands/softdelete/${id}`, {
+      const res = await fetch(`https://localhost:7240/api/Employees/harddelete/${id}`, {
         method: "DELETE",
         headers: {
           'Authorization': `Bearer ${response.accessToken}`, // Thêm Authorization header
@@ -141,53 +140,70 @@ const BrandPage = () => {
       });
 
       if (res.ok) {
-        await fetchBrands();
+        await fetchEmployees();
       } else {
-        console.error("Failed to delete brand");
+        console.error("Failed to delete employee");
       }
     } catch (error) {
-      console.error("Error deleting brand:", error);
+      console.error("Error deleting employee:", error);
+    }
+  };
+
+  //Handle Restore
+  const restoreEmployee = async (id: number) => {
+    if (!response || !response.accessToken) return;
+    if (response.employee?.position != "Manager") {
+      alert("Ban khong co quyen truy cap")
+      return;
+    }
+    const confirmed = confirm("Are you sure you want to restore this employee?");
+    if (!confirmed) return;
+
+    try {
+      const res = await fetch(`https://localhost:7240/api/Employees/restore/${id}`, {
+        method: "PUT",
+        headers: {
+          'Authorization': `Bearer ${response.accessToken}`, // Thêm Authorization header
+        }
+      });
+
+      if (res.ok) {
+        await fetchEmployees();
+      } else {
+        console.error("Failed to delete employee");
+      }
+    } catch (error) {
+      console.error("Error deleting employee:", error);
     }
   };
 
   return (
     <div className="bg-white dark:bg-gray-800 min-h-screen max-w-screen-xl w-full mx-auto px-4 py-12 m-2 rounded-md">
-      <div className="flex items-center justify-between mb-6">
         <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-          Browse Brands
+          Employee Trashbin
         </h1>
-        <SearchBrands onSearch={handleSearch} />
+        
+      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center space-x-2">
+        <SearchEmployees onSearch={handleSearch} />
         <Link
-          href={"/dashboard/brands/add-brand"}
+          href={"/dashboard/employees"}
           className="py-2 px-6 rounded-md bg-blue-500 hover:opacity-60 text-white"
         >
-          Add Brand
-        </Link>
-        <Link
-          href={"/dashboard/brands/brand-trashbin"}
-          className="py-2 px-6 rounded-md bg-blue-500 hover:opacity-60 text-white"
-        >
-          <Trash />
+          Active
         </Link>
       </div>
+    </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {paginatedBrands.map((brand) => (
+        {paginatedEmployees.map((employee) => (
           <div
-            key={brand.brandId}
+            key={employee.employeeId}
             className="bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden shadow-md"
           >
-            <div className="relative w-full h-[16rem] p-2">
-              <Image
-                src={brand.images[0]?.imageUrl || ""}
-                fill
-                alt={brand.brandName}
-                className="w-full h-64 object-contain"
-              />
-            </div>
             <div className="p-6">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                {brand.brandName}
+                {employee.fullName}
               </h2>
               <p className="text-gray-700 dark:text-gray-300">Description</p>
               <div className="mt-4 flex space-x-4">
@@ -198,23 +214,17 @@ const BrandPage = () => {
                     </div>
                   </PopoverTrigger>
                   <PopoverContent className="text-start">
-                    <Link
-                      href={`/dashboard/brands/addImage/${brand.brandId}`}
-                      className="py-2 px-4 rounded-md w-full block hover:bg-slate-200 dark:hover:bg-slate-900"
-                    >
-                      Add Image
-                    </Link>
-                    <Link
-                      href={`/dashboard/brands/update/${brand.brandId}`}
-                      className="py-2 px-4 rounded-md w-full block hover:bg-slate-200 dark:hover:bg-slate-900"
-                    >
-                      Update Brand
-                    </Link>
                     <button
                       className="w-full text-start hover:bg-slate-200 dark:hover:bg-slate-900 py-2 px-4 rounded-md"
-                      onClick={() => deleteBrand(brand.brandId)}
+                      onClick={() => deleteEmployee(employee.employeeId)}
                     >
-                      Delete Brand
+                      Delete Employee
+                    </button>
+                    <button
+                      className="w-full text-start hover:bg-slate-200 dark:hover:bg-slate-900 py-2 px-4 rounded-md"
+                      onClick={() => restoreEmployee(employee.employeeId)}
+                    >
+                      Restore Employee
                     </button>
                   </PopoverContent>
                 </Popover>
@@ -228,11 +238,11 @@ const BrandPage = () => {
         <Pagination
           totalPages={totalPages}
           currentPage={currentPage}
-          pageName="brandpage"
+          pageName="employeepage"
         />
       </Suspense>
     </div>
   );
 };
 
-export default BrandPage;
+export default EmployeePage;

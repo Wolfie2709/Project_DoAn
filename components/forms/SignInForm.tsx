@@ -46,9 +46,9 @@ const SignInForm = () => {
       useAuthStore.getState().login(userName, accessToken, customer, employee);
       
     if (employee) {
-      router.push("/dashboard/");
+      router.push("/dashboard");
     } else if (customer) {
-      router.push("/shop");
+      router.push("/");
     }
     
       // Optionally redirect or update UI here

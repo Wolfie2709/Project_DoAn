@@ -5,7 +5,8 @@ import BreadcrumbComponent from '@/components/others/Breadcrumb';
 import EditEmployeeForm, { EmployeeFormData } from '@/components/dashboard/forms/EditEmployeeForm';
 
 const EditEmployeePage = () => {
-  const { id } = useParams(); // lấy id từ route dynamic (vd: /dashboard/employees/update/123)
+  const params = useParams();
+  const id = typeof params === "object" && "id" in params ? params.id : "";
   const [employee, setEmployee] = useState<EmployeeFormData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

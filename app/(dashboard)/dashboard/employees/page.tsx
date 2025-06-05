@@ -3,34 +3,44 @@ import SearchEmployee from "@/components/dashboard/employee/SearchEmployee";
 import Loader from "@/components/others/Loader";
 import Pagination from "@/components/others/Pagination";
 import Image from "next/image";
-import React, { Suspense, useState } from "react";
+import React, { Suspense, useState, useEffect } from "react";
 import { Employee } from "@/types";
-import { useEffect } from "react";
 import Link from "next/link";
 import EmployeeActions from "@/components/dashboard/employee/EmployeeAction";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { Trash } from "lucide-react";
 
 const EmployeePage = () => {
-  // Dummy data for demonstration
-
   const [Employees, setEmployees] = useState<Employee[]>([]);
+  const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>([]);
 
-  const fetchEmployees = async() => {
-      try{
-          const res = await fetch(`https://localhost:7240/api/Employees`);
-          const data: Employee[] = await res.json();
-    
-          setEmployees(data);
-        } catch (error) {
-          console.error("Failed to fetch employees", error);
-          setEmployees([]);
-        }
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const currentPage = parseInt(searchParams.get("employeepage") || "1", 10);
+  const itemsPerPage = 2;
+  const totalPages = Math.ceil(filteredEmployees.length / itemsPerPage);
+  const paginatedEmployees = filteredEmployees.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const fetchEmployees = async () => {
+    try {
+      const res = await fetch(`https://localhost:7240/api/Employees`);
+      const data: Employee[] = await res.json();
+      const activeEmployees = data.filter((employee) => employee.isDeletedStatus === false);
+      setEmployees(activeEmployees);
+      setFilteredEmployees(activeEmployees);
+    } catch (error) {
+      console.error("Failed to fetch employees", error);
+      setEmployees([]);
+      setFilteredEmployees([]);
     }
+  };
 
-    useEffect(() => {
-  fetchEmployees();
-}, []);
-
-const deleteEmployee = async (id: number) => {
+  const deleteEmployee = async (id: number) => {
     const confirmed = confirm("Are you sure you want to delete this employee?");
     if (!confirmed) return;
 
@@ -49,20 +59,42 @@ const deleteEmployee = async (id: number) => {
     }
   };
 
+  const handleSearch = (query: string) => {
+    if (!query.trim()) {
+      setFilteredEmployees(Employees);
+      return;
+    }
+
+    const filtered = Employees.filter((employee) =>
+      employee.fullName?.toLowerCase().includes(query.toLowerCase())
+    );
+    setFilteredEmployees(filtered);
+  };
+
+  useEffect(() => {
+    fetchEmployees();
+  }, []);
+
   return (
     <div className="max-w-screen-xl w-full p-4 my-4 mx-auto dark:bg-slate-900 rounded-md">
       <div className="flex items-center justify-between gap-2 mb-6">
         <h2 className="text-2xl font-semibold text-gray-900 dark:text-white ">
           Employees
         </h2>
-        <SearchEmployee />
+        <SearchEmployee onSearch={handleSearch}/>
       </div>
-       <div className="flex justify-end my-4">
+      <div className="flex justify-end my-4 space-x-4">
         <Link
           href={"/dashboard/employees/add-employee"}
           className="py-2 px-6 rounded-md bg-blue-500 hover:opacity-60 text-white"
         >
           Add Employee
+        </Link>
+        <Link
+           href={"/dashboard/employees/employee-trashbin"}
+          className="py-2 px-6 rounded-md bg-blue-500 hover:opacity-60 text-white"
+        >
+          <Trash />
         </Link>
       </div>
       <div className="overflow-x-auto">
@@ -111,7 +143,7 @@ const deleteEmployee = async (id: number) => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-900 dark:divide-gray-700">
-            {Employees.map((employee) => (
+            {paginatedEmployees.map((employee) => (
               <tr key={employee.employeeId}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
                   {employee.employeeId}
@@ -143,7 +175,11 @@ const deleteEmployee = async (id: number) => {
         </table>
       </div>
       <Suspense fallback={<Loader />}>
-        <Pagination totalPages={5} currentPage={1} pageName="employeepage" />
+        <Pagination
+          totalPages={totalPages}
+          currentPage={currentPage}
+          pageName="employeepage"
+        />
       </Suspense>
     </div>
   );

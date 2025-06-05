@@ -63,6 +63,7 @@ birthday?: string;
 gender?: string;
 address?: string;
 lastLogin: string;
+isDeletedStatus?: boolean;
 }
 
 export type Order={
@@ -146,3 +147,10 @@ export type CartItem = Product & {
   selectedColor: string;
   quantity: number;
 };
+
+export type Response = {
+  userName?: string;
+  accessToken?: string;
+  customer?: Customer;
+  employee?: Employee;
+}

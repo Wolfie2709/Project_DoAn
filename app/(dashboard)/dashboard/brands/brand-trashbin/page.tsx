@@ -13,7 +13,6 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { Response } from "@/types"
 import { Button } from "@/components/ui/button";
-import { Trash } from "lucide-react";
 
 const BrandPage = () => {
   const [brands, setBrands] = useState<Brand[]>([]);
@@ -87,14 +86,14 @@ const BrandPage = () => {
     console.log(response);
   }, [response]);
 
-  // Fetch brand data where ActiveStatus is true
+  // Fetch brand data where ActiveStatus is false
   const fetchBrands = async () => {
     if (!response || !response.accessToken) return null;
 
     try {
       const res = await fetch("https://localhost:7240/api/Brands");
       const data: Brand[] = await res.json();
-      const activeBrands = data.filter((brand) => brand.activeStatus === true);
+      const activeBrands = data.filter((brand) => brand.activeStatus === false);
       setBrands(activeBrands);
       setFilteredBrands(activeBrands);
     } catch (error) {
@@ -122,10 +121,10 @@ const BrandPage = () => {
     router.replace(`${pathname}?${params}`);
   };
 
-  // Handle deletion (soft delete)
+  // Handle hard deletion
   const deleteBrand = async (id: number) => {
-    if(!response || !response.accessToken) return;
-    if (response.employee?.position != "Manager"){
+    if (!response || !response.accessToken) return;
+    if (response.employee?.position != "Manager") {
       alert("Ban khong co quyen truy cap")
       return;
     }
@@ -133,8 +132,36 @@ const BrandPage = () => {
     if (!confirmed) return;
 
     try {
-      const res = await fetch(`https://localhost:7240/api/Brands/softdelete/${id}`, {
+      const res = await fetch(`https://localhost:7240/api/Brands/harddelete/${id}`, {
         method: "DELETE",
+        headers: {
+          'Authorization': `Bearer ${response.accessToken}`, // Thêm Authorization header
+        }
+      });
+
+      if (res.ok) {
+        await fetchBrands();
+      } else {
+        console.error("Failed to delete brand");
+      }
+    } catch (error) {
+      console.error("Error deleting brand:", error);
+    }
+  };
+
+  //Handle Restore
+  const restoreBrand = async (id: number) => {
+    if (!response || !response.accessToken) return;
+    if (response.employee?.position != "Manager") {
+      alert("Ban khong co quyen truy cap")
+      return;
+    }
+    const confirmed = confirm("Are you sure you want to restore this brand?");
+    if (!confirmed) return;
+
+    try {
+      const res = await fetch(`https://localhost:7240/api/Brands/restore/${id}`, {
+        method: "PUT",
         headers: {
           'Authorization': `Bearer ${response.accessToken}`, // Thêm Authorization header
         }
@@ -154,20 +181,14 @@ const BrandPage = () => {
     <div className="bg-white dark:bg-gray-800 min-h-screen max-w-screen-xl w-full mx-auto px-4 py-12 m-2 rounded-md">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-          Browse Brands
+          Brand Trashbin
         </h1>
         <SearchBrands onSearch={handleSearch} />
         <Link
-          href={"/dashboard/brands/add-brand"}
+          href={"/dashboard/brands"}
           className="py-2 px-6 rounded-md bg-blue-500 hover:opacity-60 text-white"
         >
-          Add Brand
-        </Link>
-        <Link
-          href={"/dashboard/brands/brand-trashbin"}
-          className="py-2 px-6 rounded-md bg-blue-500 hover:opacity-60 text-white"
-        >
-          <Trash />
+          Active
         </Link>
       </div>
 
@@ -198,23 +219,17 @@ const BrandPage = () => {
                     </div>
                   </PopoverTrigger>
                   <PopoverContent className="text-start">
-                    <Link
-                      href={`/dashboard/brands/addImage/${brand.brandId}`}
-                      className="py-2 px-4 rounded-md w-full block hover:bg-slate-200 dark:hover:bg-slate-900"
-                    >
-                      Add Image
-                    </Link>
-                    <Link
-                      href={`/dashboard/brands/update/${brand.brandId}`}
-                      className="py-2 px-4 rounded-md w-full block hover:bg-slate-200 dark:hover:bg-slate-900"
-                    >
-                      Update Brand
-                    </Link>
                     <button
                       className="w-full text-start hover:bg-slate-200 dark:hover:bg-slate-900 py-2 px-4 rounded-md"
                       onClick={() => deleteBrand(brand.brandId)}
                     >
                       Delete Brand
+                    </button>
+                    <button
+                      className="w-full text-start hover:bg-slate-200 dark:hover:bg-slate-900 py-2 px-4 rounded-md"
+                      onClick={() => restoreBrand(brand.brandId)}
+                    >
+                      Restore Brand
                     </button>
                   </PopoverContent>
                 </Popover>
