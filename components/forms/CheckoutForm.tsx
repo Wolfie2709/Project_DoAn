@@ -18,6 +18,7 @@ const schema = z.object({
   city: z.string().min(3, "City is required"),
   zip: z.string().min(5, "ZIP Code is required"),
   country: z.string().min(2, "Country is required"),
+  email: z.string().min(5, "Email is required")
 });
 type CheckoutFormData = z.infer<typeof schema>;
 
@@ -42,6 +43,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmitForm }) => {
       const fullName = customer.fullName?.split(" ") || [];
       const firstName = fullName[0] || "";
       const lastName = fullName.slice(1).join(" ") || "";
+      const email= customer.email || "";
       const address = customer.address?.split(",") || [];
       const home_address = address[0] || "";
       const city = address[1] || "";
@@ -55,17 +57,21 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmitForm }) => {
       setValue("zip", zip);
       setValue("country", country);
       setValue("phone", customer.phoneNumber || "");
+      setValue("email", email);
     }
   }, [customer, setValue]);
  
 
   const onSubmit: SubmitHandler<CheckoutFormData> = (data) => {
-    onSubmitForm(data); // send up to parent
-
+    // Store only the form data in localStorage (not full order)
+    if (typeof window !== "undefined") {
+      localStorage.setItem("shippingFormData", JSON.stringify(data));
+    }
+    alert("Shipping info saved.");
   };
 
 return (
-    <form id="CheckoutForm" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <form id="CheckoutForm" onSubmit={handleSubmit((data) => onSubmitForm(data))} className="space-y-4">
       {/* Form fields — no need to disable anything */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div>
@@ -80,6 +86,13 @@ return (
           <Input id="lastName" {...register("lastName")} />
           {errors.lastName && (
             <span className="text-red-500">{errors.lastName.message}</span>
+          )}
+        </div>
+        <div>
+          <Label htmlFor="email">Email</Label>
+          <Input id="email" {...register("email")} />
+          {errors.email && (
+            <span className="text-red-500">{errors.email.message}</span>
           )}
         </div>
       </div>
