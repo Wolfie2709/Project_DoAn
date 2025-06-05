@@ -8,16 +8,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-// Schema validation
 const productSchema = z.object({
   name: z.string().min(1, "Name is required"),
   price: z.string().min(1, "Price is required"),
-  category: z.string().min(1, "Category is required"), // dùng để hiển thị thôi
+  category: z.string().min(1, "Category is required"),
   brand: z.string().min(1, "Brand is required"),
   type: z.enum(["featured", "top-rated", "most-popular", "new-arrivals"]),
   description: z.string().min(1, "Description is required"),
   aboutItem: z.string().optional(),
-  images: z.array(z.instanceof(File)).min(1, "At least one image is required"),
+  images: z.array(z.instanceof(File)).optional(),
   color: z.array(z.string()).optional(),
   discount: z.number().min(0).max(100).optional(),
 });
@@ -25,55 +24,69 @@ const productSchema = z.object({
 type ProductFormData = z.infer<typeof productSchema>;
 
 const ProductForm = () => {
+
   const {
-    handleSubmit,
     register,
-    reset,
+    handleSubmit,
     formState: { errors, isSubmitting },
+    reset,
   } = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
+    defaultValues: {
+      name: "",
+      price: "",
+      category: "",
+      brand: "",
+      type: "featured",
+      description: "",
+      aboutItem: "",
+      images: [],
+      color: [],
+      discount: undefined,
+    },
   });
 
   const onSubmit = async (data: ProductFormData) => {
-  const formData = new FormData();
-  formData.append("productName", data.name);
-  formData.append("price", data.price);
-  formData.append("description", data.description);
-  formData.append("shortDescription", data.aboutItem ?? "");
-  formData.append("brandId", "1"); // 👈 Update theo brand thật
-  formData.append("categoryId", "1"); // 👈 Update theo category thật
-  formData.append("stock", "10"); // 👈 Giả sử
-
-  for (let image of data.images) {
-    formData.append("images", image);
-  }
-
   try {
+    const payload = {
+  productName: data.name,                
+  stock: 10,                            
+  price: parseFloat(data.price),        
+  description: data.description,   
+  shortDescription: data.aboutItem || "",
+  createdAt: new Date().toISOString(),  
+  updatedAt: new Date().toISOString(),  
+  brandId: 1,
+  categoryId: 1,                         
+  addedBy: null                         
+};
+
+
+
+    console.log("🚀 Payload gửi đi:", payload);
+
     const res = await fetch("https://localhost:7240/api/Products", {
       method: "POST",
-      body: JSON.stringify({
-        productName: data.name,
-        price: parseFloat(data.price),
-        description: data.description,
-        shortDescription: data.aboutItem ?? "",
-        brandId: 1,
-        categoryId: 1,
-        stock: 10,
-      }),
       headers: {
         "Content-Type": "application/json",
       },
+      body: JSON.stringify(payload),
     });
 
-    if (!res.ok) throw new Error("Failed to create product");
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error("❌ API error:", errorText);
+      throw new Error("Failed to add product");
+    }
 
-    alert("Product added!");
-  } catch (err) {
-    console.error(err);
-    alert("Failed to add product");
+    const result = await res.json();
+    console.log("✅ Product created:", result);
+    alert("Product added successfully!");
+  } catch (error) {
+    console.error("🚨 Error creating product", error);
+    alert("Error creating product");
   }
 };
-
 
   return (
     <div className="max-w-screen-xl mx-auto w-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 my-4">
@@ -111,6 +124,21 @@ const ProductForm = () => {
         </div>
 
         <div>
+          <Label htmlFor="type">Type</Label>
+          <select
+            id="type"
+            {...register("type")}
+            className="p-2 w-full border rounded-md bg-white dark:bg-gray-900"
+          >
+            <option value="featured">Featured</option>
+            <option value="top-rated">Top Rated</option>
+            <option value="most-popular">Most Popular</option>
+            <option value="new-arrivals">New Arrivals</option>
+          </select>
+          {errors.type && <span className="text-red-500">{errors.type.message}</span>}
+        </div>
+
+        <div>
           <Label htmlFor="description">Description</Label>
           <textarea id="description" {...register("description")} className="p-2 w-full rounded-md border" />
           {errors.description && <span className="text-red-500">{errors.description.message}</span>}
@@ -122,7 +150,7 @@ const ProductForm = () => {
         </div>
 
         <div>
-          <Label htmlFor="images">Images</Label>
+          <Label htmlFor="images">Images (optional)</Label>
           <Input id="images" type="file" multiple {...register("images")} />
           {errors.images && <span className="text-red-500">{errors.images.message}</span>}
         </div>

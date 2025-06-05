@@ -1,72 +1,61 @@
 "use client";
+
 import HomePageChart from "@/components/dashboard/charts/HomePageChart";
 import ProductOverviewChart from "@/components/dashboard/charts/ProductOverviewChart";
 import RecentOrdersSection from "@/components/dashboard/order/RecentOrders";
 import StatisticsCard from "@/components/dashboard/statistics/StatisticsCard";
 import { Employee, Order } from "@/types";
 import { Activity, DollarSign, ShoppingBag, Users } from "lucide-react";
-import React from "react";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 
 const DashboardPageOne = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [activeEmployees, setEmployees] = useState<Employee[]>([]);
-  //Lay get response
 
-  ///
-
-  //lay api get all order
-  // Fetch brand data where ActiveStatus is true
+  // Lấy tất cả orders từ API
   const fetchOrders = async () => {
-    // if (!response || !response.accessToken) return null;
-
     try {
       const res = await fetch("https://localhost:7240/api/Orders/with-customer");
-      const data: Order[] = await res.json();
-      setOrders(data);
-      // setFilteredBrands(activeBrands);
+      const json = await res.json();
+
+      if (Array.isArray(json)) {
+        setOrders(json);
+      } else {
+        console.error("API không trả về mảng:", json);
+        setOrders([]);
+      }
     } catch (error) {
-      console.error("Failed to fetch brands", error);
+      console.error("Lỗi khi fetch orders:", error);
       setOrders([]);
-      // setFilteredBrands([]);
     }
   };
 
-  useEffect(()=>{
+  useEffect(() => {
     fetchOrders();
-  }, [])
+  }, []);
 
-  //fetch lay employee
+  // Lấy danh sách employees (lọc active)
   const fetchEmployees = async () => {
-    // if (!response || !response.accessToken) return null;
-
     try {
       const res = await fetch("https://localhost:7240/api/Employees");
       const data: Employee[] = await res.json();
+
       const activeEmployees = data.filter((employee) => employee.isDeletedStatus === false);
       setEmployees(activeEmployees);
-      // setFilteredBrands(activeBrands);
     } catch (error) {
-      console.error("Failed to fetch brands", error);
+      console.error("Lỗi khi fetch employees:", error);
       setEmployees([]);
-      // setFilteredBrands([]);
     }
   };
 
-  useEffect(()=>{
+  useEffect(() => {
     fetchEmployees();
-  }, [])
+  }, []);
 
-  //Tinh toan
-  var revenue = 0
-  orders.forEach((order) =>{
-    if(order.totalCost==null){
-      revenue+=0
-    }
-    else{
-      revenue+=order.totalCost;
-    }
-  })
+  // Tính revenue an toàn bằng useMemo
+  const revenue = useMemo(() => {
+    return orders.reduce((sum, order) => sum + (order.totalCost ?? 0), 0);
+  }, [orders]);
 
   return (
     <section className="max-w-screen-xl mx-auto py-4">
@@ -83,11 +72,10 @@ const DashboardPageOne = () => {
           value="$1,000"
           icon={ShoppingBag}
         />
-
         <StatisticsCard
           iconColor="bg-rose-500"
           title="Orders"
-          value="$4,000"
+          value={orders.length.toString()}
           icon={Activity}
         />
         <StatisticsCard
@@ -97,8 +85,9 @@ const DashboardPageOne = () => {
           icon={Users}
         />
       </div>
+
       <HomePageChart />
-      <RecentOrdersSection recentOrderList={orders.slice(-5)}/>
+      <RecentOrdersSection recentOrderList={orders.slice(-5)} />
       <ProductOverviewChart />
     </section>
   );
