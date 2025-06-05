@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,8 +23,11 @@ const productSchema = z.object({
 
 type ProductFormData = z.infer<typeof productSchema>;
 
-const ProductForm = () => {
+type ProductFormProps = {
+  onAdd?: () => void;
+};
 
+const ProductForm: React.FC<ProductFormProps> = ({ onAdd }) => {
   const {
     register,
     handleSubmit,
@@ -47,46 +50,46 @@ const ProductForm = () => {
   });
 
   const onSubmit = async (data: ProductFormData) => {
-  try {
-    const payload = {
-  productName: data.name,                
-  stock: 10,                            
-  price: parseFloat(data.price),        
-  description: data.description,   
-  shortDescription: data.aboutItem || "",
-  createdAt: new Date().toISOString(),  
-  updatedAt: new Date().toISOString(),  
-  brandId: 1,
-  categoryId: 1,                         
-  addedBy: null                         
-};
+    try {
+      const payload = {
+        productName: data.name,
+        stock: 10,
+        price: parseFloat(data.price),
+        description: data.description,
+        shortDescription: data.aboutItem || "",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        brandId: 1,
+        categoryId: 1,
+        addedBy: null,
+      };
 
+      console.log("🚀 Payload gửi đi:", payload);
 
+      const res = await fetch("https://localhost:7240/api/Products", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
 
-    console.log("🚀 Payload gửi đi:", payload);
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error("❌ API error:", errorText);
+        throw new Error("Failed to add product");
+      }
 
-    const res = await fetch("https://localhost:7240/api/Products", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
-
-    if (!res.ok) {
-      const errorText = await res.text();
-      console.error("❌ API error:", errorText);
-      throw new Error("Failed to add product");
+      const result = await res.json();
+      console.log("✅ Product created:", result);
+      alert("Product added successfully!");
+      onAdd?.(); // gọi callback cập nhật danh sách
+      reset();   // reset form sau khi thêm
+    } catch (error) {
+      console.error("🚨 Error creating product", error);
+      alert("Error creating product");
     }
-
-    const result = await res.json();
-    console.log("✅ Product created:", result);
-    alert("Product added successfully!");
-  } catch (error) {
-    console.error("🚨 Error creating product", error);
-    alert("Error creating product");
-  }
-};
+  };
 
   return (
     <div className="max-w-screen-xl mx-auto w-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 my-4">
@@ -155,7 +158,7 @@ const ProductForm = () => {
           {errors.images && <span className="text-red-500">{errors.images.message}</span>}
         </div>
 
-        <div>
+        <div className="col-span-full">
           <Button type="submit" disabled={isSubmitting}>
             {isSubmitting ? "Submitting..." : "Submit"}
           </Button>
@@ -166,3 +169,4 @@ const ProductForm = () => {
 };
 
 export default ProductForm;
+

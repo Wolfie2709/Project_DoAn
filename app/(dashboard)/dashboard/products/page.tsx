@@ -1,6 +1,5 @@
 "use client";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { MoreHorizontal } from "lucide-react";
+
 import React, { useEffect, useState, Suspense } from "react";
 import Image from "next/image";
 import ProductActions from "@/components/dashboard/product/ProductActions";
@@ -8,14 +7,11 @@ import ProductHeader from "@/components/dashboard/product/ProductHeader";
 import Loader from "@/components/others/Loader";
 import Pagination from "@/components/others/Pagination";
 import { Product } from "@/types";
-import Link from "next/dist/client/link";
 
-// Component
 const ProductsPage = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
-  // Fetch products with category from API
   const fetchData = async () => {
     try {
       setLoading(true);
@@ -26,7 +22,6 @@ const ProductsPage = () => {
       }
 
       const data: Product[] = await res.json();
-      console.log("Fetched products with category:", data);
       setProducts(data);
     } catch (error) {
       console.error("Failed to fetch products", error);
@@ -50,11 +45,21 @@ const ProductsPage = () => {
           <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 border dark:border-gray-500">
             <thead className="bg-gray-50 dark:bg-gray-700">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Image
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Name
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Price
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Category
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -69,51 +74,11 @@ const ProductsPage = () => {
                       className="h-10 w-10 rounded-full object-cover"
                     />
                   </td>
+                  <td className="px-6 py-4 whitespace-nowrap">{product.productName?.slice(0, 30) || "No name"}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">${product.price.toFixed(2)}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{product.category?.categoryName || "No category"}</td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    {product.productName?.slice(0, 30) || "No name"}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    ${product.price.toFixed(2)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {product.category?.categoryName || "No category"}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="mt-4 flex space-x-4">
-                <Popover>
-                  <PopoverTrigger>
-                    <div className="flex items-center justify-center hover:bg-slate-200 p-2 rounded-full dark:hover:bg-slate-900 duration-200">
-                      <MoreHorizontal />
-                    </div>
-                  </PopoverTrigger>
-                  <PopoverContent className="text-start">
-                    <Link
-                      href={`#`}
-                      className="py-2 px-4 rounded-md w-full block hover:bg-slate-200 dark:hover:bg-slate-900"
-                    >
-                      View Product
-                    </Link>
-                    <Link
-                      href={`#`}
-                      className="py-2 px-4 rounded-md w-full block hover:bg-slate-200 dark:hover:bg-slate-900"
-                    >
-                      Add Image
-                    </Link>
-                    <Link
-                      href={`#`}
-                      className="py-2 px-4 rounded-md w-full block hover:bg-slate-200 dark:hover:bg-slate-900"
-                    >
-                      Update Product
-                    </Link>
-                    <button
-                      className="w-full text-start hover:bg-slate-200 dark:hover:bg-slate-900 py-2 px-4 rounded-md"
-                      // onClick={() => deleteBrand(brand.brandId)}
-                    >
-                      Delete Product
-                    </button>
-                  </PopoverContent>
-                </Popover>
-              </div>
+                    <ProductActions productId={product.productId} onDelete={fetchData} />
                   </td>
                 </tr>
               ))}
@@ -129,4 +94,3 @@ const ProductsPage = () => {
 };
 
 export default ProductsPage;
-

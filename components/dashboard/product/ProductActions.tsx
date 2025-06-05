@@ -15,25 +15,25 @@ type ProductActionsProps = {
 };
 
 const ProductActions: React.FC<ProductActionsProps> = ({ productId, onDelete }) => {
-  const handleDelete = async () => {
-    const confirmDelete = confirm("Are you sure to delete this product?");
+  const handleSoftDelete = async () => {
+    const confirmDelete = confirm("Are you sure to soft delete (ẩn) this product?");
     if (!confirmDelete) return;
 
     try {
-      const res = await fetch(`https://localhost:7240/api/Products/${productId}`, {
+      const res = await fetch(`https://localhost:7240/api/Products/softdelete/${productId}`, {
         method: "DELETE",
       });
 
       if (res.ok) {
-        alert("✅ Product deleted successfully");
-        onDelete(); // Gọi lại fetchData bên ngoài
+        alert("✅ Product soft deleted successfully");
+        onDelete(); // reload lại danh sách sản phẩm
       } else {
         const errorText = await res.text();
-        console.error("❌ Failed to delete:", errorText);
-        alert("❌ Failed to delete product");
+        console.error("❌ Soft delete failed:", errorText);
+        alert("❌ Failed to soft delete product");
       }
     } catch (error) {
-      console.error("❌ Delete error", error);
+      console.error("❌ Soft delete error", error);
       alert("❌ Error deleting product");
     }
   };
@@ -59,10 +59,10 @@ const ProductActions: React.FC<ProductActionsProps> = ({ productId, onDelete }) 
           Update Product
         </Link>
         <button
-          onClick={handleDelete}
-          className="w-full text-start py-2 px-4 rounded-md hover:bg-red-100 dark:hover:bg-red-900 text-red-600"
+          onClick={handleSoftDelete}
+          className="w-full text-start py-2 px-4 rounded-md hover:bg-yellow-100 dark:hover:bg-yellow-900 text-yellow-600"
         >
-          Delete Product
+          Soft Delete
         </button>
       </PopoverContent>
     </Popover>
