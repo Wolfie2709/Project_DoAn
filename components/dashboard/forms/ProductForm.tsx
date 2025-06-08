@@ -83,8 +83,8 @@ const ProductForm: React.FC<ProductFormProps> = ({ onAdd }) => {
       const result = await res.json();
       console.log("✅ Product created:", result);
       alert("Product added successfully!");
-      onAdd?.();
-      reset(); 
+      onAdd?.(); // gọi callback cập nhật danh sách
+      reset();   // reset form sau khi thêm
     } catch (error) {
       console.error("🚨 Error creating product", error);
       alert("Error creating product");
