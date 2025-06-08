@@ -34,6 +34,10 @@ const ViewEmployeePage = async ({ params }: { params: { id: string } }) => {
               <p className="text-gray-800 dark:text-white">{employee.fullName}</p>
             </div>
             <div>
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Gender</label>
+              <p className="text-gray-800 dark:text-white">{employee.gender}</p>
+            </div>
+            <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Position</label>
               <p className="text-gray-800 dark:text-white">{employee.position}</p>
             </div>

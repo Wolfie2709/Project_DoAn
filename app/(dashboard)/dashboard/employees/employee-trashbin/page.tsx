@@ -1,5 +1,5 @@
 "use client";
-import EmployeeActions from "@/components/dashboard/employee/EmployeeAction";
+import EmployeeActions from "@/components/dashboard/employee/EmployeeActions";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { MoreHorizontal } from "lucide-react";
 import SearchEmployees from "@/components/dashboard/employee/SearchEmployee";

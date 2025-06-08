@@ -5,18 +5,46 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Heart, HelpCircle, ListOrdered, LogOut, User } from "lucide-react";
+import { Heart, HelpCircle, ListOrdered, LogOut, User, LogIn, UserPlus} from "lucide-react";
 import Link from "next/link";
 import { Separator } from "../ui/separator";
 import UserAvatar from "./UserAvatar";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-
+import { useAuthStore } from "@/store/authStore";
+import { Avatar, AvatarImage, AvatarFallback} from "@/components/ui/avatar";
+import { useRouter } from "next/navigation";
 
 const AccountPopover = () => {
   const pathname = usePathname();
+  const isLoggedIn = !!useAuthStore((state) => state.accessToken);
+  const logout = useAuthStore((state) => state.logout);
+  const customer = useAuthStore((state) => state.customer);
+  const employee = useAuthStore((state) => state.employee);
+  const role = employee ? "employee" : "customer";
 
-  const userLinks = [
+   const guestLinks = [
+    {
+      link: "/sign-in",
+      label: "Sign In",
+      icon: <LogIn />,
+      isActive: pathname.includes("/sign-in"),
+    },
+    {
+      link: "/sign-up",
+      label: "Sign Up",
+      icon: <UserPlus />,
+      isActive: pathname.includes("/sign-up"),
+    },
+    {
+      link: "/help",
+      label: "Help",
+      icon: <HelpCircle />,
+      isActive: pathname.includes("/help"),
+    },
+  ];
+
+  const customerLinks = [
     {
       link: "/my-account",
       label: "My Account",
@@ -43,6 +71,33 @@ const AccountPopover = () => {
     },
   ];
 
+  const employeeLinks = [
+    {
+      link: "/my-account",
+      label: "My Account",
+      icon: <User />,
+      isActive: pathname.includes("/my-account"),
+    },
+    {
+      link: "/dashboard",
+      label: "Dashboard",
+      icon: <ListOrdered />,
+      isActive: pathname.includes("/dashboard"),
+    },
+  ];
+
+  const router = useRouter();
+
+const handleLogout = () => {
+  logout();
+  router.push("/sign-in");
+};
+
+ const resolvedLinks = isLoggedIn
+    ? role === "employee"
+      ? employeeLinks
+      : customerLinks
+    : guestLinks;
   return (
     <div className="hidden lg:block">
       <Popover>
@@ -50,13 +105,23 @@ const AccountPopover = () => {
           <User size={25}  />
         </PopoverTrigger>
         <PopoverContent
-          className=" rounded-2xl 
-      "
-        >
+          className="rounded-2xl ">
           <ul className="space-y-1 text-center ">
-            <UserAvatar />
+            {isLoggedIn ? (
+              <UserAvatar />
+            ) : (
+              <div className="flex items-center gap-2">
+                <Avatar>
+                  <AvatarImage src="https://github.com/shadcn.png" />
+                  <AvatarFallback>G</AvatarFallback>
+                </Avatar>
+                <p className="font-semibold text-lg">
+                  Welcome, <span className="font-normal">Guest</span>
+                </p>
+              </div>
+            )}
             <Separator className="!my-2" />
-            {userLinks.map((link) => (
+            {resolvedLinks.map((link) => (
               <Link
                 key={link.link}
                 href={link.link}
@@ -68,11 +133,14 @@ const AccountPopover = () => {
                 {link.icon} {link.label}
               </Link>
             ))}
-            <Separator className="!my-2" />
-            <button className="flex items-start justify-start gap-2 p-2 bg-transparent hover:opacity-50">
+            {isLoggedIn && (
+            <button
+              onClick={handleLogout}
+              className="flex items-star justify-start gap-2 p-2 bg-transparent hover:opacity-50">
               <LogOut />
               Logout
             </button>
+            )}
           </ul>
         </PopoverContent>
       </Popover>

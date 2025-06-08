@@ -117,6 +117,8 @@ export type Customer={
   orders: Order[];
   reviews: Review[];
   shoppingCarts: ShoppingCart[];
+  isDeletedStatus?: boolean;
+  lastLogin: string;
 }
 
 export type Review = {

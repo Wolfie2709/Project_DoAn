@@ -31,15 +31,6 @@ const DropdownMenuComponent = () => {
             <Link href={"/blogpagetwo"}>Blog Page Two</Link>
           </DropdownMenuItem>
           <DropdownMenuItem>
-            <Link href={"/dashboard"}>Dashboard Page</Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <Link href={"/sign-up"}>Sign Up Page</Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <Link href={"/sign-in"}>Sign In Page</Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem>
             <Link href={"/forgot-password"}>Forgot Password Page</Link>
           </DropdownMenuItem>
         </DropdownMenuContent>

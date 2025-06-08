@@ -6,7 +6,7 @@ import Image from "next/image";
 import React, { Suspense, useState, useEffect } from "react";
 import { Employee } from "@/types";
 import Link from "next/link";
-import EmployeeActions from "@/components/dashboard/employee/EmployeeAction";
+import EmployeeActions from "@/components/dashboard/employee/EmployeeActions";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { Trash } from "lucide-react";
 

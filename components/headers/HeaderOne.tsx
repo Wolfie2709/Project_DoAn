@@ -14,8 +14,7 @@ import { cn } from "@/lib/utils";
 import { useMobileSearchModal } from "@/store/mobileSearchStore";
 import Loader from "../others/Loader";
 import DropdownMenuComponent from "../others/DropdownMenu";
-import SignInBtn from "../buttons/SignInBtn";
-import SignUpBtn from "../buttons/SignUpBtn";
+
 
 const HeaderOne = () => {
   const pathname = usePathname();
@@ -72,8 +71,6 @@ const HeaderOne = () => {
             <AccountPopover />
             <Cart />
             <MobileHeader />
-            <SignInBtn/>
-            <SignUpBtn/>
           </div>
         </div>
       </div>
