@@ -1,13 +1,13 @@
 "use client";
-import React, { useState } from "react";
-import { optional, z } from "zod";
+
+import React from "react";
+import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-// Define the schema for form validation
 const productSchema = z.object({
   name: z.string().min(1, "Name is required"),
   price: z.string().min(1, "Price is required"),
@@ -16,210 +16,157 @@ const productSchema = z.object({
   type: z.enum(["featured", "top-rated", "most-popular", "new-arrivals"]),
   description: z.string().min(1, "Description is required"),
   aboutItem: z.string().optional(),
-  images: z.array(z.instanceof(File)).min(1, "At least one image is required"),
+  images: z.array(z.instanceof(File)).optional(),
   color: z.array(z.string()).optional(),
   discount: z.number().min(0).max(100).optional(),
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
 
-const ProductForm = () => {
-  const [formData, setFormData] = useState<ProductFormData>({
-    name: "",
-    price: "",
-    category: "",
-    brand: "",
-    type: "featured",
-    description: "",
-    aboutItem: '',
-    images: [],
-    color: [],
-    discount: undefined,
-  });
+type ProductFormProps = {
+  onAdd?: () => void;
+};
 
+const ProductForm: React.FC<ProductFormProps> = ({ onAdd }) => {
   const {
-    handleSubmit,
     register,
+    handleSubmit,
     formState: { errors, isSubmitting },
+    reset,
   } = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
-  });
-
-  const onSubmit = (data: ProductFormData) => {
-    console.log(data);
-    // Add logic to handle form submission (e.g., API call to add product)
-    setFormData({
+    defaultValues: {
       name: "",
       price: "",
       category: "",
       brand: "",
       type: "featured",
       description: "",
-      aboutItem: '',
+      aboutItem: "",
       images: [],
       color: [],
       discount: undefined,
-    });
+    },
+  });
+
+  const onSubmit = async (data: ProductFormData) => {
+    try {
+      const payload = {
+        productName: data.name,
+        stock: 10,
+        price: parseFloat(data.price),
+        description: data.description,
+        shortDescription: data.aboutItem || "",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        brandId: 1,
+        categoryId: 1,
+        addedBy: null,
+      };
+
+      console.log("🚀 Payload gửi đi:", payload);
+
+      const res = await fetch("https://localhost:7240/api/Products", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error("❌ API error:", errorText);
+        throw new Error("Failed to add product");
+      }
+
+      const result = await res.json();
+      console.log("✅ Product created:", result);
+      alert("Product added successfully!");
+      onAdd?.(); // gọi callback cập nhật danh sách
+      reset();   // reset form sau khi thêm
+    } catch (error) {
+      console.error("🚨 Error creating product", error);
+      alert("Error creating product");
+    }
   };
 
   return (
     <div className="max-w-screen-xl mx-auto w-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 my-4">
-      <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-        Add New Product
-      </h2>
+      <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Add New Product</h2>
+
       <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div>
-          <Label
-            htmlFor="name"
-            className="block text-sm font-medium text-gray-700 dark:text-white"
-          >
-            Product Name
-          </Label>
-          <Input
-            id="name"
-            type="text"
-            className="mt-1 p-2 block w-full rounded-md border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
-            {...register("name")}
-          />
-          {errors.name && (
-            <span className="text-red-500">{errors.name.message}</span>
-          )}
+          <Label htmlFor="name">Product Name</Label>
+          <Input id="name" type="text" {...register("name")} />
+          {errors.name && <span className="text-red-500">{errors.name.message}</span>}
         </div>
 
         <div>
-          <Label
-            htmlFor="price"
-            className="block text-sm font-medium text-gray-700 dark:text-white"
-          >
-            Price
-          </Label>
-          <Input
-            id="price"
-            type="text"
-            className="mt-1 p-2 block w-full rounded-md border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
-            {...register("price")}
-          />
-          {errors.price && (
-            <span className="text-red-500">{errors.price.message}</span>
-          )}
+          <Label htmlFor="price">Price</Label>
+          <Input id="price" type="text" {...register("price")} />
+          {errors.price && <span className="text-red-500">{errors.price.message}</span>}
         </div>
 
         <div>
-          <Label
-            htmlFor="price"
-            className="block text-sm font-medium text-gray-700 dark:text-white"
-          >
-            discount
-          </Label>
-          <Input
-            id="price"
-            type="number"
-            className="mt-1 p-2 block w-full rounded-md border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
-            {...register("discount")}
-          />
-          {errors.discount && (
-            <span className="text-red-500">{errors.discount.message}</span>
-          )}
+          <Label htmlFor="discount">Discount (%)</Label>
+          <Input id="discount" type="number" {...register("discount", { valueAsNumber: true })} />
+          {errors.discount && <span className="text-red-500">{errors.discount.message}</span>}
         </div>
 
         <div>
-          <Label
-            htmlFor="category"
-            className="block text-sm font-medium text-gray-700 dark:text-white"
-          >
-            Category
-          </Label>
-          <Input
-            id="category"
-            type="text"
-            className="mt-1 p-2 block w-full rounded-md border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
-            {...register("category")}
-          />
-          {errors.category && (
-            <span className="text-red-500">{errors.category.message}</span>
-          )}
+          <Label htmlFor="category">Category</Label>
+          <Input id="category" type="text" {...register("category")} />
+          {errors.category && <span className="text-red-500">{errors.category.message}</span>}
         </div>
 
         <div>
-          <Label
-            htmlFor="brand"
-            className="block text-sm font-medium text-gray-700 dark:text-white"
-          >
-            Brand
-          </Label>
-          <Input
-            id="brand"
-            type="text"
-            className="mt-1 p-2 block w-full rounded-md border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
-            {...register("brand")}
-          />
-          {errors.brand && (
-            <span className="text-red-500">{errors.brand.message}</span>
-          )}
+          <Label htmlFor="brand">Brand</Label>
+          <Input id="brand" type="text" {...register("brand")} />
+          {errors.brand && <span className="text-red-500">{errors.brand.message}</span>}
         </div>
 
         <div>
-          <Label
-            htmlFor="description"
-            className="block text-sm font-medium text-gray-700 dark:text-white"
+          <Label htmlFor="type">Type</Label>
+          <select
+            id="type"
+            {...register("type")}
+            className="p-2 w-full border rounded-md bg-white dark:bg-gray-900"
           >
-            Description
-          </Label>
-          <textarea
-            id="description"
-            className="mt-1 p-2 block border bg-white dark:bg-slate-950 rounded-md w-full  border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
-            {...register("description")}
-          />
-          {errors.description && (
-            <span className="text-red-500">{errors.description.message}</span>
-          )}
+            <option value="featured">Featured</option>
+            <option value="top-rated">Top Rated</option>
+            <option value="most-popular">Most Popular</option>
+            <option value="new-arrivals">New Arrivals</option>
+          </select>
+          {errors.type && <span className="text-red-500">{errors.type.message}</span>}
         </div>
 
         <div>
-          <Label
-            htmlFor="aboutItem"
-            className="block text-sm font-medium text-gray-700 dark:text-white"
-          >
-            About Item
-          </Label>
-          <textarea
-            id="aboutItem"
-            className="mt-1 border p-2 block w-full rounded-md dark:bg-slate-950 border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
-            {...register("aboutItem")}
-          />
-          {errors.aboutItem && (
-            <span className="text-red-500">{errors.aboutItem.message}</span>
-          )}
+          <Label htmlFor="description">Description</Label>
+          <textarea id="description" {...register("description")} className="p-2 w-full rounded-md border" />
+          {errors.description && <span className="text-red-500">{errors.description.message}</span>}
         </div>
 
         <div>
-          <Label
-            htmlFor="images"
-            className="block text-sm font-medium text-gray-700 dark:text-white"
-          >
-            Product Images
-          </Label>
-          <p className="text-gray-500">
-            You can upload multiple images for this product.
-          </p>
-          <Input
-            id="images"
-            type="file"
-            multiple
-            className="mt-1 p-2 block w-full rounded-md border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
-            {...register("images")}
-          />
-          {errors.images && (
-            <span className="text-red-500">{errors.images.message}</span>
-          )}
+          <Label htmlFor="aboutItem">About Item</Label>
+          <textarea id="aboutItem" {...register("aboutItem")} className="p-2 w-full rounded-md border" />
         </div>
+
         <div>
-          <Button type="submit">Submit</Button>
+          <Label htmlFor="images">Images (optional)</Label>
+          <Input id="images" type="file" multiple {...register("images")} />
+          {errors.images && <span className="text-red-500">{errors.images.message}</span>}
+        </div>
+
+        <div className="col-span-full">
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? "Submitting..." : "Submit"}
+          </Button>
         </div>
       </form>
     </div>
   );
 };
 
-
 export default ProductForm;
+
