@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation"; // Next.js 13 app router
 import Image from "next/image";
-import AddToCartBtn from "../buttons/AddToCartBtn";
+import AddToCartBtn from "@/components/buttons/AddToCartBtn";
 
 type Product = {
   productId: number;
