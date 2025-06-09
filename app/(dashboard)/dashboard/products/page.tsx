@@ -35,6 +35,8 @@ const ProductsPage = () => {
     fetchData();
   }, []);
 
+  console.log(products)
+
   return (
     <div className="max-w-screen-xl mx-auto w-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 my-4">
       <ProductHeader />
@@ -63,7 +65,7 @@ const ProductsPage = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-              {products.slice(0, 6).map((product) => (
+              {products.slice(0, 8).map((product) => (
                 <tr key={product.productId} className="bg-white dark:bg-gray-800">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <Image

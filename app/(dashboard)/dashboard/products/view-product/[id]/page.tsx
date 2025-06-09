@@ -6,7 +6,7 @@ import Image from "next/image";
 import AddToCartBtn from "@/components/buttons/AddToCartBtn";
 
 type Product = {
-  productId: number;
+  id: number;
   productName: string;
   description: string;
   price: number;
@@ -18,36 +18,39 @@ type Product = {
 
 const ProductDetailView = () => {
   const params = useParams();
-  const productId = params.productId; // lấy productId từ route params
+  const { id } = useParams();
+  // const id = params.id; // lấy id từ route params
+  console.log(id)
 
   const [product, setProduct] = useState<Product | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // const [loading, setLoading] = useState(true);
+  // const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!productId) return;
+    if (!id) return;
 
     const fetchProduct = async () => {
       try {
-        setLoading(true);
-        const res = await fetch(`https://localhost:7240/api/Products/${productId}`);
+        // setLoading(true);
+        const res = await fetch(`https://localhost:7240/api/Products/${id}`);
         if (!res.ok) {
           throw new Error("Failed to fetch product");
         }
         const data = await res.json();
         setProduct(data);
       } catch (err: any) {
-        setError(err.message);
+        alert(err);
+        // setError(err.message);
       } finally {
-        setLoading(false);
+        // setLoading(false);
       }
     };
 
     fetchProduct();
-  }, [productId]);
+  }, [id]);
 
-  if (loading) return <div>Loading product...</div>;
-  if (error) return <div>Error: {error}</div>;
+  // // if (loading) return <div>Loading product...</div>;
+  // if (error) return <div>Error: {error}</div>;
   if (!product) return <div>Product not found</div>;
 
   return (

@@ -30,6 +30,7 @@ const ProductActions: React.FC<ProductActionsProps> = ({ productId, onDelete }) 
       } else {
         const errorText = await res.text();
         console.error("❌ Soft delete failed:", errorText);
+        console.log(productId);
         alert("❌ Failed to soft delete product");
       }
     } catch (error) {
@@ -47,13 +48,13 @@ const ProductActions: React.FC<ProductActionsProps> = ({ productId, onDelete }) 
       </PopoverTrigger>
       <PopoverContent className="text-start space-y-1">
         <Link
-          href={`/dashboard/products/${productId}`}
+          href={`/dashboard/products/view-product/${productId}`}
           className="block py-2 px-4 rounded-md hover:bg-slate-200 dark:hover:bg-slate-900"
         >
           View Product
         </Link>
         <Link
-          href={`/dashboard/products/edit/${productId}`}
+          href={`/dashboard/products/update/${productId}`}
           className="block py-2 px-4 rounded-md hover:bg-slate-200 dark:hover:bg-slate-900"
         >
           Update Product
