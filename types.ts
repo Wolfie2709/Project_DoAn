@@ -168,3 +168,29 @@ export type Response = {
   customer?: CustomerSessionDto;
   employee?: EmployeeSessionDto;
 }
+
+export type OrderedProductDto = {
+  orderDetailId: number;
+  orderId: number;
+  productName?: string;
+  imageUrl?: string;
+  price: number;
+  amount?: number;
+  originalPrice?: number;
+  discountAmount?: number;
+  finalPrice?: number;
+}
+
+export type OrderDashboardDto = {
+  orderId: number;
+  customerName: string;
+  orderDate?: string;
+  estimatedDate?: string;
+  orderStatus?: string;
+  shippingAddress?: string;
+  receiverName?: string;
+  receiverNumber?: string;
+  note?: string;
+  totalPrice?: number;
+  orderedProducts: OrderedProductDto[];
+}

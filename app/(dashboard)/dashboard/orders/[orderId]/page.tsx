@@ -1,78 +1,103 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
+import { useParams, useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { Response } from "@/types"
 import { Separator } from "@/components/ui/separator";
 import Image from "next/image";
-import React from "react";
+import React, { Suspense } from "react";
+import { OrderedProductDto, OrderDashboardDto } from '@/types';
+import Loader from "@/components/others/Loader";
+import Pagination from "@/components/others/Pagination";
 
 const OrderDetails = () => {
-  const { id } = useParams();
+  const { orderId } = useParams();
+  const [response, setResponse] = useState<Response>();
+  const [order, setOrder] = useState<OrderDashboardDto>();
+  const [orderDetailList, setOrderDetailList] = useState<OrderedProductDto[]>([]);
+  const searchParams = useSearchParams();
   const router = useRouter();
 
+  const currentPage = parseInt(searchParams.get("orderdetailpage") || "1", 10);
+  const itemsPerPage = 1;
+  const totalPages = Math.ceil(orderDetailList.length / itemsPerPage);
+  const paginatedOrderDetailsList = orderDetailList.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
-  // //Lay ra brand theo id
-  //   useEffect(() => {
-  //     const fetchBrand = async () => {
-  //       if(!response || !response.accessToken) return;
-  //       try {
-  //         // console.log(response.accessToken)
-  //         const res = await fetch(`https://localhost:7240/api/Brands/dashboard/${id}`, {
-  //           headers: {
-  //             'Authorization': `Bearer ${response?.accessToken}` //Thêm Authorization header
-  //           }
-  //         });
-  //         const data = await res.json();
-          
-  //         setValue('name', data.brandName || '');
-  //         setValue('description', data.description || '');
-          
-  //         if (data.images != null) {
-  //           setImageUrl(data.images[0].imageUrl);
-  //           setImageId(data.images[0].imageId); // Gán imageId
-  //         }
-  //         // console.log(data.images)
-  //       } catch (error) {
-  //         console.error('Failed to fetch brand:', error);
-  //       }
-  //     };
-      
-  //     fetchBrand();
-  //   }, [response, id, setValue]);
+  //Ham lay get response
+  const getResponse = () => {
+    try {
+      //lay value tu session storage
+      const storedData = sessionStorage.getItem("food-storage");
+      if (storedData == null) {
+        throw new Error("Ban chua dang nhap")
+      }
 
-  // get order data based on orderId from the params here
-  const order = {
-    orderNumber: "ORD123456",
-    customerName: "John Doe",
-    date: "2024-04-01",
-    status: "Shipped",
-    shippingAddress: "123 Main Street",
-    city: "New York",
-    country: "USA",
-    products: [
-      {
-        id: 1,
-        name: "Tao la hacker",
-        price: 50,
-        quantity: 2,
-        image: "/images/products/apple-watch-9-3-removebg-preview.png",
-      },
-      {
-        id: 2,
-        name: "Apple watch se 9",
-        price: 50,
-        quantity: 2,
-        image: "/images/products/apple-watch-se-2-removebg-preview.png",
-      },
-    ],
-    total: 190,
-  };
+      //lay ra noi dung ben trong storedData
+      const parsed = JSON.parse(storedData);
+      if (parsed == null) {
+        throw new Error("Ban chua dang nhap: loi o parsed")
+      }
+
+      //Lay ra response
+      const responseData = parsed.state;
+      if (responseData == null) {
+        throw new Error("Ban chua dang nhap: loi o response")
+      }
+
+      if (responseData.employee == null) {
+        throw new Error("Ban khong phai la employee")
+      }
+      setResponse(responseData);
+    } catch (error) {
+      alert(error);
+      router.push("/dashboard")
+    }
+  }
+
+  // useEffect để lấy response từ session
+  useEffect(() => {
+    getResponse();
+  }, []);
+
+  useEffect(() => {
+    if (!response || !response.accessToken) return;
+
+    //prevent clerk from access update view
+    try {
+      if (response.employee == null) {
+        throw new Error("Ban khong co quyen truy cap")
+      }
+    } catch (error) {
+      alert(error)
+      router.push("/dashboard/brands")
+    }
+  }, [response])
+
+  //Lay ra brand theo id
+  useEffect(() => {
+    const fetchOrder = async () => {
+      if (!response || !response.accessToken) return;
+      try {
+        const res = await fetch(`https://localhost:7240/api/Orders/OrderWithDetails/${orderId}`, {
+          // headers: {
+          //   'Authorization': `Bearer ${response?.accessToken}` //Thêm Authorization header
+          // }
+        });
+        const data = await res.json();
+        console.log(data)
+        setOrder(data);
+        setOrderDetailList(data.orderedProducts);
+      } catch (error) {
+        console.error('Failed to fetch brand:', error);
+      }
+    };
+
+    fetchOrder();
+  }, [response, orderId]);
+
+  // // [response, id, setValue]
 
   return (
     <div className="max-w-screen-xl w-full mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 my-4">
@@ -87,23 +112,24 @@ const OrderDetails = () => {
             Order Information
           </h3>
           <p className="text-gray-700 dark:text-gray-300">
-            Order Number: {order.orderNumber}
+            Order Number: {order?.orderId}
           </p>
           <p className="text-gray-700 dark:text-gray-300">
-            Customer Name: {order.customerName}
+            Customer Name: {order?.customerName}
           </p>
-          <p className="text-gray-700 dark:text-gray-300">Date: {order.date}</p>
+          <p className="text-gray-700 dark:text-gray-300">Date: {order?.orderDate}</p>
+          <p className="text-gray-700 dark:text-gray-300">Date: {order?.estimatedDate}</p>
           <p className="text-gray-700 dark:text-gray-300">
             Status:{" "}
             <span
-              className={`inline-flex text-sm font-semibold rounded-full px-2 ${order.status === "Shipped"
+              className={`inline-flex text-sm font-semibold rounded-full px-2 ${order?.orderStatus === "Shipped"
                 ? "bg-green-100 text-green-800"
-                : order.status === "Pending"
+                : order?.orderStatus === "Pending"
                   ? "bg-yellow-100 text-yellow-800"
                   : "bg-blue-100 text-blue-800"
                 }`}
             >
-              {order.status}
+              {order?.orderStatus}
             </span>
           </p>
         </div>
@@ -112,47 +138,59 @@ const OrderDetails = () => {
             Shipping Information
           </h3>
           <p className="text-gray-700 dark:text-gray-300">
-            Address: {order.shippingAddress}
+            Address: {order?.shippingAddress}
           </p>
-          <p className="text-gray-700 dark:text-gray-300">City: {order.city}</p>
+          <p className="text-gray-700 dark:text-gray-300">Receiver Name: {order?.receiverName}</p>
           <p className="text-gray-700 dark:text-gray-300">
-            Country: {order.country}
+            Receiver Phone Number: {order?.receiverNumber}
+          </p>
+          <p className="text-gray-700 dark:text-gray-300">
+            Note: {order?.note}
           </p>
         </div>
       </div>
-
 
       <div className="mt-6">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
           Ordered Products
         </h3>
         <ul className=" dark:divide-gray-700 my-4 space-y-2">
-          {order.products.map((product) => (
-            <li key={product.id} className="">
+          {paginatedOrderDetailsList.map((orderDetail) => (
+            <li key={orderDetail.orderDetailId} className="">
               <div className="flex justify-between items-center !border dark:border-gray-500 px-2 rounded-md ">
-                <p className="text-gray-900 dark:text-white text-lg font-semibold">{product.name}</p>
-                <Image
-                  src={product.image}
-                  alt="product image"
-                  width={80}
-                  height={80}
-                  className="object-contain"
-                />
+                <p className="text-gray-900 dark:text-white text-lg font-semibold">{orderDetail.productName}</p>
+                <div className="w-32 h-32 relative">
+                  <Image
+                    src={orderDetail?.imageUrl || ""}
+                    alt={orderDetail.productName || "place holder"}
+                    layout="fill"
+                    objectFit="contain"
+                    className="rounded-md"
+                  />
+                </div>
                 <p className="text-gray-700 dark:text-gray-300">
-                  Qty : {product.quantity}
+                  Qty : {orderDetail.amount}
                 </p>
-                <p>Price : {product.price}</p>
+                <p>Price : {orderDetail.price}</p>
               </div>
             </li>
           ))}
         </ul>
       </div>
+      {/* Pagination */}
+      <Suspense fallback={<Loader />}>
+        <Pagination
+          totalPages={totalPages}
+          currentPage={currentPage}
+          pageName="orderdetailpage"
+        />
+      </Suspense>
       <div className="mt-6 flex items-center gap-4">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
           Total :
         </h3>
         <p className="text-xl font-bold text-gray-900 dark:text-white">
-          ${order.total}
+          ${order?.totalPrice}
         </p>
       </div>
     </div>
