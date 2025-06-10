@@ -189,6 +189,9 @@ const BrandPage = () => {
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
                 {brand.brandName}
               </h2>
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                {brand.description}
+              </h3>
               <p className="text-gray-700 dark:text-gray-300">Description</p>
               <div className="mt-4 flex space-x-4">
                 <Popover>

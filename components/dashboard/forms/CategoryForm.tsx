@@ -96,10 +96,9 @@ const CategoryForm: React.FC = () => {
         },
         body: JSON.stringify({
           categoryName: data.name,
-          // Các field còn lại nếu bạn có thêm: parentCategoryId, addedBy, ...
           parenCategoryId: null,
           addedBy: whichEmployee,
-          // Nếu muốn thêm mô tả, bạn cần cập nhật model để hỗ trợ description
+          description: data.description
         }),
       });
 

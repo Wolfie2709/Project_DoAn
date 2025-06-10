@@ -1,17 +1,17 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { Customer } from '@/types'; // adjust path as needed
-import { Employee } from '@/types';
+import { CustomerSessionDto } from '@/types'; // adjust path as needed
+import { EmployeeSessionDto } from '@/types';
 
 type AuthStore = {
   userName: string;
   accessToken: string;
-  customer: Customer | null;
-  employee: Employee | null;
-  login: (userName: string, accessToken: string, customer: Customer, employee: Employee) => void;
+  customer: CustomerSessionDto | null;
+  employee: EmployeeSessionDto | null;
+  login: (userName: string, accessToken: string, customer: CustomerSessionDto, employee: EmployeeSessionDto) => void;
   logout: () => void;
-  setCustomer: (customer: Customer) => void; 
-  setEmployee: (employee: Employee) => void;
+  setCustomer: (customer: CustomerSessionDto) => void; 
+  setEmployee: (employee: EmployeeSessionDto) => void;
 };
 
 export const useAuthStore = create<AuthStore>()(

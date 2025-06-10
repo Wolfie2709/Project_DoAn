@@ -15,8 +15,13 @@ import {
 
 import { MoreHorizontal } from "lucide-react";
 import Link from "next/link";
+import { Order } from "@/types";
 
-const OrderActions = () => {
+type Props = {
+  WhichOrder: Order;
+};
+
+const OrderActions = ({ WhichOrder }: Props) => {
   return (
     <div>
       <Popover>
@@ -27,7 +32,7 @@ const OrderActions = () => {
         </PopoverTrigger>
         <PopoverContent className="text-start">
           <Link
-            href={`/dashboard/orders/id`}
+            href={`/dashboard/orders/${WhichOrder.orderId}`}
             className="py-2 px-4 rounded-md w-full  block hover:bg-slate-200 dark:hover:bg-slate-900"
           >
             View Details
