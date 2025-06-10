@@ -11,13 +11,14 @@ import { useRouter, useSearchParams, usePathname } from "next/navigation";
 const OrdersPage = () => {
   // Lay api fetch all order with customer
   const [orders, setOrders] = useState<Order[]>([]);
+  // const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
 
   //Pagination
   const currentPage = parseInt(searchParams.get("orderpage") || "1", 10);
-  const itemsPerPage = 3;
+  const itemsPerPage = 2;
   const totalPages = Math.ceil(orders.length / itemsPerPage);
   const paginatedOrders = orders.slice(
     (currentPage - 1) * itemsPerPage,
@@ -41,11 +42,28 @@ const OrdersPage = () => {
     }
   };
 
+  // Handle search input
+  const handleSearch = (query: string) => {
+    if(query==""){
+      fetchOrders();
+    }
+    const queryID = parseInt(query);
+    const results = orders.filter((order) =>
+      order.orderId == queryID
+    );
+    setOrders(results);
+
+    // Reset to page 1 after search
+    const params = new URLSearchParams(searchParams);
+    params.set("brandpage", "1");
+    router.replace(`${pathname}?${params}`);
+  };
+
   useEffect(() => {
     fetchOrders();
   }, [])
 
-  // console.log(orders)
+  // console.log(paginatedOrders)
 
   return (
     <div className="max-w-screen-xl mx-auto w-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 my-4 ">
@@ -53,7 +71,7 @@ const OrdersPage = () => {
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white ">
           Orders
         </h2>
-        <OrderSearch />
+        <OrderSearch onSearch={handleSearch}/>
       </div>
       <div className="overflow-x-auto">
         <table className="min-w-full w-full divide-y divide-gray-200 dark:divide-gray-700 border dark:border-gray-500 rounded-md">
@@ -64,6 +82,9 @@ const OrdersPage = () => {
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Customer Name
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Total money
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Date
@@ -85,6 +106,9 @@ const OrdersPage = () => {
                 <td className="px-6 py-4 whitespace-nowrap">
                   {order.customer.fullName}
                 </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  {order.totalCost} vnd
+                </td>
                 <td className="px-6 py-4 whitespace-nowrap">{order.estimatedDate}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span
@@ -100,7 +124,7 @@ const OrdersPage = () => {
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <OrderActions />
+                  <OrderActions WhichOrder={order}/>
                 </td>
               </tr>
             ))}

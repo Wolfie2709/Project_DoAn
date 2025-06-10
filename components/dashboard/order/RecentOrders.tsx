@@ -7,11 +7,6 @@ type Props = {
 };
 
 const RecentOrdersSection = ({recentOrderList}: Props) => {
-
-  console.log(recentOrderList);
-  // recentOrderList.forEach((order)=>{
-  //   console.log(order.customer.customerId)
-  // })
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 my-4">
       <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Recent Orders</h2>
@@ -31,13 +26,14 @@ const RecentOrdersSection = ({recentOrderList}: Props) => {
               <tr key={order.orderId} className="bg-white dark:bg-gray-800">
                 <td className="px-6 py-4 whitespace-nowrap">{order.orderId}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{order.customer.fullName}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{order.totalCost} vnd</td>
                 <td className="px-6 py-4 whitespace-nowrap">{order.estimatedDate}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${order.status === 'Shipped' ? 'bg-green-100 text-green-800' : order.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-blue-100 text-blue-800'}`}>{order.status}</span>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                {/* <td className="px-6 py-4 whitespace-nowrap">
                   <OrderActions />
-                </td>
+                </td> */}
               </tr>
             ))}
           </tbody>

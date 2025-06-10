@@ -1,8 +1,50 @@
+'use client';
+import { useEffect, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { Response } from "@/types"
 import { Separator } from "@/components/ui/separator";
 import Image from "next/image";
 import React from "react";
 
 const OrderDetails = () => {
+  const { id } = useParams();
+  const router = useRouter();
+
+
+  // //Lay ra brand theo id
+  //   useEffect(() => {
+  //     const fetchBrand = async () => {
+  //       if(!response || !response.accessToken) return;
+  //       try {
+  //         // console.log(response.accessToken)
+  //         const res = await fetch(`https://localhost:7240/api/Brands/dashboard/${id}`, {
+  //           headers: {
+  //             'Authorization': `Bearer ${response?.accessToken}` //Thêm Authorization header
+  //           }
+  //         });
+  //         const data = await res.json();
+          
+  //         setValue('name', data.brandName || '');
+  //         setValue('description', data.description || '');
+          
+  //         if (data.images != null) {
+  //           setImageUrl(data.images[0].imageUrl);
+  //           setImageId(data.images[0].imageId); // Gán imageId
+  //         }
+  //         // console.log(data.images)
+  //       } catch (error) {
+  //         console.error('Failed to fetch brand:', error);
+  //       }
+  //     };
+      
+  //     fetchBrand();
+  //   }, [response, id, setValue]);
 
   // get order data based on orderId from the params here
   const order = {
@@ -16,7 +58,7 @@ const OrderDetails = () => {
     products: [
       {
         id: 1,
-        name: "Apple watch 9 pro",
+        name: "Tao la hacker",
         price: 50,
         quantity: 2,
         image: "/images/products/apple-watch-9-3-removebg-preview.png",
@@ -54,13 +96,12 @@ const OrderDetails = () => {
           <p className="text-gray-700 dark:text-gray-300">
             Status:{" "}
             <span
-              className={`inline-flex text-sm font-semibold rounded-full px-2 ${
-                order.status === "Shipped"
-                  ? "bg-green-100 text-green-800"
-                  : order.status === "Pending"
+              className={`inline-flex text-sm font-semibold rounded-full px-2 ${order.status === "Shipped"
+                ? "bg-green-100 text-green-800"
+                : order.status === "Pending"
                   ? "bg-yellow-100 text-yellow-800"
                   : "bg-blue-100 text-blue-800"
-              }`}
+                }`}
             >
               {order.status}
             </span>
@@ -80,7 +121,7 @@ const OrderDetails = () => {
         </div>
       </div>
 
-      
+
       <div className="mt-6">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
           Ordered Products
