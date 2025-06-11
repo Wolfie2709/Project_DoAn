@@ -7,23 +7,47 @@ import { Button } from "../ui/button";
 import { formatPrice } from "@/lib/formatPrice";
 import { useAuthStore } from "@/store/authStore";
 import { Label } from "../ui/label";
+import { Customer } from "@/types";
 
 const FinalConfirmationForm = () => {
   const [shippingData, setShippingData] = useState<any>(null);
   const [isMounted, setIsMounted] = useState(false);
   const { getTotalPrice, getTax, getShippingFee, getTotalAmount, cartItems } = useCartStore();
-  const { customer } = useAuthStore();
+  const { customer, customerDetails, setCustomerDetails } = useAuthStore();
   const [paymentMethod, setPaymentMethod] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
+  
+    const fetchCustomerDetails = async () => {
+      if (customer && !customerDetails) {
+        try {
+          const res = await fetch(`https://localhost:7240/api/Customers/${customer.customerId}/details`);
+          if (!res.ok) throw new Error("Failed to fetch customer details");
+          const data = await res.json();
+          setCustomerDetails({ email: data.email, phone: data.phone });
+        } catch (err) {
+          console.error("Error fetching customer details:", err);
+        }
+      }
+    };
+  
     const storedData = localStorage.getItem("shippingFormData");
-    if (storedData) {
-      setShippingData(JSON.parse(storedData));
-    }
-  }, []);
-
+    let parsedData = storedData ? JSON.parse(storedData) : null;
+  
+    fetchCustomerDetails().then(() => {
+      // after fetching, override if available
+      if (parsedData) {
+        if (customerDetails) {
+          parsedData.email = customerDetails.email || parsedData.email;
+          parsedData.phone = customerDetails.phone || parsedData.phone;
+        }
+        setShippingData(parsedData);
+      }
+    });
+  }, [customer, customerDetails]);
+  
   const handleFormSubmit = async () => {
     if (!shippingData || !customer || !paymentMethod || cartItems.length === 0) {
       alert("Please make sure all information is filled and cart is not empty.");
@@ -37,7 +61,7 @@ const FinalConfirmationForm = () => {
       Note: shippingData.note || "",
       ReceiverName: `${shippingData.firstName} ${shippingData.lastName}`,
       ReceiverPhone: shippingData.phone,
-      ReceiverEmail: shippingData.email || customer.email,
+      ReceiverEmail: shippingData.email,
       productList: cartItems.map((item: any) => ({
         ProductId: item.productId,
         Amount: item.quantity,

@@ -6,62 +6,78 @@ import Image from "next/image";
 import AddToWishlistBtn from "../buttons/AddToWishlistBtn";
 import AddToCartBtn from "../buttons/AddToCartBtn";
 import { Product } from "@/types";
-import { calculateDiscount } from "@/lib/calculateDiscount";
+import { formatPrice } from "@/lib/formatPrice";
 
 const SingleProductListView = ({ product }: { product: Product }) => {
-  const { productId,
+  const {
+    productId,
     productName,
     description,
-    stock,
     price,
-    brandID,
-    categoryID,
-    shortDescription,
-    brand,
-    category,
     discountedPrice,
-    images } =
-    product;
+    category,
+    images,
+  } = product;
 
-  // const discountPrice = calculateDiscount(price, discount);
+  const displayPrice = formatPrice(price);
+  const displayDiscount = discountedPrice ? formatPrice(discountedPrice) : null;
+  const imageUrl = images?.[0]?.imageUrl || "/placeholder.jpg";
 
   return (
-    <Link
-      href={`/shop/${productId}`}
-      className="group flex flex-col lg:flex-row lg:items-start items-center justify-center gap-4 relative space-y-4 p-4 md:p-8 border"
+    <div
+      className="group flex flex-col lg:flex-row lg:items-start items-center justify-center gap-4 relative space-y-4 p-4 md:p-8 border hover:shadow-md transition"
     >
-      <div className="flex-shrink-0 w-[20rem] h-[18rem] relative rounded-md overflow-hidden bg-gray-200">
-      {images && images[0] && <Image className="object-contain" src={images[0].imageUrl} alt={images[0].imageUrl} fill />}
-      </div>
-      <div className="">
-        <p className="text-sm text-sky-500 font-light">{category?.categoryName}</p>
-        <div className="flex items-center justify-between">
-        {productName && (<h3 className="text-xl font-fold capitalize hover:text-green-500">
-          {productName.slice(0, 45)}
+      {/* Image Section */}
+      <Link
+        href={`/shop/${productId}`}
+        className="flex-shrink-0 w-[20rem] h-[18rem] relative rounded-md overflow-hidden bg-gray-200"
+      >
+        <Image
+          className="object-contain"
+          src={imageUrl}
+          alt={productName}
+          fill
+        />
+      </Link>
+
+      {/* Product Details Section */}
+      <div className="flex flex-col flex-1">
+        <p className="text-sm text-sky-500 font-light">
+          {category?.categoryName}
+        </p>
+        <Link
+          href={`/shop/${productId}`}
+          className="text-xl font-semibold capitalize hover:text-green-500"
+        >
+          {productName?.slice(0, 45)}
           {productName.length > 45 && "..."}
-        </h3>)}
-        </div>
+        </Link>
+
+        {/* RatingReview can be used here if enabled */}
         {/* <RatingReview rating={rating} review={reviews.length} /> */}
-        <div className="text-lg font-bold space-x-2 my-4 ">
-          <span className=" text-muted-foreground">${price}</span>
-          <span className="text-xl font-bold text-green-500">
-            ${discountedPrice}
-          </span>
+
+        <div className="text-lg font-bold space-x-2 my-4">
+          <span className="text-muted-foreground line-through">${displayPrice}</span>
+          {displayDiscount && (
+            <span className="text-xl font-bold text-green-500">
+              ${displayDiscount}
+            </span>
+          )}
         </div>
-        <div className=" text-sm">
-          {description}
-        </div>
+
+        <p className="text-sm text-gray-700 dark:text-gray-300">
+          {product.description?.slice(0, 120)}{product.description?.length > 120 && "..."}
+        </p>
+
         <div
           className="flex flex-col md:flex-row mt-4 items-center gap-2 max-w-96 ml-auto justify-end"
-          onClick={(e) => e.preventDefault()}
+          onClick={(e) => e.stopPropagation()}
         >
           <AddToWishlistBtn product={product} />
-          <AddToCartBtn
-            product={{ ...product, quantity: 1, selectedColor: "" }}
-          />
+          <AddToCartBtn product={{ ...product, quantity: 1, selectedColor: "" }} />
         </div>
       </div>
-    </Link>
+    </div>
   );
 };
 

@@ -5,22 +5,25 @@ import { Product,} from "@/types";
 import useWishlistStore from "@/store/wishlistStore";
 import { showToast } from "@/lib/showToast";
 
+
 const AddToWishlistBtn = ({product}:{product:Product}) => {
   const {addToWishlist,isInWishlist} = useWishlistStore()
+  const imageUrl = product.images?.[0]?.imageUrl || "";
+  const productName = product.productName || "Product";
 
   const handleAddToWishList = () => {
-    if(isInWishlist(product.id)){
-      showToast('Item Already Exist In Wishlist',product.images[0] as string, product.name)
+    if(isInWishlist(product.productId)){
+      showToast('Item Already Exist In Wishlist',imageUrl, productName)
     }else{
       addToWishlist(product);
-    showToast('Item Added To The Wishlist',product.images[0] as string, product.name)
+      showToast('Item Added To The Wishlist',imageUrl, productName)
     }
   }
 
   return (
     <Button onClick={(handleAddToWishList)} variant={"outline"} className="w-full p-8 text-xl rounded-full">
       {" "}
-      Add To Wishlish
+      Add To Wishlist
     </Button>
   );
 };

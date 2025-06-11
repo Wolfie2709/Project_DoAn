@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import ProductOptions from "./ProductOptions";
 import { Product } from "@/types";
-
+import AddToWishlistBtn from "../buttons/AddToWishlistBtn";
 import { useRouter } from "next/navigation";
 import { Images } from "lucide-react";
 
@@ -78,6 +78,9 @@ const SingleProductCartView = ({ product }: { product: Product }) => {
           <span className=" font-bold text-white-600">${price}</span>
           <span className="text-xl font-bold text-green-500">
           </span>
+        </div>
+        <div className="mt-2">
+          <AddToWishlistBtn product={product} />
         </div>
       </div>
     </Link>
