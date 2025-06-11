@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Popover,
   PopoverContent,
@@ -15,13 +15,41 @@ type ProductActionsProps = {
 };
 
 const ProductActions: React.FC<ProductActionsProps> = ({ productId, onDelete }) => {
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [position, setPosition] = useState<string | null>(null);
+
+  useEffect(() => {
+    const stored = sessionStorage.getItem("food-storage");
+    if (!stored) return;
+
+    try {
+      const parsed = JSON.parse(stored);
+      const state = parsed?.state;
+
+      if (state?.accessToken) {
+        setAccessToken(state.accessToken);
+        setPosition(state.employee?.position || null);
+      }
+    } catch (error) {
+      console.error("Error parsing session storage:", error);
+    }
+  }, []);
+
   const handleSoftDelete = async () => {
     const confirmDelete = confirm("Are you sure to soft delete (ẩn) this product?");
     if (!confirmDelete) return;
 
+    if (!accessToken || position !== "Manager") {
+      alert("Bạn không có quyền soft delete sản phẩm.");
+      return;
+    }
+
     try {
       const res = await fetch(`https://localhost:7240/api/Products/softdelete/${productId}`, {
         method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
       });
 
       if (res.ok) {
@@ -30,7 +58,6 @@ const ProductActions: React.FC<ProductActionsProps> = ({ productId, onDelete }) 
       } else {
         const errorText = await res.text();
         console.error("❌ Soft delete failed:", errorText);
-        console.log(productId);
         alert("❌ Failed to soft delete product");
       }
     } catch (error) {

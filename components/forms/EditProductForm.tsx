@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -36,7 +36,32 @@ const EditProductForm: React.FC<Props> = ({ id, initialData }) => {
     defaultValues: initialData,
   });
 
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [position, setPosition] = useState<string | null>(null);
+
+  useEffect(() => {
+    const stored = sessionStorage.getItem("food-storage");
+    if (!stored) return;
+
+    try {
+      const parsed = JSON.parse(stored);
+      const state = parsed?.state;
+
+      if (state?.accessToken) {
+        setAccessToken(state.accessToken);
+        setPosition(state.employee?.position || null);
+      }
+    } catch (error) {
+      console.error("Error parsing session storage:", error);
+    }
+  }, []);
+
   const onSubmit = async (data: FormData) => {
+    if (!accessToken || position !== "Manager") {
+      alert("Bạn không có quyền cập nhật sản phẩm.");
+      return;
+    }
+
     const payload = {
       productName: data.name,
       stock: 10,
@@ -45,8 +70,8 @@ const EditProductForm: React.FC<Props> = ({ id, initialData }) => {
       shortDescription: data.aboutItem || "",
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      brandId: 1,
-      categoryId: 1,
+      brandId: 1, // giả lập, cần thay bằng brand thực tế
+      categoryId: 1, // giả lập, cần thay bằng category thực tế
       addedBy: null,
       discount: data.discount || 0,
     };
@@ -56,13 +81,19 @@ const EditProductForm: React.FC<Props> = ({ id, initialData }) => {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify(payload),
       });
 
-      if (!res.ok) throw new Error("Failed to update");
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(errorText);
+      }
+
       alert("✅ Product updated!");
     } catch (err) {
+      console.error("❌ Update error:", err);
       alert("❌ Error updating product");
     }
   };
@@ -137,7 +168,7 @@ const EditProductForm: React.FC<Props> = ({ id, initialData }) => {
         </div>
 
         <div className="col-span-full">
-          <Button type="submit" disabled={isSubmitting} className="w-full h-12 text-lg">
+          <Button type="submit" disabled={isSubmitting || !accessToken} className="w-full h-12 text-lg">
             {isSubmitting ? "Updating..." : "Update Product"}
           </Button>
         </div>
@@ -147,4 +178,3 @@ const EditProductForm: React.FC<Props> = ({ id, initialData }) => {
 };
 
 export default EditProductForm;
-
