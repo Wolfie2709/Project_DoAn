@@ -168,3 +168,4 @@ export type Response = {
   customer?: CustomerSessionDto;
   employee?: EmployeeSessionDto;
 }
+
