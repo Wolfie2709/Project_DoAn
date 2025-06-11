@@ -17,7 +17,7 @@ import Loader from "../others/Loader";
 const ProductOptions = ({ product }: { product: Product }) => {
   const [isMounted, setIsMounted] = useState(false);
   const { openModal } = useProductQuickViewStore();
-  const { images, name } = product;
+  const { images, productName } = product;
 
   const { addToCart } = useCartStore();
   const { addToWishlist, isInWishlist } = useWishlistStore();
@@ -32,15 +32,15 @@ const ProductOptions = ({ product }: { product: Product }) => {
 
   const handleAddToCart = () => {
     addToCart({ ...product, quantity: 1, selectedColor: "" });
-    showToast("Item Added To Cart", images[0], name);
+    showToast("Item Added To Cart", images?.[0]?.imageUrl, productName);
   };
 
   const handleAddToWishList = () => {
-    if (isInWishlist(product.id)) {
-      showToast("Item Added To Wishlist", images[0], name);
+    if (isInWishlist(product.productId)) {
+      showToast("Item Already Exists In Wishlist", images?.[0]?.imageUrl, productName);
     } else {
       addToWishlist(product);
-      showToast("Item Already Exist In Wishlist", images[0], name);
+      showToast("Item Added To Wishlist", images?.[0]?.imageUrl, productName);
     }
   };
 
@@ -67,6 +67,7 @@ const ProductOptions = ({ product }: { product: Product }) => {
             <p>Add To Wishlist</p>
           </TooltipContent>
         </Tooltip>
+
         <Tooltip>
           <TooltipTrigger>
             <div
@@ -80,6 +81,7 @@ const ProductOptions = ({ product }: { product: Product }) => {
             <p>Quick View</p>
           </TooltipContent>
         </Tooltip>
+
         <Tooltip>
           <TooltipTrigger>
             <div

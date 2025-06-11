@@ -8,8 +8,7 @@ import Link from "next/link";
 import { formatPrice } from "@/lib/formatPrice";
 
 const CartItemsDetails = () => {
-
-  const [isMounted, setIsMounted] = useState(false)
+  const [isMounted, setIsMounted] = useState(false);
 
   const {
     cartItems,
@@ -18,77 +17,90 @@ const CartItemsDetails = () => {
     clearCart,
   } = useCartStore();
 
-
-  
   useEffect(() => {
-    setIsMounted(true)
-  },[])
+    setIsMounted(true);
+  }, []);
 
-
-  if(!isMounted){
-    return null
+  if (!isMounted) {
+    return null;
   }
 
-  if(cartItems?.length === 0){
-   return <div className="text-xl text-center p-2 lg:col-span-2">
-      Sorry, No Item Found In The Cart
-    </div>
+  if (cartItems?.length === 0) {
+    return (
+      <div className="text-xl text-center p-2 lg:col-span-2">
+        Sorry, No Item Found In The Cart
+      </div>
+    );
   }
 
   return (
-    <div className="space-x-2 lg:col-span-2" >
-      {cartItems?.map((item) => (
-        <div
-          key={item?.productId}
-          className="flex flex-wrap items-center justify-between gap-1 md:gap-2 border-b border-gray-300 dark:border-gray-500 py-4 !m-0"
-        >
-          <div className="flex items-center space-x-4">
-            <Image
-              src={ item?.images && item?.images [0]}
-              alt="Product"
-              height={64}
-              width={64}
-              className="w-16 h-16 rounded-lg object-cover"
-            />
-            <Link href={`/shop/${item.productId}`} className="text-xl font-semibold text-gray-900 dark:text-white hover:opacity-60">
-              {item?.productName?.slice(0, 30)}...
-            </Link>
-          </div>
-          <p className="border rounded-md border-green-400 py-1 px-2  text-xl text-green-500">
-            ${formatPrice(item?.price)}
-          </p>
+    <div className="space-x-2 lg:col-span-2">
+      {cartItems?.map((item) => {
+        const imageUrl = item?.images?.[0]?.imageUrl || "/placeholder.jpg"; // fallback image
 
-          <div className="flex items-center gap-2">
-            <Button
-              disabled={item?.quantity === 1}
-              onClick={() => updateQuantity(item?.productId, item?.quantity - 1)}
-              size={"sm"}
-              variant={"outline"}
-            >
-              <Minus />
-            </Button>
-            <p>{item.quantity}</p>
-            <Button
-              onClick={() => updateQuantity(item.productId, item.quantity + 1)}
-              size={"sm"}
-              variant={"outline"}
-            >
-              <Plus />
-            </Button>
-          </div>
+        return (
+          <div
+            key={item?.productId}
+            className="flex flex-wrap items-center justify-between gap-1 md:gap-2 border-b border-gray-300 dark:border-gray-500 py-4 !m-0"
+          >
+            <div className="flex items-center space-x-4">
+              <Image
+                src={imageUrl}
+                alt={item.productName || "Product"}
+                height={64}
+                width={64}
+                className="w-16 h-16 rounded-lg object-cover"
+              />
+              <Link
+                href={`/shop/${item.productId}`}
+                className="text-xl font-semibold text-gray-900 dark:text-white hover:opacity-60"
+              >
+                {item?.productName?.slice(0, 30)}...
+              </Link>
+            </div>
 
-          <div>
-            <Button
-              onClick={() => removeFromCart(item.productId)}
-              variant={"destructive"}
-            >
-              <X />
-            </Button>
+            <p className="border rounded-md border-green-400 py-1 px-2 text-xl text-green-500">
+              ${formatPrice(item?.price)}
+            </p>
+
+            <div className="flex items-center gap-2">
+              <Button
+                disabled={item?.quantity === 1}
+                onClick={() =>
+                  updateQuantity(item?.productId, item?.quantity - 1)
+                }
+                size={"sm"}
+                variant={"outline"}
+              >
+                <Minus />
+              </Button>
+              <p>{item.quantity}</p>
+              <Button
+                onClick={() =>
+                  updateQuantity(item.productId, item.quantity + 1)
+                }
+                size={"sm"}
+                variant={"outline"}
+              >
+                <Plus />
+              </Button>
+            </div>
+
+            <div>
+              <Button
+                onClick={() => removeFromCart(item.productId)}
+                variant={"destructive"}
+              >
+                <X />
+              </Button>
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
       {cartItems?.length >= 1 && (
-        <Button variant={'outline'} className="my-2" onClick={clearCart}>Clear Cart</Button>
+        <Button variant={"outline"} className="my-2" onClick={clearCart}>
+          Clear Cart
+        </Button>
       )}
     </div>
   );

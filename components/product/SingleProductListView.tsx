@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import RatingReview from "../others/RatingReview";
 import Link from "next/link";
 import Image from "next/image";
@@ -7,6 +7,13 @@ import AddToWishlistBtn from "../buttons/AddToWishlistBtn";
 import AddToCartBtn from "../buttons/AddToCartBtn";
 import { Product } from "@/types";
 import { formatPrice } from "@/lib/formatPrice";
+
+interface ProductImage {
+  imageId: number;
+  imageUrl: string;
+  productId: number;
+  mainImage: boolean;
+}
 
 const SingleProductListView = ({ product }: { product: Product }) => {
   const {
@@ -16,17 +23,32 @@ const SingleProductListView = ({ product }: { product: Product }) => {
     price,
     discountedPrice,
     category,
-    images,
   } = product;
+
+  const [mainImageUrl, setMainImageUrl] = useState("/placeholder.jpg");
+
+  useEffect(() => {
+    const fetchMainImage = async () => {
+      try {
+        const res = await fetch(`https://localhost:7240/api/Images?productId=${productId}`);
+        const data: ProductImage[] = await res.json();
+        const mainImage = data.find((img) => img.mainImage) || data[0];
+        if (mainImage?.imageUrl) {
+          setMainImageUrl(mainImage.imageUrl);
+        }
+      } catch (error) {
+        console.error("Failed to fetch product image", error);
+      }
+    };
+
+    fetchMainImage();
+  }, [productId]);
 
   const displayPrice = formatPrice(price);
   const displayDiscount = discountedPrice ? formatPrice(discountedPrice) : null;
-  const imageUrl = images?.[0]?.imageUrl || "/placeholder.jpg";
 
   return (
-    <div
-      className="group flex flex-col lg:flex-row lg:items-start items-center justify-center gap-4 relative space-y-4 p-4 md:p-8 border hover:shadow-md transition"
-    >
+    <div className="group flex flex-col lg:flex-row lg:items-start items-center justify-center gap-4 relative space-y-4 p-4 md:p-8 border hover:shadow-md transition">
       {/* Image Section */}
       <Link
         href={`/shop/${productId}`}
@@ -34,8 +56,8 @@ const SingleProductListView = ({ product }: { product: Product }) => {
       >
         <Image
           className="object-contain"
-          src={imageUrl}
-          alt={productName}
+          src={mainImageUrl}
+          alt={productName || "Product Image"}
           fill
         />
       </Link>
@@ -50,11 +72,8 @@ const SingleProductListView = ({ product }: { product: Product }) => {
           className="text-xl font-semibold capitalize hover:text-green-500"
         >
           {productName?.slice(0, 45)}
-          {productName.length > 45 && "..."}
+          {productName?.length > 45 && "..."}
         </Link>
-
-        {/* RatingReview can be used here if enabled */}
-        {/* <RatingReview rating={rating} review={reviews.length} /> */}
 
         <div className="text-lg font-bold space-x-2 my-4">
           <span className="text-muted-foreground line-through">${displayPrice}</span>
@@ -66,7 +85,8 @@ const SingleProductListView = ({ product }: { product: Product }) => {
         </div>
 
         <p className="text-sm text-gray-700 dark:text-gray-300">
-          {product.description?.slice(0, 120)}{product.description?.length > 120 && "..."}
+          {description?.slice(0, 120)}
+          {description?.length > 120 && "..."}
         </p>
 
         <div

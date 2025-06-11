@@ -2,18 +2,19 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { CustomerSessionDto } from '@/types'; // adjust path as needed
 import { EmployeeSessionDto } from '@/types';
+import { Order } from '@/types';
 
 type AuthStore = {
   userName: string;
   accessToken: string;
   customer: CustomerSessionDto | null;
   employee: EmployeeSessionDto | null;
-  customerDetails: { email: string; phone: string } | null; // ✅ add this
+  customerDetails: { email: string; phone: string, address: string} | null; // ✅ add this
   login: (userName: string, accessToken: string, customer: CustomerSessionDto, employee: EmployeeSessionDto) => void;
   logout: () => void;
   setCustomer: (customer: CustomerSessionDto) => void;
   setEmployee: (employee: EmployeeSessionDto) => void;
-  setCustomerDetails: (details: { email: string; phone: string }) => void; // ✅ add this
+  setCustomerDetails: (details: { email: string; phone: string, address: string }) => void; // ✅ add this
 };
 
 

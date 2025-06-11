@@ -78,7 +78,7 @@ const MyAccountPage = () => {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Username</label>
-              <p className="text-gray-800 dark:text-white">{user.username}</p>
+              <p className="text-gray-800 dark:text-white">{user.cusername || user.eusername}</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
