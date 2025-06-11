@@ -65,7 +65,7 @@ const ProductsPage = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-              {products.slice(0, 8).map((product) => (
+              {products.slice(0, 12).map((product) => (
                 <tr key={product.productId} className="bg-white dark:bg-gray-800">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <Image

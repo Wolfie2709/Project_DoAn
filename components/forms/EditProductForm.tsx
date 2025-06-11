@@ -4,16 +4,19 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const schema = z.object({
-  name: z.string().min(1),
-  price: z.string().min(1),
-  category: z.string().min(1),
-  brand: z.string().min(1),
+  name: z.string().min(1, "Name is required"),
+  price: z.string().min(1, "Price is required"),
+  category: z.string().min(1, "Category is required"),
+  brand: z.string().min(1, "Brand is required"),
   type: z.enum(["featured", "top-rated", "most-popular", "new-arrivals"]),
-  description: z.string(),
+  description: z.string().min(1, "Description is required"),
   aboutItem: z.string().optional(),
-  discount: z.coerce.number().optional(),
+  discount: z.coerce.number().min(0).max(100).optional(),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -58,7 +61,6 @@ const EditProductForm: React.FC<Props> = ({ id, initialData }) => {
       });
 
       if (!res.ok) throw new Error("Failed to update");
-
       alert("✅ Product updated!");
     } catch (err) {
       alert("❌ Error updating product");
@@ -66,36 +68,83 @@ const EditProductForm: React.FC<Props> = ({ id, initialData }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <input {...register("name")} placeholder="Name" />
-      {errors.name && <p>{errors.name.message}</p>}
+    <div className="w-full max-w-[1400px] mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-lg p-10 my-10">
+      <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Edit Product</h2>
 
-      <input {...register("price")} placeholder="Price" />
-      {errors.price && <p>{errors.price.message}</p>}
+      <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div>
+          <Label htmlFor="name">Product Name</Label>
+          <Input id="name" {...register("name")} className="h-12 text-base" />
+          {errors.name && <span className="text-red-500">{errors.name.message}</span>}
+        </div>
 
-      <input {...register("category")} placeholder="Category" />
-      {errors.category && <p>{errors.category.message}</p>}
+        <div>
+          <Label htmlFor="price">Price</Label>
+          <Input id="price" {...register("price")} className="h-12 text-base" />
+          {errors.price && <span className="text-red-500">{errors.price.message}</span>}
+        </div>
 
-      <input {...register("brand")} placeholder="Brand" />
-      {errors.brand && <p>{errors.brand.message}</p>}
+        <div>
+          <Label htmlFor="discount">Discount (%)</Label>
+          <Input id="discount" type="number" {...register("discount")} className="h-12 text-base" />
+          {errors.discount && <span className="text-red-500">{errors.discount.message}</span>}
+        </div>
 
-      <select {...register("type")}>
-        <option value="featured">Featured</option>
-        <option value="top-rated">Top Rated</option>
-        <option value="most-popular">Most Popular</option>
-        <option value="new-arrivals">New Arrivals</option>
-      </select>
+        <div>
+          <Label htmlFor="category">Category</Label>
+          <Input id="category" {...register("category")} className="h-12 text-base" />
+          {errors.category && <span className="text-red-500">{errors.category.message}</span>}
+        </div>
 
-      <textarea {...register("description")} placeholder="Description" />
-      <textarea {...register("aboutItem")} placeholder="About Item" />
+        <div>
+          <Label htmlFor="brand">Brand</Label>
+          <Input id="brand" {...register("brand")} className="h-12 text-base" />
+          {errors.brand && <span className="text-red-500">{errors.brand.message}</span>}
+        </div>
 
-      <input type="number" {...register("discount")} placeholder="Discount" />
+        <div>
+          <Label htmlFor="type">Type</Label>
+          <select
+            id="type"
+            {...register("type")}
+            className="h-12 text-base border rounded-md w-full bg-white dark:bg-gray-900"
+          >
+            <option value="featured">Featured</option>
+            <option value="top-rated">Top Rated</option>
+            <option value="most-popular">Most Popular</option>
+            <option value="new-arrivals">New Arrivals</option>
+          </select>
+          {errors.type && <span className="text-red-500">{errors.type.message}</span>}
+        </div>
 
-      <button type="submit" disabled={isSubmitting}>
-        Update
-      </button>
-    </form>
+        <div className="col-span-full">
+          <Label htmlFor="description">Description</Label>
+          <textarea
+            id="description"
+            {...register("description")}
+            className="p-3 w-full rounded-md border h-32 text-base"
+          />
+          {errors.description && <span className="text-red-500">{errors.description.message}</span>}
+        </div>
+
+        <div className="col-span-full">
+          <Label htmlFor="aboutItem">About Item</Label>
+          <textarea
+            id="aboutItem"
+            {...register("aboutItem")}
+            className="p-3 w-full rounded-md border h-24 text-base"
+          />
+        </div>
+
+        <div className="col-span-full">
+          <Button type="submit" disabled={isSubmitting} className="w-full h-12 text-lg">
+            {isSubmitting ? "Updating..." : "Update Product"}
+          </Button>
+        </div>
+      </form>
+    </div>
   );
 };
 
 export default EditProductForm;
+
