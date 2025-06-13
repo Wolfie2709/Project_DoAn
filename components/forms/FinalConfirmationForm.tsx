@@ -11,44 +11,84 @@ import { Label } from "../ui/label";
 const FinalConfirmationForm = () => {
   const [shippingData, setShippingData] = useState<any>(null);
   const [isMounted, setIsMounted] = useState(false);
-  const { getTotalPrice, getTax, getShippingFee, getTotalAmount, cartItems } = useCartStore();
-  const { customer } = useAuthStore();
+  const { getTotalPrice, getTax, getShippingFee, getTotalAmount, cartItems, clearCart } = useCartStore();
+  const { customer, customerDetails, setCustomerDetails } = useAuthStore();
   const [paymentMethod, setPaymentMethod] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
-    const storedData = localStorage.getItem("shippingFormData");
-    if (storedData) {
-      setShippingData(JSON.parse(storedData));
-    }
-  }, []);
+  
+    const initialize = async () => {
+      const fetchCustomerDetails = async () => {
+        if (customer) {
+          try {
+            const res = await fetch(`https://localhost:7240/api/Customers/${customer.customerId}`);
+            if (!res.ok) throw new Error("Failed to fetch customer details");
+            const data = await res.json();
+  
+            console.log("📦 API response data:", data);
+  
+            setCustomerDetails({
+              email: data.email ?? "",
+              phone: data.phoneNumber ?? "",
+              address: data.address ?? "",
+            });
+          } catch (err) {
+            console.error("Error fetching customer details:", err);
+          }
+        }
+      };
+  
+      await fetchCustomerDetails();
+  
+      const storedData = localStorage.getItem("shippingFormData");
+      const parsedData = storedData ? JSON.parse(storedData) : null;
+  
+      if (parsedData) {
+        const latest = useAuthStore.getState().customerDetails;
+        if (latest) {
+          parsedData.email = latest.email || parsedData.email;
+          parsedData.phone = latest.phone || parsedData.phone;
+          parsedData.address = latest.address || parsedData.address;
+        }
+  
+        console.log("✅ Final merged shippingData:", parsedData);
+        setShippingData(parsedData);
+      }
+    };
+  
+    initialize(); // ✅ Run async logic inside this function
+  }, [customer]);
+  
+  
 
   const handleFormSubmit = async () => {
     if (!shippingData || !customer || !paymentMethod || cartItems.length === 0) {
       alert("Please make sure all information is filled and cart is not empty.");
       return;
     }
-  
+
     const order = {
       CustomerId: customer.customerId,
-      Address: `${shippingData.home_address}, ${shippingData.city}, ${shippingData.zip}, ${shippingData.country}`,
+      Address: `${shippingData?.home_address ?? ""}, ${shippingData?.city ?? ""}, ${shippingData?.zip ?? ""}, ${shippingData?.country ?? ""}`,
       EstimateDate: new Date().toISOString(),
-      Note: shippingData.note || "",
-      ReceiverName: `${shippingData.firstName} ${shippingData.lastName}`,
-      ReceiverPhone: shippingData.phone,
-      ReceiverEmail: shippingData.email || customer.email,
+      Note: shippingData?.note ?? "",
+      ReceiverName: `${shippingData?.firstName ?? ""} ${shippingData?.lastName ?? ""}`,
+      ReceiverPhone: shippingData?.phone ?? "",
+      ReceiverEmail: shippingData?.email ?? "",
       productList: cartItems.map((item: any) => ({
         ProductId: item.productId,
         Amount: item.quantity,
         OriginalPrice: item.price,
-        DiscountedPrice: item.discountedPrice || item.price,
+        DiscountedPrice: item.discountedPrice ?? item.price,
       })),
     };
-  
+    
+
     try {
       setIsSubmitting(true);
-  
+
       const res = await fetch("https://localhost:7240/api/Orders", {
         method: "POST",
         body: JSON.stringify(order),
@@ -56,26 +96,27 @@ const FinalConfirmationForm = () => {
           "Content-Type": "application/json",
         },
       });
-  
+
       if (!res.ok) {
         const contentType = res.headers.get("Content-Type");
         let errorText = "Unknown error";
-  
-        if (contentType && contentType.includes("application/json")) {
+
+        if (contentType?.includes("application/json")) {
           const errorData = await res.json();
           errorText = errorData.message || JSON.stringify(errorData);
         } else {
-          errorText = await res.text(); // fallback to plain text
+          errorText = await res.text();
         }
-  
+
         console.error("Order API validation error:", errorText);
         alert(`Failed to place order: ${errorText}`);
         return;
       }
-  
+
       alert("Order placed successfully!");
       localStorage.removeItem("shippingFormData");
-      // Optionally redirect or clear cart
+      clearCart?.(); // optional if your cartStore supports this
+
     } catch (err) {
       console.error(err);
       alert("Failed to place order: " + (err instanceof Error ? err.message : "Unknown error"));
@@ -84,9 +125,6 @@ const FinalConfirmationForm = () => {
     }
   };
   
-  
-
-
   if (!isMounted) {
     // avoid hydration mismatch, or show loader
     return <div>Loading...</div>;
@@ -104,7 +142,7 @@ const FinalConfirmationForm = () => {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Email Address</label>
-            <p className="text-gray-800 dark:text-white">{shippingData?.email}</p>
+            <p className="text-gray-800 dark:text-white">{shippingData?.Email}</p>
           </div>
         </div>
       </div>
@@ -113,7 +151,7 @@ const FinalConfirmationForm = () => {
       <div className="mt-8 bg-white dark:bg-gray-900 p-6 rounded-lg shadow-md">
         <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">Address</h2>
         <p className="text-gray-800 dark:text-white">{shippingData?.home_address}, {shippingData?.city}, {shippingData?.zip}, {shippingData?.country}</p>
-        <p className="text-gray-800 dark:text-white">Phone: {shippingData?.phone}</p>
+        <p className="text-gray-800 dark:text-white">Phone: {shippingData?.phoneNumber}</p>
       </div>
 
       {/* Order Items */}

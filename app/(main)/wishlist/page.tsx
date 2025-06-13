@@ -35,32 +35,34 @@ const WishlistPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {wishlistItems.map((cart) => (
             <div
-              key={cart.id}
+            key={cart.productId}
               className="bg-white dark:bg-gray-900 rounded-lg shadow-md overflow-hidden"
             >
               <div className="relative w-full h-48 mt-2">
-                <Image
-                  src={cart.images && cart.images[0]}
-                  alt="Product"
-                  fill
-                  className="object-contain"
-                />
+              <Image
+                src={cart.images?.[0]?.imageUrl || "/placeholder.jpg"}
+                alt={cart.productName || "Product Image"}
+                fill
+                className="object-contain"
+                sizes="(max-width: 768px) 100vw, 33vw"
+              />
+
               </div>
               <div className="p-4">
                 <Link
-                  href={`shop/${cart.id}`}
+                  href={`shop/${cart.productId}`}
                   className="text-xl font-semibold text-gray-800 dark:text-white hover:opacity-60"
                 >
-                  {cart.name.slice(0, 50)}
+                  {cart.productName?.slice(0, 50)}
                 </Link>
                 <p className="text-gray-700 dark:text-gray-300 mb-4">
-                  {cart.description.slice(0, 100)}
+                  {cart.description?.slice(0, 100)}
                 </p>
                 <div className="flex justify-between items-center">
                   <p className="text-green-500 font-semibold text-lg">${formatPrice(cart.price)}</p>
                   <button
                     className="text-red-500 hover:text-red-600 focus:outline-none"
-                    onClick={() => removeFromWishlist(cart.id)}
+                    onClick={() => removeFromWishlist(cart.productId)}
                   >
                     <X size={20} />
                   </button>

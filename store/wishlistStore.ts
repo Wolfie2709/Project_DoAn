@@ -4,46 +4,91 @@ import { create } from 'zustand';
 
 interface WishlistState {
   wishlistItems: Product[];
-  addToWishlist: (newItem: Product) => void;
+  addToWishlist: (newItem: Product, customerId: number) => Promise<void>;
   removeFromWishlist: (itemId: number) => void;
   isInWishlist: (itemId: number) => boolean;
 }
 
 const useWishlistStore = create<WishlistState>((set, get) => {
-  // Check if localStorage is available
-  const isLocalStorageAvailable = typeof window !== 'undefined' && window.localStorage;
+  let parsedWishlistItems: Product[] = [];
 
-  // Load wishlist items from localStorage on initialization
-  const initialWishlistItems = isLocalStorageAvailable && localStorage.getItem('wishlist-items');
-  const parsedWishlistItems: Product[] = initialWishlistItems ? JSON.parse(initialWishlistItems) : [];
+  if (typeof window !== 'undefined') {
+    const stored = localStorage.getItem('wishlist-items');
+    parsedWishlistItems = stored ? JSON.parse(stored) : [];
+  }
 
   return {
     wishlistItems: parsedWishlistItems,
-    addToWishlist: (newItem: Product) => {
-      set((state) => {
-        const existingItem = state.wishlistItems.find((item) => item.productId === newItem.productId);
-        return {
-          wishlistItems: existingItem ? state.wishlistItems : [...state.wishlistItems, { ...newItem }],
-        };
-      });
-      if (isLocalStorageAvailable) {
-        localStorage.setItem('wishlist-items', JSON.stringify(get().wishlistItems));
-      }
-    },
-    removeFromWishlist: (itemId: number) => {
-      set((state) => ({
-        wishlistItems: state.wishlistItems.filter((item) => item.productId !== item.productId),
-      }));
-      if (isLocalStorageAvailable) {
-        localStorage.setItem('wishlist-items', JSON.stringify(get().wishlistItems));
-      }
-    },
-    isInWishlist: (productId: number) => {
-      // Access state through the get function
+    addToWishlist: async (product: Product, customerId: number) => {
       const { wishlistItems } = get();
-      return wishlistItems.some((item) => item.productId === productId);
+    
+      if (wishlistItems.some((item) => item.productId === product.productId)) return;
+    
+      try {
+        const res = await fetch("https://localhost:7240/api/Wishlists", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            customerId,
+            productId: product.productId,
+          }),
+        });
+    
+        const data = await res.json(); // assume response contains { wishlistId }
+    
+        const productWithWishlistId = {
+          ...product,
+          wishlistId: data.wishlistId, // ← Inject custom field directly
+        };
+    
+        const updatedList = [...wishlistItems, productWithWishlistId];
+    
+        set({ wishlistItems: updatedList });
+    
+        if (typeof window !== "undefined") {
+          localStorage.setItem("wishlist-items", JSON.stringify(updatedList));
+        }
+      } catch (error) {
+        console.error("Failed to add to wishlist", error);
+      }
+    },
+   
+    removeFromWishlist: async (productId: number) => {
+      const { wishlistItems } = get();
+    
+      const product = wishlistItems.find(item => item.productId === productId);
+    
+      if (!product || !product.wishlistId) {
+        console.warn("No wishlistId found for this product.");
+        return;
+      }
+    
+      try {
+        await fetch(`https://localhost:7240/api/Wishlists/${product.wishlistId}`, {
+          method: "DELETE",
+        });
+    
+        const updatedList = wishlistItems.filter(
+          (item) => item.productId !== productId
+        );
+    
+        set({ wishlistItems: updatedList });
+    
+        if (typeof window !== "undefined") {
+          localStorage.setItem("wishlist-items", JSON.stringify(updatedList));
+        }
+      } catch (error) {
+        console.error("Failed to remove from wishlist", error);
+      }
+    },
+    
+    
+
+    isInWishlist: (itemId: number) => {
+      return get().wishlistItems.some((item) => item.productId === itemId);
     },
   };
 });
+
 
 export default useWishlistStore;

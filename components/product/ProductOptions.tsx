@@ -13,12 +13,13 @@ import { showToast } from "@/lib/showToast";
 import { Product } from "@/types";
 import { useProductQuickViewStore } from "@/store/productQuickViewStore";
 import Loader from "../others/Loader";
-
+import { Customer } from "@/types";
+import { useAuthStore } from "@/store/authStore";
 const ProductOptions = ({ product }: { product: Product }) => {
   const [isMounted, setIsMounted] = useState(false);
   const { openModal } = useProductQuickViewStore();
-  const { images, name } = product;
-
+  const { images, productName } = product;
+  const { customer } = useAuthStore(); // get logged-in customer
   const { addToCart } = useCartStore();
   const { addToWishlist, isInWishlist } = useWishlistStore();
 
@@ -32,18 +33,24 @@ const ProductOptions = ({ product }: { product: Product }) => {
 
   const handleAddToCart = () => {
     addToCart({ ...product, quantity: 1, selectedColor: "" });
-    showToast("Item Added To Cart", images[0], name);
+    showToast("Item Added To Cart", images?.[0]?.imageUrl, productName);
   };
 
-  const handleAddToWishList = () => {
-    if (isInWishlist(product.id)) {
-      showToast("Item Added To Wishlist", images[0], name);
+  const handleAddToWishList = async () => {
+    const imageUrl = images?.[0]?.imageUrl || "";
+    if (!customer) {
+      showToast("Please log in to use the wishlist", imageUrl, productName);
+      return;
+    }
+  
+    if (isInWishlist(product.productId)) {
+      showToast("Item already in wishlist", imageUrl, productName);
     } else {
-      addToWishlist(product);
-      showToast("Item Already Exist In Wishlist", images[0], name);
+      await addToWishlist(product, customer.customerId);
+      showToast("Item added to wishlist", imageUrl, productName);
     }
   };
-
+  
   const handleProductQuickView = () => {
     openModal(product);
   };
@@ -56,17 +63,18 @@ const ProductOptions = ({ product }: { product: Product }) => {
       <TooltipProvider delayDuration={0}>
         <Tooltip>
           <TooltipTrigger>
-            <div
-              onClick={handleAddToWishList}
-              className="p-2 rounded-lg mr-1 bg-slate-900 text-white"
-            >
-              <Heart />
-            </div>
+          <div
+            onClick={async () => await handleAddToWishList()}
+            className="p-2 rounded-lg mr-1 bg-slate-900 text-white"
+          >
+            <Heart />
+          </div>
           </TooltipTrigger>
           <TooltipContent>
             <p>Add To Wishlist</p>
           </TooltipContent>
         </Tooltip>
+
         <Tooltip>
           <TooltipTrigger>
             <div
@@ -80,6 +88,7 @@ const ProductOptions = ({ product }: { product: Product }) => {
             <p>Quick View</p>
           </TooltipContent>
         </Tooltip>
+
         <Tooltip>
           <TooltipTrigger>
             <div
