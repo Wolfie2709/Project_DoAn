@@ -7,10 +7,25 @@ import ProductHeader from "@/components/dashboard/product/ProductHeader";
 import Loader from "@/components/others/Loader";
 import Pagination from "@/components/others/Pagination";
 import { Product } from "@/types";
+import { Trash } from "lucide-react";
+import Link from "next/link";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 
 const ProductsPage = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const currentPage = parseInt(searchParams.get("productpage") || "1", 10);
+  const itemsPerPage = 12;
+  const totalPages = Math.ceil(products.length / itemsPerPage);
+  const paginatedProducts = products.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   const fetchData = async () => {
     try {
@@ -35,11 +50,17 @@ const ProductsPage = () => {
     fetchData();
   }, []);
 
-  console.log(products)
-
   return (
     <div className="max-w-screen-xl mx-auto w-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 my-4">
-      <ProductHeader />
+      <div className="flex items-center justify-between mb-6">
+        <ProductHeader />
+        <Link
+          href="/dashboard/products/product-trashbin"
+          className="py-2 px-6 rounded-md bg-blue-500 hover:opacity-60 text-white flex items-center gap-2"
+        >
+          <Trash size={18} /> Trash
+        </Link>
+      </div>
       <div className="overflow-x-auto">
         {loading ? (
           <Loader />
@@ -65,7 +86,7 @@ const ProductsPage = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-              {products.slice(0, 12).map((product) => (
+              {paginatedProducts.map((product) => (
                 <tr key={product.productId} className="bg-white dark:bg-gray-800">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <Image
@@ -76,9 +97,15 @@ const ProductsPage = () => {
                       className="h-10 w-10 rounded-full object-cover"
                     />
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">{product.productName?.slice(0, 30) || "No name"}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">${product.price.toFixed(2)}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">{product.category?.categoryName || "No category"}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {product.productName?.slice(0, 30) || "No name"}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    ${product.price.toFixed(2)}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {product.category?.categoryName || "No category"}
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <ProductActions productId={product.productId} onDelete={fetchData} />
                   </td>
@@ -88,7 +115,7 @@ const ProductsPage = () => {
           </table>
         )}
         <Suspense fallback={<Loader />}>
-          <Pagination totalPages={10} currentPage={1} pageName="productpage" />
+          <Pagination totalPages={totalPages} currentPage={currentPage} pageName="productpage" />
         </Suspense>
       </div>
     </div>
