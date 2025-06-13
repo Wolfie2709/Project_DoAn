@@ -7,6 +7,20 @@ import React, { Suspense } from "react";
 import { Order } from "@/types";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Filter } from "lucide-react";
 
 const OrdersPage = () => {
   // Lay api fetch all order with customer
@@ -61,7 +75,24 @@ const OrdersPage = () => {
 
   useEffect(() => {
     fetchOrders();
-  }, [])
+  }, []);
+
+  //Filter status
+  const filterStatus = (statusFiltered: string) =>{
+    if (statusFiltered=="All"){
+      var query = "";
+    }
+    else{
+      query = statusFiltered;
+    }
+    const result = orders.filter((order) => order.status == query)
+    setOrders(result);
+
+    // Reset to page 1 after search
+    const params = new URLSearchParams(searchParams);
+    params.set("orderpage", "1");
+    router.replace(`${pathname}?${params}`);
+  }
 
   // console.log(paginatedOrders)
 
@@ -72,6 +103,28 @@ const OrdersPage = () => {
           Orders
         </h2>
         <OrderSearch onSearch={handleSearch}/>
+        <Popover>
+          <PopoverTrigger className="">
+            <div className="flex items-center justify-center hover:bg-slate-200 p-2 rounded-full dark:hover:bg-slate-900 duration-200">
+              <Filter />
+            </div>
+          </PopoverTrigger>
+          <PopoverContent className="text-start">
+            <Select onValueChange={filterStatus}>
+              <SelectTrigger className="w-full text-base px-4 border-none outline-none focus:ring-offset-0 focus:ring-0 focus-within:outline-none hover:bg-slate-200 dark:hover:bg-slate-900">
+                <SelectValue placeholder="Filter by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="All">All</SelectItem>
+                <SelectItem value="Pending">Pending</SelectItem>
+                <SelectItem value="Shipped">Shipped</SelectItem>
+                <SelectItem value="Delivered">Delivered</SelectItem>
+                <SelectItem value="Success">Success</SelectItem>
+                <SelectItem value="Aborted">Aborted</SelectItem>
+              </SelectContent>
+            </Select>
+          </PopoverContent>
+        </Popover>
       </div>
       <div className="overflow-x-auto">
         <table className="min-w-full w-full divide-y divide-gray-200 dark:divide-gray-700 border dark:border-gray-500 rounded-md">
