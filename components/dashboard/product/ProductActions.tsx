@@ -29,9 +29,14 @@ const ProductActions: React.FC<ProductActionsProps> = ({ productId, onDelete }) 
       if (state?.accessToken) {
         setAccessToken(state.accessToken);
         setPosition(state.employee?.position || null);
+
+        console.log("✅ Access token loaded:", state.accessToken);
+        console.log("✅ User position:", state.employee?.position);
+      } else {
+        console.warn("⚠ Không tìm thấy accessToken trong state.");
       }
     } catch (error) {
-      console.error("Error parsing session storage:", error);
+      console.error("❌ Error parsing session storage:", error);
     }
   }, []);
 
@@ -40,7 +45,7 @@ const ProductActions: React.FC<ProductActionsProps> = ({ productId, onDelete }) 
     if (!confirmDelete) return;
 
     if (!accessToken || position !== "Manager") {
-      alert("Bạn không có quyền soft delete sản phẩm.");
+      alert("❌ Bạn không có quyền soft delete sản phẩm.");
       return;
     }
 
@@ -48,17 +53,18 @@ const ProductActions: React.FC<ProductActionsProps> = ({ productId, onDelete }) 
       const res = await fetch(`https://localhost:7240/api/Products/softdelete/${productId}`, {
         method: "DELETE",
         headers: {
+          "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
         },
       });
 
       if (res.ok) {
         alert("✅ Product soft deleted successfully");
-        onDelete(); // reload lại danh sách sản phẩm
+        onDelete(); // Gọi lại để reload danh sách
       } else {
         const errorText = await res.text();
         console.error("❌ Soft delete failed:", errorText);
-        alert("❌ Failed to soft delete product");
+        alert("❌ Failed to soft delete product: " + errorText);
       }
     } catch (error) {
       console.error("❌ Soft delete error", error);
@@ -86,12 +92,14 @@ const ProductActions: React.FC<ProductActionsProps> = ({ productId, onDelete }) 
         >
           Update Product
         </Link>
-        <button
-          onClick={handleSoftDelete}
-          className="w-full text-start py-2 px-4 rounded-md hover:bg-yellow-100 dark:hover:bg-yellow-900 text-yellow-600"
-        >
-          Soft Delete
-        </button>
+        {position === "Manager" && (
+          <button
+            onClick={handleSoftDelete}
+            className="w-full text-start py-2 px-4 rounded-md hover:bg-yellow-100 dark:hover:bg-yellow-900 text-yellow-600"
+          >
+            Soft Delete
+          </button>
+        )}
       </PopoverContent>
     </Popover>
   );
