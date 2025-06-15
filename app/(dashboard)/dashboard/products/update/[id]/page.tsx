@@ -18,7 +18,6 @@ type ProductData = {
 const EditProductPage = () => {
   const params = useParams();
 
-  // ✅ Ép kiểu đúng, vì params.id có thể là string | string[]
   const rawId = typeof params === "object" && "id" in params ? params.id : "";
   const id = Array.isArray(rawId) ? rawId[0] : rawId;
 
