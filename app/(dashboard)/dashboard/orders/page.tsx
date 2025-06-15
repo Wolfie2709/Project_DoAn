@@ -25,7 +25,10 @@ import { Filter } from "lucide-react";
 const OrdersPage = () => {
   // Lay api fetch all order with customer
   const [orders, setOrders] = useState<Order[]>([]);
-  // const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
+  const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
+  const [selectedYear, setSelectedYear] = useState("");
+  const [selectedMonth, setSelectedMonth] = useState("");
+  const [selectedDay, setSelectedDay] = useState("");
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -33,8 +36,8 @@ const OrdersPage = () => {
   //Pagination
   const currentPage = parseInt(searchParams.get("orderpage") || "1", 10);
   const itemsPerPage = 2;
-  const totalPages = Math.ceil(orders.length / itemsPerPage);
-  const paginatedOrders = orders.slice(
+  const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
+  const paginatedOrders = filteredOrders.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -48,24 +51,30 @@ const OrdersPage = () => {
       const res = await fetch("https://localhost:7240/api/Orders/with-customer");
       const data: Order[] = await res.json();
       setOrders(data);
-      // setFilteredBrands(activeBrands);
+      setFilteredOrders(data);
+      console.log(data);
     } catch (error) {
       console.error("Failed to fetch brands", error);
       setOrders([]);
-      // setFilteredBrands([]);
     }
   };
 
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
   // Handle search input
   const handleSearch = (query: string) => {
-    if(query==""){
-      fetchOrders();
+    if (query == "") {
+      setFilteredOrders(orders);
     }
-    const queryID = parseInt(query);
-    const results = orders.filter((order) =>
-      order.orderId == queryID
-    );
-    setOrders(results);
+    else {
+      const queryID = parseInt(query);
+      const results = orders.filter((order) =>
+        order.orderId == queryID
+      );
+      setFilteredOrders(results);
+    }
 
     // Reset to page 1 after search
     const params = new URLSearchParams(searchParams);
@@ -73,26 +82,52 @@ const OrdersPage = () => {
     router.replace(`${pathname}?${params}`);
   };
 
-  useEffect(() => {
-    fetchOrders();
-  }, []);
-
   //Filter status
-  const filterStatus = (statusFiltered: string) =>{
-    if (statusFiltered=="All"){
+  const filterStatus = (statusFiltered: string) => {
+    if (statusFiltered == "All") {
       var query = "";
+      const result = orders.filter((order) => order.status?.toLowerCase().includes(query.toLowerCase()))
+      setFilteredOrders(result);
     }
-    else{
+    else {
       query = statusFiltered;
+      const result = orders.filter((order) => order.status == query)
+      setFilteredOrders(result);
     }
-    const result = orders.filter((order) => order.status == query)
-    setOrders(result);
 
     // Reset to page 1 after search
     const params = new URLSearchParams(searchParams);
     params.set("orderpage", "1");
     router.replace(`${pathname}?${params}`);
-  }
+  };
+
+  //Filter by Date
+  const filterByDate = () => {
+    if (!selectedYear && !selectedMonth && !selectedDay) return;
+
+    const result = orders.filter((order) => {
+      if (!order.orderDate) return false;
+
+      const [year, month, day] = order.orderDate.split("-");
+
+      const matchYear = selectedYear ? year === selectedYear : true;
+      const matchMonth = selectedMonth ? month === selectedMonth.padStart(2, "0") : true;
+      const matchDay = selectedDay ? day === selectedDay.padStart(2, "0") : true;
+
+      return matchYear && matchMonth && matchDay;
+    });
+
+    setFilteredOrders(result);
+
+    // Reset page
+    const params = new URLSearchParams(searchParams);
+    params.set("orderpage", "1");
+    router.replace(`${pathname}?${params}`);
+  };
+
+  const filterByDateReset = () => {
+    setFilteredOrders(orders);
+  };
 
   // console.log(paginatedOrders)
 
@@ -102,7 +137,7 @@ const OrdersPage = () => {
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white ">
           Orders
         </h2>
-        <OrderSearch onSearch={handleSearch}/>
+        <OrderSearch onSearch={handleSearch} />
         <Popover>
           <PopoverTrigger className="">
             <div className="flex items-center justify-center hover:bg-slate-200 p-2 rounded-full dark:hover:bg-slate-900 duration-200">
@@ -125,6 +160,68 @@ const OrdersPage = () => {
             </Select>
           </PopoverContent>
         </Popover>
+
+        <Popover>
+          <PopoverTrigger className="">
+            <div className="flex items-center justify-center hover:bg-slate-200 p-2 rounded-full dark:hover:bg-slate-900 duration-200">
+              Filter By Date
+            </div>
+          </PopoverTrigger>
+          <PopoverContent className="text-start">
+            {/* Year */}
+            <Select onValueChange={(val) => setSelectedYear(val)}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select Year" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="2023">2023</SelectItem>
+                <SelectItem value="2024">2024</SelectItem>
+                <SelectItem value="2025">2025</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {/* Month */}
+            <Select onValueChange={(val) => setSelectedMonth(val)}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select Month" />
+              </SelectTrigger>
+              <SelectContent>
+                {[...Array(12)].map((_, i) => {
+                  const val = String(i + 1).padStart(2, "0");
+                  return <SelectItem key={val} value={val}>{val}</SelectItem>;
+                })}
+              </SelectContent>
+            </Select>
+
+            {/* Day */}
+            <Select onValueChange={(val) => setSelectedDay(val)}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select Day" />
+              </SelectTrigger>
+              <SelectContent>
+                {[...Array(31)].map((_, i) => {
+                  const val = String(i + 1).padStart(2, "0");
+                  return <SelectItem key={val} value={val}>{val}</SelectItem>;
+                })}
+              </SelectContent>
+            </Select>
+
+            {/* Filter Button */}
+            <button
+              onClick={filterByDate}
+              className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition"
+            >
+              Filter by Date
+            </button>
+            <button
+              onClick={filterByDateReset}
+              className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition"
+            >
+              Reset Filter
+            </button>
+          </PopoverContent>
+        </Popover>
+
       </div>
       <div className="overflow-x-auto">
         <table className="min-w-full w-full divide-y divide-gray-200 dark:divide-gray-700 border dark:border-gray-500 rounded-md">
@@ -162,24 +259,23 @@ const OrdersPage = () => {
                 <td className="px-6 py-4 whitespace-nowrap">
                   {order.totalCost} vnd
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">{order.estimatedDate}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{order.orderDate}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span
-                    className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      order.status === "Shipped"
+                    className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${order.status === "Shipped"
                         ? "bg-green-100 text-green-800"
                         : order.status === "Pending"
-                        ? "bg-yellow-100 text-yellow-800"
-                        : order.status === "Aborted"
-                        ? "bg-red-100 text-red-800"
-                        : "bg-blue-100 text-blue-800"
-                    }`}
+                          ? "bg-yellow-100 text-yellow-800"
+                          : order.status === "Aborted"
+                            ? "bg-red-100 text-red-800"
+                            : "bg-blue-100 text-blue-800"
+                      }`}
                   >
                     {order.status}
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <OrderActions WhichOrder={order} onStatusUpdated={fetchOrders}/>
+                  <OrderActions WhichOrder={order} onStatusUpdated={fetchOrders} />
                 </td>
               </tr>
             ))}

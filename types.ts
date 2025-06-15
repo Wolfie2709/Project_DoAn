@@ -12,6 +12,7 @@ export type Product = {
   images: Image[];
   discountedPrice: number;
   wishlistId: number;
+  activeStatus: boolean;
 };
 
 export type Brand = {
