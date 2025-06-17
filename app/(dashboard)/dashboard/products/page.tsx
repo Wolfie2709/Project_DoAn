@@ -2,22 +2,21 @@
 
 import React, { useEffect, useState, Suspense } from "react";
 import Image from "next/image";
-import ProductActions from "@/components/dashboard/product/ProductActions";
+import Link from "next/link";
+import { Trash } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+
 import ProductHeader from "@/components/dashboard/product/ProductHeader";
+import ProductActions from "@/components/dashboard/product/ProductActions";
 import Loader from "@/components/others/Loader";
 import Pagination from "@/components/others/Pagination";
 import { Product } from "@/types";
-import { Trash } from "lucide-react";
-import Link from "next/link";
-import { useSearchParams, useRouter, usePathname } from "next/navigation";
 
 const ProductsPage = () => {
   const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-
+  const [loading, setLoading] = useState(false);
+  const [position, setPosition] = useState<string | null>(null);
   const searchParams = useSearchParams();
-  const router = useRouter();
-  const pathname = usePathname();
 
   const currentPage = parseInt(searchParams.get("productpage") || "1", 10);
   const itemsPerPage = 12;
@@ -28,19 +27,14 @@ const ProductsPage = () => {
   );
 
   const fetchData = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
       const res = await fetch("https://localhost:7240/api/Products/with-category");
-
-      if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
-      }
-
-      const data: Product[] = await res.json();
+      if (!res.ok) throw new Error("Failed to fetch");
+      const data = await res.json();
       setProducts(data);
     } catch (error) {
-      console.error("Failed to fetch products", error);
-      setProducts([]);
+      console.error("❌ Error fetching products:", error);
     } finally {
       setLoading(false);
     }
@@ -50,70 +44,74 @@ const ProductsPage = () => {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    const stored = sessionStorage.getItem("food-storage");
+    if (!stored) return;
+
+    try {
+      const state = JSON.parse(stored)?.state;
+      setPosition(state?.employee?.position || null);
+    } catch (error) {
+      console.error("❌ Error reading session position:", error);
+    }
+  }, []);
+
   return (
-    <div className="max-w-screen-xl mx-auto w-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 my-4">
+    <div className="max-w-screen-xl mx-auto w-full bg-white dark:bg-gray-900 rounded-xl shadow-md p-6 my-6">
       <div className="flex items-center justify-between mb-6">
         <ProductHeader />
         <Link
           href="/dashboard/products/product-trashbin"
-          className="py-2 px-6 rounded-md bg-blue-500 hover:opacity-60 text-white flex items-center gap-2"
+          className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-500 rounded hover:bg-red-600 transition"
         >
           <Trash size={18} /> Trash
         </Link>
       </div>
-      <div className="overflow-x-auto">
-        {loading ? (
-          <Loader />
-        ) : (
-          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 border dark:border-gray-500">
-            <thead className="bg-gray-50 dark:bg-gray-700">
+
+      {loading ? (
+        <Loader />
+      ) : (
+        <div className="overflow-x-auto rounded-lg border dark:border-gray-700">
+          <table className="min-w-full table-auto text-sm text-left">
+            <thead className="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-200 uppercase text-xs">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Image
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Name
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Price
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Category
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
+                {["Image", "Name", "Price", "Category", "Actions"].map((title) => (
+                  <th key={title} className="px-6 py-4 font-medium">
+                    {title}
+                  </th>
+                ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+            <tbody className="divide-y dark:divide-gray-800">
               {paginatedProducts.map((product) => (
                 <tr key={product.productId} className="bg-white dark:bg-gray-800">
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-6 py-4">
                     <Image
                       src={product.images?.[0]?.imageUrl || "/placeholder.png"}
-                      alt={product.productName || "Product image"}
+                      alt="product image"
                       width={40}
                       height={40}
-                      className="h-10 w-10 rounded-full object-cover"
+                      className="rounded-full object-cover border border-gray-300 dark:border-gray-600"
                     />
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {product.productName?.slice(0, 30) || "No name"}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    ${product.price.toFixed(2)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {product.category?.categoryName || "No category"}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <ProductActions productId={product.productId} onDelete={fetchData} />
+                  <td className="px-6 py-4">{product.productName || "No name"}</td>
+                  <td className="px-6 py-4 text-green-600 dark:text-green-400">${product.price?.toFixed(2)}</td>
+                  <td className="px-6 py-4">{product.category?.categoryName || "No category"}</td>
+                  <td className="px-6 py-4">
+                    <ProductActions
+                      productId={product.productId}
+                      onDelete={fetchData}
+                      position={position}
+                    />
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-        )}
+        </div>
+      )}
+
+      <div className="mt-6">
         <Suspense fallback={<Loader />}>
           <Pagination totalPages={totalPages} currentPage={currentPage} pageName="productpage" />
         </Suspense>
@@ -123,3 +121,4 @@ const ProductsPage = () => {
 };
 
 export default ProductsPage;
+
