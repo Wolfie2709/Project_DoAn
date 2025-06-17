@@ -1,46 +1,48 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import EditProductForm from "@/components/forms/EditProductForm";
-
-type ProductData = {
-  name: string;
-  price: string;
-  category: string;
-  brand: string;
-  type: "featured" | "top-rated" | "most-popular" | "new-arrivals";
-  description: string;
-  aboutItem?: string;
-  discount?: number;
-};
+import { Response } from "@/types";
 
 const EditProductPage = () => {
+  const router = useRouter();
   const params = useParams();
-
   const rawId = typeof params === "object" && "id" in params ? params.id : "";
   const id = Array.isArray(rawId) ? rawId[0] : rawId;
 
-  const [product, setProduct] = useState<ProductData | null>(null);
+  const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!id) return;
-
-    const fetchData = async () => {
+    const fetchProductWithAuth = async () => {
       try {
-        const res = await fetch(`https://localhost:7240/api/Products/${id}`);
-        if (!res.ok) throw new Error("Failed to fetch product");
+        // Lấy session
+        const stored = sessionStorage.getItem("food-storage");
+        if (!stored) throw new Error("Bạn chưa đăng nhập");
 
+        const parsed = JSON.parse(stored);
+        const state: Response = parsed?.state;
+        if (!state?.accessToken) throw new Error("Token không hợp lệ");
+        if (state.employee?.position !== "Manager") throw new Error("Bạn không có quyền truy cập");
+
+        // Lấy sản phẩm
+        const res = await fetch(`https://localhost:7240/api/Products/${id}`, {
+          headers: {
+            Authorization: `Bearer ${state.accessToken}`,
+          },
+        });
+
+        if (!res.ok) throw new Error("Không thể tải sản phẩm");
         const data = await res.json();
 
         setProduct({
-          name: data.productName || "",
+          name: data.productName,
           price: data.price?.toString() || "",
           category: data.category?.name || "",
           brand: data.brand?.name || "",
-          type: "featured", // or derive from data if available
+          type: "featured",
           description: data.description || "",
           aboutItem: data.shortDescription || "",
           discount: data.discount || 0,
@@ -50,22 +52,25 @@ const EditProductPage = () => {
       } catch (err: any) {
         setError(err.message);
         setLoading(false);
+        setTimeout(() => router.push("/dashboard/products"), 2000);
       }
     };
 
-    fetchData();
-  }, [id]);
+    if (id) fetchProductWithAuth();
+  }, [id, router]);
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div className="text-red-500">Error: {error}</div>;
-  if (!product) return <div>Product not found.</div>;
+  if (loading) return <div className="p-4 text-gray-500">⏳ Đang tải sản phẩm...</div>;
+  if (error) return <div className="p-4 text-red-500">❌ {error}</div>;
 
   return (
-    <div className="p-4">
-      <h2 className="text-2xl font-bold mb-4">Edit Product</h2>
-      <EditProductForm id={id} initialData={product} />
+    <div className="max-w-4xl mx-auto p-6 bg-white dark:bg-gray-900 rounded-xl shadow">
+      <h1 className="text-2xl font-semibold mb-4">🛠️ Edit Product</h1>
+      {product && <EditProductForm id={id} initialData={product} />}
     </div>
   );
 };
 
 export default EditProductPage;
+
+
+

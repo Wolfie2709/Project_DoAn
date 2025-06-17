@@ -1,12 +1,13 @@
+
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useParams } from "next/navigation"; // Next.js 13 app router
+import { useParams } from "next/navigation";
 import Image from "next/image";
 import AddToCartBtn from "@/components/buttons/AddToCartBtn";
 
 type Product = {
-  id: number;
+  productId: number;
   productName: string;
   description: string;
   price: number;
@@ -16,49 +17,36 @@ type Product = {
   category?: { categoryName: string };
 };
 
-const ProductDetailView = () => {
-  const params = useParams();
+const ViewProductPage = () => {
   const { id } = useParams();
-  // const id = params.id; // lấy id từ route params
-  console.log(id)
-
   const [product, setProduct] = useState<Product | null>(null);
-  // const [loading, setLoading] = useState(true);
-  // const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
 
     const fetchProduct = async () => {
       try {
-        // setLoading(true);
-        const res = await fetch(`https://localhost:7240/api/Products/${id}`);
-        if (!res.ok) {
-          throw new Error("Failed to fetch product");
-        }
+        const res = await fetch(`https://localhost:7240/api/products/${id}`);
+        if (!res.ok) throw new Error("Failed to fetch product");
         const data = await res.json();
         setProduct(data);
-      } catch (err: any) {
-        alert(err);
-        // setError(err.message);
-      } finally {
-        // setLoading(false);
+      } catch (err) {
+        console.error("❌", err);
+        alert("Lỗi khi lấy sản phẩm");
       }
     };
 
     fetchProduct();
   }, [id]);
 
-  // // if (loading) return <div>Loading product...</div>;
-  // if (error) return <div>Error: {error}</div>;
-  if (!product) return <div>Product not found</div>;
+  if (!product) return <div>⏳ Loading...</div>;
 
   return (
     <div className="max-w-screen-lg mx-auto p-4">
       <h1 className="text-3xl font-bold mb-4">{product.productName}</h1>
       <div className="flex flex-col md:flex-row gap-6">
         <div className="w-full md:w-1/2 h-96 relative bg-gray-100 rounded-md overflow-hidden">
-          {product.images && product.images.length > 0 ? (
+          {product.images?.[0]?.imageUrl ? (
             <Image
               src={product.images[0].imageUrl}
               alt={product.productName}
@@ -84,4 +72,5 @@ const ProductDetailView = () => {
   );
 };
 
-export default ProductDetailView;
+export default ViewProductPage;
+
