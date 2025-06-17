@@ -35,13 +35,17 @@ export type Image = {
 export type Category = {
   categoryId: number;
   categoryName: string;
-  parentCategoryID: number;
+  parentCategoryID: number | null;
   inverseParentCategory: Category;
   description: string;
   products: Product;
   images: Image[];
   activeStatus: boolean;
 }
+
+export type CategoryNode = Category & {
+  children: CategoryNode[];
+};
 
 export type OrderDetails = {
   orderDetailID: number;
@@ -195,4 +199,23 @@ export type OrderDashboardDto = {
   note?: string;
   totalPrice?: number;
   orderedProducts: OrderedProductDto[];
+}
+
+export type OrderChartDto = {
+  orderDetailId: number;
+  orderId?: number;
+  productId: number;
+  amount?: number;
+  brandId?: number;
+  categoryId?: number;
+}
+
+export type OrderHomeDto = {
+  orderId: number;
+  customerName: string;
+  orderDate?: string;
+  estimatedDate?: string;
+  orderStatus?: string;
+  totalCost?: number;
+  orderCharts: OrderChartDto[];
 }
