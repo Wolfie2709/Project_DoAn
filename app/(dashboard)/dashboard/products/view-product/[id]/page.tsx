@@ -1,9 +1,9 @@
-
 "use client";
 
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link"; // 👈 THÊM Link
 import AddToCartBtn from "@/components/buttons/AddToCartBtn";
 
 type Product = {
@@ -43,6 +43,16 @@ const ViewProductPage = () => {
 
   return (
     <div className="max-w-screen-lg mx-auto p-4">
+      {/* 👇 Nút quay lại */}
+      <div className="mb-4">
+        <Link
+          href="/dashboard/products"
+          className="inline-block bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-md transition"
+        >
+          ← Return
+        </Link>
+      </div>
+
       <h1 className="text-3xl font-bold mb-4">{product.productName}</h1>
       <div className="flex flex-col md:flex-row gap-6">
         <div className="w-full md:w-1/2 h-96 relative bg-gray-100 rounded-md overflow-hidden">
@@ -65,7 +75,6 @@ const ViewProductPage = () => {
           <p className="mb-4">{product.description}</p>
           <p className="text-2xl font-bold mb-4">${product.price.toFixed(2)}</p>
           <p className="mb-4">Stock: {product.stock}</p>
-          <AddToCartBtn product={{ ...product, quantity: 1, selectedColor: "" }} />
         </div>
       </div>
     </div>
@@ -73,4 +82,3 @@ const ViewProductPage = () => {
 };
 
 export default ViewProductPage;
-

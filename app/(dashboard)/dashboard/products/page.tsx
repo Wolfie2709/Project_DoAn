@@ -87,12 +87,13 @@ const ProductsPage = () => {
                 <tr key={product.productId} className="bg-white dark:bg-gray-800">
                   <td className="px-6 py-4">
                     <Image
-                      src={product.images?.[0]?.imageUrl || "/placeholder.png"}
-                      alt="product image"
-                      width={40}
-                      height={40}
-                      className="rounded-full object-cover border border-gray-300 dark:border-gray-600"
+                        src={product.images?.[0]?.imageUrl || "/placeholder.png"}
+                         alt="product image"
+                          width={40}
+                            height={40}
+                            className="object-cover border border-gray-300 dark:border-gray-600"
                     />
+
                   </td>
                   <td className="px-6 py-4">{product.productName || "No name"}</td>
                   <td className="px-6 py-4 text-green-600 dark:text-green-400">${product.price?.toFixed(2)}</td>

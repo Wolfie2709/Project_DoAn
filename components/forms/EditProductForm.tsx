@@ -7,6 +7,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import Link from "next/link"; // 👈 Quan trọng: dùng để thêm nút quay lại
+import { useParams } from "next/navigation";
 
 const schema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -21,23 +23,20 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>;
 
-type Props = {
-  id: string;
-  initialData: FormData;
-};
+const EditProductPage = () => {
+  const { id } = useParams();
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [position, setPosition] = useState<string | null>(null);
+  const [initialData, setInitialData] = useState<FormData | null>(null);
 
-const EditProductForm: React.FC<Props> = ({ id, initialData }) => {
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
+    reset,
   } = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: initialData,
   });
-
-  const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [position, setPosition] = useState<string | null>(null);
 
   useEffect(() => {
     const stored = sessionStorage.getItem("food-storage");
@@ -56,6 +55,37 @@ const EditProductForm: React.FC<Props> = ({ id, initialData }) => {
     }
   }, []);
 
+  useEffect(() => {
+    if (!id) return;
+
+    const fetchProduct = async () => {
+      try {
+        const res = await fetch(`https://localhost:7240/api/products/${id}`);
+        if (!res.ok) throw new Error("Failed to fetch product");
+        const data = await res.json();
+
+        const mapped: FormData = {
+          name: data.productName,
+          price: data.price.toString(),
+          description: data.description,
+          category: data.category?.categoryName || "",
+          brand: data.brand?.brandName || "",
+          type: "featured", // hoặc lấy từ data nếu có
+          aboutItem: data.shortDescription || "",
+          discount: data.discount || 0,
+        };
+
+        setInitialData(mapped);
+        reset(mapped);
+      } catch (err) {
+        console.error("❌", err);
+        alert("Lỗi khi lấy thông tin sản phẩm");
+      }
+    };
+
+    fetchProduct();
+  }, [id, reset]);
+
   const onSubmit = async (data: FormData) => {
     if (!accessToken || position !== "Manager") {
       alert("Bạn không có quyền cập nhật sản phẩm.");
@@ -63,6 +93,7 @@ const EditProductForm: React.FC<Props> = ({ id, initialData }) => {
     }
 
     const payload = {
+      productId: Number(id),
       productName: data.name,
       stock: 10,
       price: parseFloat(data.price),
@@ -70,8 +101,8 @@ const EditProductForm: React.FC<Props> = ({ id, initialData }) => {
       shortDescription: data.aboutItem || "",
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      brandId: 1, // giả lập, cần thay bằng brand thực tế
-      categoryId: 1, // giả lập, cần thay bằng category thực tế
+      brandId: 1, // Nếu muốn dynamic thì sửa sau
+      categoryId: 1,
       addedBy: null,
       discount: data.discount || 0,
     };
@@ -88,6 +119,7 @@ const EditProductForm: React.FC<Props> = ({ id, initialData }) => {
 
       if (!res.ok) {
         const errorText = await res.text();
+        console.error("❌ Update failed:", res.status, errorText);
         throw new Error(errorText);
       }
 
@@ -98,8 +130,20 @@ const EditProductForm: React.FC<Props> = ({ id, initialData }) => {
     }
   };
 
+  if (!initialData) return <div className="text-center py-10">⏳ Đang tải dữ liệu sản phẩm...</div>;
+
   return (
     <div className="w-full max-w-[1400px] mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-lg p-10 my-10">
+      {/* 👇 Nút Quay lại */}
+      <div className="mb-6">
+        <Link
+          href="/dashboard/products"
+          className="inline-block bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-md transition"
+        >
+          ← Return
+        </Link>
+      </div>
+
       <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Edit Product</h2>
 
       <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -177,4 +221,4 @@ const EditProductForm: React.FC<Props> = ({ id, initialData }) => {
   );
 };
 
-export default EditProductForm;
+export default EditProductPage;
