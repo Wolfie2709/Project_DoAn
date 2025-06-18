@@ -50,7 +50,8 @@ const DashboardPageOne = () => {
 
   // Tính revenue an toàn bằng useMemo
   const revenue = useMemo(() => {
-    return orders.reduce((sum, order) => sum + (order.totalCost ?? 0), 0);
+    const total = orders.reduce((sum, order) => sum + (order.totalCost ?? 0), 0);
+    return Math.round(total * 100) / 100;
   }, [orders]);
 
   return (

@@ -43,10 +43,6 @@ export type Category = {
   activeStatus: boolean;
 }
 
-export type CategoryNode = Category & {
-  children: CategoryNode[];
-};
-
 export type OrderDetails = {
   orderDetailID: number;
   orderID?: number;
@@ -218,4 +214,15 @@ export type OrderHomeDto = {
   orderStatus?: string;
   totalCost?: number;
   orderCharts: OrderChartDto[];
+}
+
+export type ChildCategoryDto = {
+  categoryId: number;
+  categoryName?: string;
+}
+
+export type CategoryParentListDto = {
+  categoryId: number;
+  categoryName?: string;
+  children: ChildCategoryDto[];
 }
