@@ -100,6 +100,7 @@ const AddBrandForm: React.FC = () => {
           brandName: data.name,
           // Các field còn lại nếu bạn có thêm: parentCategoryId, addedBy, ...
           addedBy: whichEmployee,
+          description: data.description
         }),
       });
 

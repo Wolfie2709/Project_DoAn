@@ -1,9 +1,7 @@
-// change or modify the types as your requirement
-
 export type Product = {
   productId: number;
-  productName?: string;
-  description?: string;
+  productName: string;
+  description: string;
   stock: number;
   price: number;
   brandID: number;
@@ -13,60 +11,64 @@ export type Product = {
   category?: Category;
   images: Image[];
   discountedPrice: number;
+  wishlistId: number;
+  activeStatus: boolean;
 };
 
-export type Brand={
-brandId: number;
-brandName: string;
-images: Image[];
-products: Product;
-activeStatus: boolean;
+export type Brand = {
+  brandId: number;
+  brandName: string;
+  description: string;
+  images: Image[];
+  products: Product;
+  activeStatus: boolean;
 }
 
-export type Image={
-  imageID : number;
-  productID : number;
-  mainImage? : boolean;
+export type Image = {
+  imageID: number;
+  productID: number;
+  mainImage?: boolean;
   imageUrl: string;
   product: Product;
 }
 
-export type Category={
-categoryId: number;
-categoryName: string;
-parentCategoryID: number;
-inverseParentCategory: Category;
-products: Product;
-images: Image[];
-activeStatus: boolean;
+export type Category = {
+  categoryId: number;
+  categoryName: string;
+  parentCategoryID: number | null;
+  inverseParentCategory: Category;
+  description: string;
+  products: Product;
+  images: Image[];
+  activeStatus: boolean;
 }
 
-export type OrderDetails={
-orderDetailID: number;
-orderID?: number;
-productID: number;
-amount: number;
-discount: number;
-order: Order;
-product: Product;
+export type OrderDetails = {
+  orderDetailID: number;
+  orderID?: number;
+  productID: number;
+  amount: number;
+  discount: number;
+  order: Order;
+  product: Product;
 }
 
-export type Employee={
-employeeId: number;
-addedBy: number;
-position: string;
-doj?: string;
-fullName?: string;
-phoneNumber?: string;
-email?: string;
-birthday?: string;  
-gender?: string;
-address?: string;
-lastLogin: string;
-isDeletedStatus?: boolean;
+export type Employee = {
+  employeeId: number;
+  addedBy: number;
+  position: string;
+  doj?: string;
+  fullName?: string;
+  phoneNumber?: string;
+  email?: string;
+  birthday?: string;
+  gender?: string;
+  address?: string;
+  lastLogin: string;
+  isDeletedStatus?: boolean;
 }
 
-export type Order={
+export type Order = {
   orderId: number;
   userId?: number;
   shippingAddress?: string;
@@ -83,7 +85,7 @@ export type Order={
   customer: Customer;
 }
 
-export type OrderDetail={
+export type OrderDetail = {
   orderDetailId: number;
   orderId?: number;
   productId?: number;
@@ -93,7 +95,7 @@ export type OrderDetail={
   product?: Product;
 }
 
-export type Payment={
+export type Payment = {
   paymentId: number;
   orderId?: number;
   paymentMethod?: string;
@@ -102,9 +104,7 @@ export type Payment={
   order?: Order;
 }
 
-
-
-export type Customer={
+export type Customer = {
   customerId: number;
   phoneNumber?: string;
   fullName?: string;
@@ -125,11 +125,11 @@ export type Review = {
   author: string;
   image: string;
   content: string;
-  rating:number
+  rating: number
   date: Date;
 };
 
-export type ShoppingCart={
+export type ShoppingCart = {
   userId: number;
   productId: number;
   amount?: number;
@@ -152,9 +152,77 @@ export type CartItem = Product & {
   quantity: number;
 };
 
+export type CustomerSessionDto = {
+  customerId: number;
+  fullName?: string;
+  userName?: string;
+}
+
+export type EmployeeSessionDto = {
+  employeeId: number;
+  position: string;
+  fullName?: string;
+}
+
 export type Response = {
   userName?: string;
   accessToken?: string;
-  customer?: Customer;
-  employee?: Employee;
+  customer?: CustomerSessionDto;
+  employee?: EmployeeSessionDto;
+}
+
+export type OrderedProductDto = {
+  orderDetailId: number;
+  orderId: number;
+  productName?: string;
+  imageUrl?: string;
+  price: number;
+  amount?: number;
+  originalPrice?: number;
+  discountAmount?: number;
+  finalPrice?: number;
+}
+
+export type OrderDashboardDto = {
+  orderId: number;
+  customerName: string;
+  orderDate?: string;
+  estimatedDate?: string;
+  orderStatus?: string;
+  shippingAddress?: string;
+  receiverName?: string;
+  receiverNumber?: string;
+  note?: string;
+  totalPrice?: number;
+  orderedProducts: OrderedProductDto[];
+}
+
+export type OrderChartDto = {
+  orderDetailId: number;
+  orderId?: number;
+  productId: number;
+  amount?: number;
+  brandId?: number;
+  categoryId?: number;
+}
+
+export type OrderHomeDto = {
+  orderId: number;
+  customerName: string;
+  orderDate?: string;
+  estimatedDate?: string;
+  orderStatus?: string;
+  totalCost?: number;
+  orderCharts: OrderChartDto[];
+}
+
+export type ChildCategoryDto = {
+  categoryId: number;
+  categoryName?: string;
+}
+
+export type CategoryParentListDto = {
+  categoryId: number;
+  categoryName?: string;
+  children: ChildCategoryDto[];
 }

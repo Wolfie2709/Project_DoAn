@@ -4,20 +4,19 @@ import HomePageChart from "@/components/dashboard/charts/HomePageChart";
 import ProductOverviewChart from "@/components/dashboard/charts/ProductOverviewChart";
 import RecentOrdersSection from "@/components/dashboard/order/RecentOrders";
 import StatisticsCard from "@/components/dashboard/statistics/StatisticsCard";
-import { Employee, Order } from "@/types";
+import { Employee, OrderHomeDto, OrderChartDto } from "@/types";
 import { Activity, DollarSign, ShoppingBag, Users } from "lucide-react";
 import React, { useEffect, useState, useMemo } from "react";
 
 const DashboardPageOne = () => {
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [orders, setOrders] = useState<OrderHomeDto[]>([]);
   const [activeEmployees, setEmployees] = useState<Employee[]>([]);
 
   // Lấy tất cả orders từ API
   const fetchOrders = async () => {
     try {
-      const res = await fetch("https://localhost:7240/api/Orders/with-customer");
+      const res = await fetch("https://localhost:7240/api/Orders/HomeChart");
       const json = await res.json();
-
       if (Array.isArray(json)) {
         setOrders(json);
       } else {
@@ -29,10 +28,6 @@ const DashboardPageOne = () => {
       setOrders([]);
     }
   };
-
-  useEffect(() => {
-    fetchOrders();
-  }, []);
 
   // Lấy danh sách employees (lọc active)
   const fetchEmployees = async () => {
@@ -49,12 +44,14 @@ const DashboardPageOne = () => {
   };
 
   useEffect(() => {
+    fetchOrders();
     fetchEmployees();
   }, []);
 
   // Tính revenue an toàn bằng useMemo
   const revenue = useMemo(() => {
-    return orders.reduce((sum, order) => sum + (order.totalCost ?? 0), 0);
+    const total = orders.reduce((sum, order) => sum + (order.totalCost ?? 0), 0);
+    return Math.round(total * 100) / 100;
   }, [orders]);
 
   return (
@@ -86,7 +83,7 @@ const DashboardPageOne = () => {
         />
       </div>
 
-      <HomePageChart />
+      <HomePageChart OrderList={orders} />
       <RecentOrdersSection recentOrderList={orders.slice(-5)} />
       <ProductOverviewChart />
     </section>
