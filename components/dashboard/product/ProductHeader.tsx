@@ -14,7 +14,7 @@ const ProductHeader: React.FC<ProductHeaderProps> = ({
   onSearchChange,
 }) => {
   return (
-    <div className="flex flex-wrap gap-2 items-center justify-between mb-4">
+    <div className="flex flex-wrap gap-2 items-center justify-between mb-4 w-full">
       <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
         Products
       </h2>
