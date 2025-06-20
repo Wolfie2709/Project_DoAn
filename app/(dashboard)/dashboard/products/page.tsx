@@ -14,16 +14,14 @@ import { Product } from "@/types";
 
 const ProductsPage = () => {
   const [products, setProducts] = useState<Product[]>([]);
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
-  const [searchQuery, setSearchQuery] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [position, setPosition] = useState<string | null>(null);
   const searchParams = useSearchParams();
 
   const currentPage = parseInt(searchParams.get("productpage") || "1", 10);
   const itemsPerPage = 12;
-
-  const paginatedProducts = filteredProducts.slice(
+  const totalPages = Math.ceil(products.length / itemsPerPage);
+  const paginatedProducts = products.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -58,20 +56,10 @@ const ProductsPage = () => {
     }
   }, []);
 
-  useEffect(() => {
-    const filtered = products.filter((product) =>
-      product.productName?.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-    setFilteredProducts(filtered);
-  }, [searchQuery, products]);
-
   return (
     <div className="max-w-screen-xl mx-auto w-full bg-white dark:bg-gray-900 rounded-xl shadow-md p-6 my-6">
       <div className="flex items-center justify-between mb-6">
-        <ProductHeader
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-        />
+        <ProductHeader />
         <Link
           href="/dashboard/products/product-trashbin"
           className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-500 rounded hover:bg-red-600 transition"
@@ -99,20 +87,17 @@ const ProductsPage = () => {
                 <tr key={product.productId} className="bg-white dark:bg-gray-800">
                   <td className="px-6 py-4">
                     <Image
-                      src={product.images?.[0]?.imageUrl || "/placeholder.png"}
-                      alt="product image"
-                      width={40}
-                      height={40}
-                      className="object-cover border border-gray-300 dark:border-gray-600"
+                        src={product.images?.[0]?.imageUrl || "/placeholder.png"}
+                         alt="product image"
+                          width={40}
+                            height={40}
+                            className="object-cover border border-gray-300 dark:border-gray-600"
                     />
+
                   </td>
                   <td className="px-6 py-4">{product.productName || "No name"}</td>
-                  <td className="px-6 py-4 text-green-600 dark:text-green-400">
-                    ${product.price?.toFixed(2)}
-                  </td>
-                  <td className="px-6 py-4">
-                    {product.category?.categoryName || "No category"}
-                  </td>
+                  <td className="px-6 py-4 text-green-600 dark:text-green-400">${product.price?.toFixed(2)}</td>
+                  <td className="px-6 py-4">{product.category?.categoryName || "No category"}</td>
                   <td className="px-6 py-4">
                     <ProductActions
                       productId={product.productId}
@@ -129,11 +114,7 @@ const ProductsPage = () => {
 
       <div className="mt-6">
         <Suspense fallback={<Loader />}>
-          <Pagination
-            totalPages={Math.ceil(filteredProducts.length / itemsPerPage)}
-            currentPage={currentPage}
-            pageName="productpage"
-          />
+          <Pagination totalPages={totalPages} currentPage={currentPage} pageName="productpage" />
         </Suspense>
       </div>
     </div>
@@ -141,3 +122,4 @@ const ProductsPage = () => {
 };
 
 export default ProductsPage;
+

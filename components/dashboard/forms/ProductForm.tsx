@@ -1,12 +1,22 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+
+type Brand = {
+  brandId: number;
+  brandName: string;
+};
+
+type Category = {
+  categoryId: number;
+  categoryName: string;
+};
 
 const productSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -28,6 +38,10 @@ type ProductFormProps = {
 };
 
 const ProductForm: React.FC<ProductFormProps> = ({ onAdd }) => {
+  const [brands, setBrands] = useState<Brand[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+
   const {
     register,
     handleSubmit,
@@ -49,6 +63,29 @@ const ProductForm: React.FC<ProductFormProps> = ({ onAdd }) => {
     },
   });
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [brandRes, categoryRes] = await Promise.all([
+          fetch("https://localhost:7240/api/Brands"),
+          fetch("https://localhost:7240/api/Categories"),
+        ]);
+
+        const brandData = await brandRes.json();
+        const categoryData = await categoryRes.json();
+
+        setBrands(Array.isArray(brandData) ? brandData : []);
+        setCategories(Array.isArray(categoryData) ? categoryData : []);
+      } catch (error) {
+        console.error("❌ Lỗi khi fetch brand/category:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   const onSubmit = async (data: ProductFormData) => {
     try {
       const payload = {
@@ -59,12 +96,10 @@ const ProductForm: React.FC<ProductFormProps> = ({ onAdd }) => {
         shortDescription: data.aboutItem || "",
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        brandId: 1,
-        categoryId: 1,
+        brandId: parseInt(data.brand),
+        categoryId: parseInt(data.category),
         addedBy: null,
       };
-
-      console.log("🚀 Payload gửi đi:", payload);
 
       const res = await fetch("https://localhost:7240/api/Products", {
         method: "POST",
@@ -76,97 +111,155 @@ const ProductForm: React.FC<ProductFormProps> = ({ onAdd }) => {
 
       if (!res.ok) {
         const errorText = await res.text();
-        console.error("❌ API error:", errorText);
-        throw new Error("Failed to add product");
+        throw new Error("❌ Failed to add product: " + errorText);
       }
 
       const result = await res.json();
-      console.log("✅ Product created:", result);
-      alert("Product added successfully!");
-      onAdd?.(); // gọi callback cập nhật danh sách
-      reset();   // reset form sau khi thêm
+      alert("✅ Product added successfully!");
+      onAdd?.();
+      reset();
     } catch (error) {
       console.error("🚨 Error creating product", error);
-      alert("Error creating product");
+      alert("❌ Error creating product");
     }
   };
 
   return (
     <div className="max-w-screen-xl mx-auto w-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 my-4">
-      <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Add New Product</h2>
+      <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+        Add New Product
+      </h2>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="name">Product Name</Label>
-          <Input id="name" type="text" {...register("name")} />
-          {errors.name && <span className="text-red-500">{errors.name.message}</span>}
-        </div>
+      {loading ? (
+        <p className="text-center text-gray-600 dark:text-gray-300">Loading...</p>
+      ) : (
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="grid grid-cols-1 lg:grid-cols-2 gap-4"
+        >
+          <div>
+            <Label htmlFor="name">Product Name</Label>
+            <Input id="name" type="text" {...register("name")} />
+            {errors.name && (
+              <span className="text-red-500">{errors.name.message}</span>
+            )}
+          </div>
 
-        <div>
-          <Label htmlFor="price">Price</Label>
-          <Input id="price" type="text" {...register("price")} />
-          {errors.price && <span className="text-red-500">{errors.price.message}</span>}
-        </div>
+          <div>
+            <Label htmlFor="price">Price</Label>
+            <Input id="price" type="text" {...register("price")} />
+            {errors.price && (
+              <span className="text-red-500">{errors.price.message}</span>
+            )}
+          </div>
 
-        <div>
-          <Label htmlFor="discount">Discount (%)</Label>
-          <Input id="discount" type="number" {...register("discount", { valueAsNumber: true })} />
-          {errors.discount && <span className="text-red-500">{errors.discount.message}</span>}
-        </div>
+          <div>
+            <Label htmlFor="discount">Discount (%)</Label>
+            <Input
+              id="discount"
+              type="number"
+              {...register("discount", { valueAsNumber: true })}
+            />
+            {errors.discount && (
+              <span className="text-red-500">{errors.discount.message}</span>
+            )}
+          </div>
 
-        <div>
-          <Label htmlFor="category">Category</Label>
-          <Input id="category" type="text" {...register("category")} />
-          {errors.category && <span className="text-red-500">{errors.category.message}</span>}
-        </div>
+          <div>
+            <Label htmlFor="category">Category</Label>
+            <select
+              id="category"
+              {...register("category")}
+              className="p-2 w-full border rounded-md bg-white dark:bg-gray-900"
+            >
+              <option value="">-- Select Category --</option>
+              {categories.map((c) => (
+                <option key={c.categoryId} value={c.categoryId}>
+                  {c.categoryName}
+                </option>
+              ))}
+            </select>
+            {errors.category && (
+              <span className="text-red-500">{errors.category.message}</span>
+            )}
+          </div>
 
-        <div>
-          <Label htmlFor="brand">Brand</Label>
-          <Input id="brand" type="text" {...register("brand")} />
-          {errors.brand && <span className="text-red-500">{errors.brand.message}</span>}
-        </div>
+          <div>
+            <Label htmlFor="brand">Brand</Label>
+            <select
+              id="brand"
+              {...register("brand")}
+              className="p-2 w-full border rounded-md bg-white dark:bg-gray-900"
+            >
+              <option value="">-- Select Brand --</option>
+              {brands.map((b) => (
+                <option key={b.brandId} value={b.brandId}>
+                  {b.brandName}
+                </option>
+              ))}
+            </select>
+            {errors.brand && (
+              <span className="text-red-500">{errors.brand.message}</span>
+            )}
+          </div>
 
-        <div>
-          <Label htmlFor="type">Type</Label>
-          <select
-            id="type"
-            {...register("type")}
-            className="p-2 w-full border rounded-md bg-white dark:bg-gray-900"
-          >
-            <option value="featured">Featured</option>
-            <option value="top-rated">Top Rated</option>
-            <option value="most-popular">Most Popular</option>
-            <option value="new-arrivals">New Arrivals</option>
-          </select>
-          {errors.type && <span className="text-red-500">{errors.type.message}</span>}
-        </div>
+          <div>
+            <Label htmlFor="type">Type</Label>
+            <select
+              id="type"
+              {...register("type")}
+              className="p-2 w-full border rounded-md bg-white dark:bg-gray-900"
+            >
+              <option value="featured">Featured</option>
+              <option value="top-rated">Top Rated</option>
+              <option value="most-popular">Most Popular</option>
+              <option value="new-arrivals">New Arrivals</option>
+            </select>
+            {errors.type && (
+              <span className="text-red-500">{errors.type.message}</span>
+            )}
+          </div>
 
-        <div>
-          <Label htmlFor="description">Description</Label>
-          <textarea id="description" {...register("description")} className="p-2 w-full rounded-md border" />
-          {errors.description && <span className="text-red-500">{errors.description.message}</span>}
-        </div>
+          <div>
+            <Label htmlFor="description">Description</Label>
+            <textarea
+              id="description"
+              {...register("description")}
+              className="p-2 w-full rounded-md border"
+            />
+            {errors.description && (
+              <span className="text-red-500">
+                {errors.description.message}
+              </span>
+            )}
+          </div>
 
-        <div>
-          <Label htmlFor="aboutItem">About Item</Label>
-          <textarea id="aboutItem" {...register("aboutItem")} className="p-2 w-full rounded-md border" />
-        </div>
+          <div>
+            <Label htmlFor="aboutItem">About Item</Label>
+            <textarea
+              id="aboutItem"
+              {...register("aboutItem")}
+              className="p-2 w-full rounded-md border"
+            />
+          </div>
 
-        <div>
-          <Label htmlFor="images">Images (optional)</Label>
-          <Input id="images" type="file" multiple {...register("images")} />
-          {errors.images && <span className="text-red-500">{errors.images.message}</span>}
-        </div>
+          <div>
+            <Label htmlFor="images">Images (optional)</Label>
+            <Input id="images" type="file" multiple {...register("images")} />
+            {errors.images && (
+              <span className="text-red-500">{errors.images.message}</span>
+            )}
+          </div>
 
-        <div className="col-span-full">
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Submitting..." : "Submit"}
-          </Button>
-        </div>
-      </form>
+          <div className="col-span-full">
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Submitting..." : "Submit"}
+            </Button>
+          </div>
+        </form>
+      )}
     </div>
   );
 };
 
 export default ProductForm;
-
