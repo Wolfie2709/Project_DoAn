@@ -14,7 +14,7 @@ const AddToCartBtn = ({product}:{product:CartItem}) => {
 
   const handleAddToCart = () => {
     addToCart(product)
-    showToast('Item Added To The Cart', product.images[0].imageUrl, product.productName ?? "")
+    showToast('Item Added To The Cart', product.images[0]?.imageUrl, product.productName ?? "")
 
   }
 
