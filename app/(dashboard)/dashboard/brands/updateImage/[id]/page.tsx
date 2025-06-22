@@ -14,6 +14,7 @@ export default function UpdateImagePage() {
   const [imageUrl, setImageUrl] = useState('');
   const [originalImage, setOriginalImage] = useState<any>(null);
   const [response, setResponse] = useState<Response>();
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   //Ham lay get response
   const getResponse = () => {
@@ -91,26 +92,29 @@ export default function UpdateImagePage() {
       alert("Ban khong co quyen truy cap");
       throw new Error("Position khong hop le");
     }
-    try {
-      const updatedImage = {
-        ...originalImage, // giữ lại các thông tin không thay đổi
-        imageUrl: imageUrl, // chỉ thay đổi imageUrl
-      };
 
-      const res = await fetch(`https://localhost:7240/api/Images/${id}`, {
-        method: 'PUT',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${response.accessToken}`, // Thêm Authorization header
+    if (!selectedFile) {
+      alert("Vui lòng chọn file ảnh mới");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", selectedFile);
+
+    try {
+      const res = await fetch(`https://localhost:7240/api/Images/updateWithFile/${id}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${response.accessToken}`,
         },
-        body: JSON.stringify(updatedImage),
+        body: formData,
       });
 
-      if (!res.ok) throw new Error('Failed to update image');
-      alert('Image updated successfully');
-      router.push('/dashboard/brands'); // hoặc trở lại trang trước
+      if (!res.ok) throw new Error("Failed to update image");
+      alert("Image updated successfully");
+      router.push("/dashboard/brands");
     } catch (error) {
-      console.error('Error updating image:', error);
+      console.error("Error updating image:", error);
     }
   };
 
@@ -120,18 +124,17 @@ export default function UpdateImagePage() {
 
       {imageUrl && (
         <div className="mb-4">
-          <img src={imageUrl} alt="Current" className="w-full h-64 object-contain border rounded" />
+          <img src={`http://localhost:5267${imageUrl}`} alt="Current" className="w-full h-64 object-contain border rounded" />
         </div>
       )}
 
       <div className="mb-4">
-        <Label htmlFor="imageUrl" className="text-sm font-medium">Image URL</Label>
+        <Label htmlFor="newImage">Upload New Image</Label>
         <Input
-          id="imageUrl"
-          type="text"
-          value={imageUrl}
-          onChange={(e) => setImageUrl(e.target.value)}
-          className="mt-1"
+          id="newImage"
+          type="file"
+          accept="image/*"
+          onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
         />
       </div>
 
