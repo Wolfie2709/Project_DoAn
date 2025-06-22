@@ -92,13 +92,14 @@ export default function AddImagePage() {
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!file) {
-      alert("Vui lòng chọn ảnh");
-      return;
+    if (!response?.accessToken) throw new Error("Không có token đăng nhập");
+    if (response.employee?.position != "Manager") {
+      alert("Ban khong co quyen truy cap");
+      throw new Error("Position khong hop le");
     }
 
-    if (!response?.accessToken) {
-      alert("Không có token");
+    if (!file) {
+      alert("Vui lòng chọn ảnh");
       return;
     }
 

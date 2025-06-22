@@ -178,12 +178,19 @@ const CategoryPage = () => {
               className="bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden shadow-md"
             >
               <div className="relative w-full h-[16rem] p-2">
-                <Image
-                  src={category.images[0] ? category.images[0].imageUrl : ""}
-                  fill
-                  alt={category.categoryName}
-                  className="w-full h-64 object-contain"
-                />
+                {category.images?.length > 0 ? (
+                  <Image
+                    src={`http://localhost:5267${category.images[0].imageUrl}`}
+                    fill
+                    alt={category.categoryName}
+                    className="object-contain"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-gray-400">
+                    No image
+                  </div>
+                )}
               </div>
               <div className="p-6">
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
@@ -222,7 +229,6 @@ const CategoryPage = () => {
                       </button>
                     </PopoverContent>
                   </Popover>
-                  {/* Add more icons as needed */}
                 </div>
               </div>
             </div>
