@@ -81,7 +81,6 @@ export default function UpdateBrandPage() {
       router.push("/dashboard/brands")
     }
   }, [response])
-
   
   //Lay ra brand theo id
   useEffect(() => {
@@ -152,7 +151,7 @@ export default function UpdateBrandPage() {
           onClick={() => router.push(`/dashboard/brands/updateImage/${imageId}`)}
         >
           <img
-            src={imageUrl}
+            src={`http://localhost:5267${imageUrl}`}
             alt="Brand Image"
             className="w-full h-64 object-contain border rounded hover:opacity-75"
           />

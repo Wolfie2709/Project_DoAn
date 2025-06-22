@@ -226,3 +226,10 @@ export type CategoryParentListDto = {
   categoryName?: string;
   children: ChildCategoryDto[];
 }
+
+export type ImageAddDto = {
+  productId?: number;
+  brandId?: number;
+  categoryId?: number;
+  mainImage?: boolean;
+}

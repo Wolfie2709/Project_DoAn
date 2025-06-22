@@ -148,7 +148,7 @@ export default function UpdateCategoryPage() {
           onClick={() => router.push(`/dashboard/categories/updateImage/${imageId}`)}
         >
           <img
-            src={imageUrl}
+            src={`http://localhost:5267${imageUrl}`}
             alt="Category Image"
             className="w-full h-64 object-contain border rounded hover:opacity-75"
           />

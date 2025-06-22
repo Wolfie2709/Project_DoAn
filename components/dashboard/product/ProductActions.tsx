@@ -69,6 +69,12 @@ const ProductActions: React.FC<ProductActionsProps> = ({ productId, onDelete, po
           View Product
         </Link>
         <Link
+          href={`/dashboard/products/add-image/${productId}`}
+          className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+        >
+          Add Image
+        </Link>
+        <Link
           href={`/dashboard/products/update/${productId}`}
           className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
         >

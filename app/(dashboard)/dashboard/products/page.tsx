@@ -16,15 +16,11 @@ const ProductsPage = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
   const [position, setPosition] = useState<string | null>(null);
-  const searchParams = useSearchParams();
+  const [searchQuery, setSearchQuery] = useState("");
 
+  const searchParams = useSearchParams();
   const currentPage = parseInt(searchParams.get("productpage") || "1", 10);
   const itemsPerPage = 12;
-  const totalPages = Math.ceil(products.length / itemsPerPage);
-  const paginatedProducts = products.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
 
   const fetchData = async () => {
     setLoading(true);
@@ -56,10 +52,26 @@ const ProductsPage = () => {
     }
   }, []);
 
+  // 🔍 Filter theo từ khóa tìm kiếm
+  const filteredProducts = products.filter((product) =>
+    product.productName?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  const paginatedProducts = filteredProducts.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  console.log(products);
+
   return (
     <div className="max-w-screen-xl mx-auto w-full bg-white dark:bg-gray-900 rounded-xl shadow-md p-6 my-6">
-      <div className="flex items-center justify-between mb-6">
-        <ProductHeader />
+      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-6 gap-4">
+        <ProductHeader
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+        />
         <Link
           href="/dashboard/products/product-trashbin"
           className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-500 rounded hover:bg-red-600 transition"
@@ -86,18 +98,28 @@ const ProductsPage = () => {
               {paginatedProducts.map((product) => (
                 <tr key={product.productId} className="bg-white dark:bg-gray-800">
                   <td className="px-6 py-4">
-                    <Image
-                        src={product.images?.[0]?.imageUrl || "/placeholder.png"}
-                         alt="product image"
-                          width={40}
-                            height={40}
-                            className="object-cover border border-gray-300 dark:border-gray-600"
-                    />
-
+                    {product.images?.length > 0 ? (
+                      <Image
+                        src={`http://localhost:5267${product.images[0].imageUrl}`}
+                        width={148}
+                        height={67}
+                        alt={product.productName}
+                        className="object-fit"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-400">
+                        No image
+                      </div>
+                    )}
                   </td>
                   <td className="px-6 py-4">{product.productName || "No name"}</td>
-                  <td className="px-6 py-4 text-green-600 dark:text-green-400">${product.price?.toFixed(2)}</td>
-                  <td className="px-6 py-4">{product.category?.categoryName || "No category"}</td>
+                  <td className="px-6 py-4 text-green-600 dark:text-green-400">
+                    ${product.price?.toFixed(2)}
+                  </td>
+                  <td className="px-6 py-4">
+                    {product.category?.categoryName || "No category"}
+                  </td>
                   <td className="px-6 py-4">
                     <ProductActions
                       productId={product.productId}
@@ -114,7 +136,11 @@ const ProductsPage = () => {
 
       <div className="mt-6">
         <Suspense fallback={<Loader />}>
-          <Pagination totalPages={totalPages} currentPage={currentPage} pageName="productpage" />
+          <Pagination
+            totalPages={totalPages}
+            currentPage={currentPage}
+            pageName="productpage"
+          />
         </Suspense>
       </div>
     </div>
@@ -122,4 +148,3 @@ const ProductsPage = () => {
 };
 
 export default ProductsPage;
-

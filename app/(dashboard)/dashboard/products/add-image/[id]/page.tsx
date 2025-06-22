@@ -22,7 +22,7 @@ export default function AddImagePage() {
   const [file, setFile] = useState<File | null>(null);
   const [mainImage, setMainImage] = useState(false);
 
-  const { id } = useParams(); // categoryId từ URL
+  const { id } = useParams(); // brandId từ URL
   const router = useRouter();
 
   const {
@@ -79,7 +79,7 @@ export default function AddImagePage() {
       }
     } catch (error) {
       alert(error)
-      router.push("/dashboard/categories")
+      router.push("/dashboard/brands")
     }
   }, [response])
 
@@ -105,11 +105,11 @@ export default function AddImagePage() {
 
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("categoryId", id as string);
+    formData.append("productId", id as string);
     formData.append("mainImage", mainImage ? "true" : "false");
 
     try {
-      const fetchResponse = await fetch('https://localhost:7240/api/Images/upload', {
+      const res = await fetch("https://localhost:7240/api/Images/upload", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${response.accessToken}`,
@@ -117,21 +117,21 @@ export default function AddImagePage() {
         body: formData,
       });
 
-      if (!fetchResponse.ok) {
-        throw new Error('Failed to add image');
+      if (!res.ok) {
+        throw new Error("Failed to upload image");
       }
 
-      alert('Image added successfully!');
-      router.push('/dashboard/categories');
-    } catch (error) {
-      console.error('Error adding image:', error);
-      alert('Error adding image');
+      alert("Upload thành công!");
+      router.push("/dashboard/products");
+    } catch (err) {
+      console.error(err);
+      alert("Lỗi upload ảnh");
     }
   };
 
   return (
     <div className="bg-white dark:bg-gray-800 min-h-screen max-w-screen-xl w-full mx-auto px-4 py-12 m-2 rounded-md">
-      <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Thêm ảnh cho Category</h2>
+      <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Thêm ảnh cho Sản phẩm</h2>
       <form onSubmit={onSubmit} className="space-y-4">
         <div>
           <Label htmlFor="file" className="block text-sm font-medium text-gray-700 dark:text-white">

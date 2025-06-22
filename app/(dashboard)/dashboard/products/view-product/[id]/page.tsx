@@ -58,10 +58,11 @@ const ViewProductPage = () => {
         <div className="w-full md:w-1/2 h-96 relative bg-gray-100 rounded-md overflow-hidden">
           {product.images?.[0]?.imageUrl ? (
             <Image
-              src={product.images[0].imageUrl}
+              src={`http://localhost:5267${product.images[0].imageUrl}`}
               alt={product.productName}
-              fill
-              className="object-contain"
+              width={500}
+              height={500}
+              className="object-fit"
             />
           ) : (
             <div className="flex items-center justify-center h-full text-gray-400">
