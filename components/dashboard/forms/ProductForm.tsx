@@ -191,17 +191,6 @@ const ProductForm: React.FC<ProductFormProps> = ({ onAdd }) => {
           </div>
 
           <div>
-            <Label htmlFor="type">Type</Label>
-            <select id="type" {...register("type")} className="p-2 w-full border rounded-md bg-white dark:bg-gray-900">
-              <option value="featured">Featured</option>
-              <option value="top-rated">Top Rated</option>
-              <option value="most-popular">Most Popular</option>
-              <option value="new-arrivals">New Arrivals</option>
-            </select>
-            {errors.type && <span className="text-red-500">{errors.type.message}</span>}
-          </div>
-
-          <div>
             <Label htmlFor="description">Description</Label>
             <textarea id="description" {...register("description")} className="p-2 w-full rounded-md border" />
             {errors.description && <span className="text-red-500">{errors.description.message}</span>}
@@ -210,12 +199,6 @@ const ProductForm: React.FC<ProductFormProps> = ({ onAdd }) => {
           <div>
             <Label htmlFor="aboutItem">About Item</Label>
             <textarea id="aboutItem" {...register("aboutItem")} className="p-2 w-full rounded-md border" />
-          </div>
-
-          <div>
-            <Label htmlFor="images">Images (optional)</Label>
-            <Input id="images" type="file" multiple {...register("images")} />
-            {errors.images && <span className="text-red-500">{errors.images.message}</span>}
           </div>
 
           <div className="col-span-full">
