@@ -30,7 +30,7 @@ const Cart = () => {
 
   const handleRovomeItemFromCart = (item: CartItem) => {
     removeFromCart(item.productId);
-    showToast("Item Removed from Cart", item?.images[0].imageUrl, item?.productName ?? "");
+    showToast("Item Removed from Cart", item?.images[0]?.imageUrl, item?.productName ?? "");
   };
 
   useEffect(() => {

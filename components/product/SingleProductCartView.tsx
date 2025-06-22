@@ -87,6 +87,14 @@ const SingleProductCartView = ({ product }: { product: Product }) => {
             </span>
           )}
         </div>
+        <div className="text-lg font-bold space-x-3">
+          <span className="text-white-600">${discountedPrice}</span>
+          {discountedPrice && (
+            <span className="text-xl font-bold text-green-500">
+              ${discountedPrice}
+            </span>
+          )}
+        </div>
       </div>
     </Link>
   );
