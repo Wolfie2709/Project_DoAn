@@ -27,7 +27,7 @@ const RecentOrdersSection = ({recentOrderList}: Props) => {
                 <td className="px-6 py-4 whitespace-nowrap">{order.orderId}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{order.customerName}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{order.estimatedDate}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{order.totalCost} vnd</td>
+                <td className="px-6 py-4 whitespace-nowrap">$ {order.totalCost} </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${order.orderStatus === 'Shipped' ? 'bg-green-100 text-green-800' : order.orderStatus === 'Pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-blue-100 text-blue-800'}`}>{order.orderStatus}</span>
                 </td>

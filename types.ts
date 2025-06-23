@@ -35,7 +35,7 @@ export type Image = {
 export type Category = {
   categoryId: number;
   categoryName: string;
-  parentCategoryID: number | null;
+  parentCategoryId?: number | null;
   inverseParentCategory: Category;
   description: string;
   products: Product;

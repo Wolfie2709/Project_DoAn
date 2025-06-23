@@ -4,13 +4,14 @@ import HomePageChart from "@/components/dashboard/charts/HomePageChart";
 import ProductOverviewChart from "@/components/dashboard/charts/ProductOverviewChart";
 import RecentOrdersSection from "@/components/dashboard/order/RecentOrders";
 import StatisticsCard from "@/components/dashboard/statistics/StatisticsCard";
-import { Employee, OrderHomeDto, OrderChartDto } from "@/types";
+import { Employee, OrderHomeDto, OrderChartDto, Customer } from "@/types";
 import { Activity, DollarSign, ShoppingBag, Users } from "lucide-react";
 import React, { useEffect, useState, useMemo } from "react";
 
 const DashboardPageOne = () => {
   const [orders, setOrders] = useState<OrderHomeDto[]>([]);
   const [activeEmployees, setEmployees] = useState<Employee[]>([]);
+  const [activeCustomers, setCustomers] = useState<Customer[]>([]);
 
   // Lấy tất cả orders từ API
   const fetchOrders = async () => {
@@ -43,9 +44,24 @@ const DashboardPageOne = () => {
     }
   };
 
+  // Lấy danh sách employees (lọc active)
+  const fetchCustomers = async () => {
+    try {
+      const res = await fetch("https://localhost:7240/api/Customers");
+      const data: Customer[] = await res.json();
+
+      const activeCustomers = data.filter((customer) => customer.isDeletedStatus === false);
+      setCustomers(activeCustomers);
+    } catch (error) {
+      console.error("Lỗi khi fetch customer:", error);
+      setEmployees([]);
+    }
+  };
+
   useEffect(() => {
     fetchOrders();
     fetchEmployees();
+    fetchCustomers();
   }, []);
 
   // Tính revenue an toàn bằng useMemo
@@ -63,12 +79,12 @@ const DashboardPageOne = () => {
           value={revenue.toString()}
           icon={DollarSign}
         />
-        <StatisticsCard
+        {/* <StatisticsCard
           iconColor="bg-lime-500"
           title="Sales"
           value="$1,000"
           icon={ShoppingBag}
-        />
+        /> */}
         <StatisticsCard
           iconColor="bg-rose-500"
           title="Orders"
@@ -81,11 +97,17 @@ const DashboardPageOne = () => {
           value={activeEmployees.length.toString()}
           icon={Users}
         />
+        <StatisticsCard
+          iconColor="bg-violet-500"
+          title="Customers"
+          value={activeCustomers.length.toString()}
+          icon={Users}
+        />
       </div>
 
       <HomePageChart OrderList={orders} />
       <RecentOrdersSection recentOrderList={orders.slice(-5)} />
-      <ProductOverviewChart />
+      {/* <ProductOverviewChart OrderList={orders} /> */}
     </section>
   );
 };

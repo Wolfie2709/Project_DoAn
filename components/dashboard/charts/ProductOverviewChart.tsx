@@ -1,18 +1,15 @@
 "use client";
 import React from "react";
-import {
-  AreaChart,
-  Area,
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  Legend,
-} from "recharts";
+import { AreaChart, Area, ResponsiveContainer, 
+  BarChart, Bar, XAxis, YAxis, Tooltip, Legend,} from "recharts";
 
-const ProductOverviewChart = () => {
+import { OrderHomeDto, Category, Brand, CategoryParentListDto } from "@/types";
+
+type Props = {
+  OrderList: Array<OrderHomeDto>;
+};
+
+const ProductOverviewChart = ({ OrderList }: Props) => {
   // Sample data for the charts
   const productData = [
     { name: "Electronics", Sales: 3000 },
@@ -20,6 +17,8 @@ const ProductOverviewChart = () => {
     { name: "Home Appliances", Sales: 4000 },
     { name: "Books", Sales: 2000 },
   ];
+
+  // console.log(OrderList);
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
