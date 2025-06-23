@@ -196,8 +196,13 @@ const CategoryPage = () => {
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
                   {category.categoryName}
                 </h2>
-                <p className="text-gray-700 dark:text-gray-300">
-                  Description
+                <p className="text-gray-700 dark:text-gray-300 italic">
+                  {category.parentCategoryId === null
+                    ? `Sản phẩm ${category.categoryName}`
+                    : (() => {
+                      const parent = categories.find(c => c.categoryId === category.parentCategoryId);
+                      return parent ? `Thuộc ${parent.categoryName}` : "Danh mục con";
+                    })()}
                 </p>
                 <div className="mt-4 flex space-x-4">
 

@@ -8,13 +8,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from 'react';
-import { Response } from "@/types"
+import { Response } from "@/types";
+import { Category } from "@/types";
 
 // Define the schema for form validation
 const formSchema = z.object({
   name: z.string().min(1, "Category name is required"),
-  // image: z.string().url({ message: "Invalid URL format" }),
   description: z.string().min(1, "Description is required"),
+  parentCategoryId: z.string().nullable().optional(), // cho phép null
 });
 
 // Define TypeScript types for form data
@@ -22,6 +23,8 @@ type FormData = z.infer<typeof formSchema>;
 
 const CategoryForm: React.FC = () => {
   const [response, setResponse] = useState<Response>();
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [filteredCategories, setFilteredCategories] = useState<Category[]>([]);
 
   // Initialize react-hook-form
   const router = useRouter();
@@ -81,7 +84,31 @@ const CategoryForm: React.FC = () => {
       alert(error)
       router.push("/dashboard/categories")
     }
-  }, [response])
+  }, [response]);
+
+  //Lấy ra mọi category
+  const fetchCategories = async () => {
+
+    try {
+      const res = await fetch(`https://localhost:7240/api/Categories`);
+      const data: Category[] = await res.json();
+
+      // Lọc các category có activeStatus là true
+      const activeCategories = data.filter(category => category.activeStatus === true);
+
+      setCategories(activeCategories);
+      setFilteredCategories(activeCategories);
+      console.log(data)
+    } catch (error) {
+      console.error("Failed to fetch products", error);
+      setCategories([]);
+      setFilteredCategories([]);
+    }
+  }
+  // Update state with initial values
+  useEffect(() => {
+    fetchCategories();
+  }, [response]);
 
   // Form submission handler
   const onSubmit = async (data: FormData) => {
@@ -96,9 +123,10 @@ const CategoryForm: React.FC = () => {
         },
         body: JSON.stringify({
           categoryName: data.name,
-          parenCategoryId: null,
+          parentCategoryId: data.parentCategoryId ? parseInt(data.parentCategoryId) : null,
           addedBy: whichEmployee,
-          description: data.description
+          description: data.description,
+          activeStatus: true,
         }),
       });
 
@@ -114,6 +142,8 @@ const CategoryForm: React.FC = () => {
       console.error("Error submitting category:", error);
     }
   };
+
+  // console.log(filteredCategories);
 
   return (
     <div className="max-w-screen-xl w-full mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 my-4">
@@ -138,6 +168,26 @@ const CategoryForm: React.FC = () => {
           {errors.name && (
             <span className="text-red-500 text-sm">{errors.name.message}</span>
           )}
+        </div>
+        <div className="space-y-2">
+          <Label
+            htmlFor="parentCategoryId"
+            className="block text-sm font-medium text-gray-700 dark:text-white"
+          >
+            Parent Category
+          </Label>
+          <select
+            id="parentCategoryId"
+            {...register("parentCategoryId")}
+            className="mt-1 p-2 w-full rounded-md border border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-950"
+          >
+            <option value="">No Parent</option> {/* chọn null */}
+            {filteredCategories.map((category) => (
+              <option key={category.categoryId} value={category.categoryId}>
+                {category.categoryName}
+              </option>
+            ))}
+          </select>
         </div>
         <div className="space-y-2">
           <Label
