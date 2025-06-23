@@ -72,7 +72,15 @@ const Cart = () => {
                     className="flex items-center justify-start gap-2 p-2
                       mt-2 border-b-2 border-t-gray-500"
                   >
-                    {item.images && item.images[0] && <Image className="rounded-full object-contain" src={item.images[0].imageUrl} alt={item.images[0].imageUrl} width = {70} height = {70} />}
+                    {item.images && item.images[0] &&
+                      <Image
+                        src={`http://localhost:5267${item.images[0].imageUrl}`}
+                        width = {70}
+                        height = {70}
+                        alt={item.productName}
+                        className="object-contain"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      />}
                     <div className="space-y-2">
                       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-2">
                         <h2>{item?.productName?.slice(0, 50)}...</h2>

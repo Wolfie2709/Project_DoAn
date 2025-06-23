@@ -44,13 +44,20 @@ const CartItemsDetails = () => {
             className="flex flex-wrap items-center justify-between gap-1 md:gap-2 border-b border-gray-300 dark:border-gray-500 py-4 !m-0"
           >
             <div className="flex items-center space-x-4">
-              <Image
-                src={imageUrl}
-                alt={item.productName || "Product"}
-                height={64}
-                width={64}
-                className="w-16 h-16 rounded-lg object-cover"
-              />
+              {item.images?.length > 0 ? (
+                <Image
+                  src={`http://localhost:5267${item.images[0].imageUrl}`}
+                  width={64}
+                  height={64}
+                  alt={item.productName}
+                  className="object-contain"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-gray-400">
+                  No image
+                </div>
+              )}
               <Link
                 href={`/shop/${item.productId}`}
                 className="text-xl font-semibold text-gray-900 dark:text-white hover:opacity-60"

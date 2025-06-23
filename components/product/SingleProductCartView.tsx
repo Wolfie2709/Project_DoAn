@@ -40,12 +40,19 @@ const SingleProductCartView = ({ product }: { product: Product }) => {
     >
       <div className="w-full bg-gray-200 overflow-hidden">
         <div className="relative w-full h-[18rem] group-hover:scale-110 transition-all duration-300 rounded-md overflow-hidden">
-          <Image
-            className="object-contain"
-            src={imageUrl}
-            alt={productName || "Product Image"}
-            fill
-          />
+          {product.images?.length > 0 ? (
+            <Image
+              src={`http://localhost:5267${product.images[0].imageUrl}`}
+              fill
+              alt={product.productName}
+              className="object-contain"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-gray-400">
+              No image
+            </div>
+          )}
           {stock === 0 && (
             <p className="py-1 px-4 text-sm font-bold rounded-sm bg-rose-500 text-white absolute top-2 right-2">
               Out of stock

@@ -62,11 +62,25 @@ const MyAccountPage = () => {
     return <p className="p-4 text-center text-red-500">Failed to load account information.</p>;
   }
 
+  console.log("Customer: ", customerSession);
+  console.log("Employee: ", employeeSession);
+  console.log("User: ", user);
 
   return (
     <div className="px-4 py-8 lg:px-16 lg:py-12 bg-gray-100 dark:bg-gray-800">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl lg:text-4xl font-bold text-gray-800 dark:text-white mb-8">My Account</h1>
+
+        {/* Avatar
+        <div className="mt-8 bg-white dark:bg-gray-900 p-6 rounded-lg shadow-md">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">Address</h2>
+            <Link href="/my-account/edit" className="p-2 rounded-md border">
+              Edit Address
+            </Link>
+          </div>
+          <p className="text-gray-800 dark:text-white">{user.address}</p>
+        </div> */}
 
         {/* Personal Information */}
         <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-md">

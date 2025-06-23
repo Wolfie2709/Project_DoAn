@@ -23,6 +23,7 @@ const SingleProductListView = ({ product }: { product: Product }) => {
     price,
     discountedPrice,
     category,
+    images,
   } = product;
 
   const [mainImageUrl, setMainImageUrl] = useState("/placeholder.jpg");
@@ -54,12 +55,19 @@ const SingleProductListView = ({ product }: { product: Product }) => {
         href={`/shop/${productId}`}
         className="flex-shrink-0 w-[20rem] h-[18rem] relative rounded-md overflow-hidden bg-gray-200"
       >
-        <Image
-          className="object-contain"
-          src={mainImageUrl}
-          alt={productName || "Product Image"}
-          fill
-        />
+        {product.images?.length > 0 ? (
+          <Image
+            src={`http://localhost:5267${product.images[0].imageUrl}`}
+            fill
+            alt={product.productName}
+            className="object-contain"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-gray-400">
+            No image
+          </div>
+        )}
       </Link>
 
       {/* Product Details Section */}

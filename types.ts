@@ -25,8 +25,8 @@ export type Brand = {
 }
 
 export type Image = {
-  imageID: number;
-  productID: number;
+  imageId: number;
+  productId: number;
   mainImage?: boolean;
   imageUrl: string;
   product: Product;
