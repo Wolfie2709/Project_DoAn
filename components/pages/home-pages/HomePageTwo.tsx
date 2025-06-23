@@ -18,7 +18,7 @@ const HomePageTwo = () => {
       <Suspense fallback={<Loader />}>
         <CategorySectionOne />
       </Suspense>
-      <ProductsCollectionTwo />
+      {/* <ProductsCollectionTwo /> */}
       <BenefitsSection textCenter={true} />
       <BannerTwo />
       <TestimonialsSection textCenter={true} />

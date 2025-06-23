@@ -30,17 +30,28 @@ const ShopPageContainer = ({
   const fetchData = async () => {
     try {
       setLoading(true);
-      const query = new URLSearchParams({
-        categoryId: searchParams.category || "",
-        brandId: searchParams.brand || "",
-        color: searchParams.color || "",
-        min: searchParams.min || "",
-        max: searchParams.max || "",
-      }).toString();
   
+      // If there's a search keyword, use the search API
+      if (searchParams.search) {
+        const searchQuery = encodeURIComponent(searchParams.search.trim());
+        const res = await fetch(`https://localhost:7240/api/Products/search?query=${searchQuery}&limit=50&featured=false`);
+        const data: Product[] = await res.json();
+        setFilteredData(data);
+        setCurrentPage(1);
+        return;
+      }
+  
+      // Otherwise, use the filtering API
+      const queryParams: Record<string, string> = {};
+      if (searchParams.category) queryParams.categoryId = searchParams.category;
+      if (searchParams.brand) queryParams.brandId = searchParams.brand;
+      if (searchParams.min) queryParams.min = searchParams.min;
+      if (searchParams.max) queryParams.max = searchParams.max;
+      if (searchParams.color) queryParams.color = searchParams.color;
+  
+      const query = new URLSearchParams(queryParams).toString();
       const res = await fetch(`https://localhost:7240/api/Products?${query}`);
       const data: Product[] = await res.json();
-  
       setFilteredData(data);
       setCurrentPage(1);
     } catch (error) {
@@ -50,6 +61,8 @@ const ShopPageContainer = ({
       setLoading(false);
     }
   };
+  
+  
   
   useEffect(() => {
     fetchData();
