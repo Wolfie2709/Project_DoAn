@@ -1,6 +1,6 @@
-'use client'
+'use client';
 import Link from 'next/link';
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuthStore } from '@/store/authStore';
 
 const getCustomerById = async (id: string) => {
@@ -23,22 +23,34 @@ const getEmployeeById = async (id: string) => {
   return res.json();
 };
 
+const getOrdersForCustomer = async () => {
+  const res = await fetch(`https://localhost:7240/api/Orders/with-customer`, {
+    cache: 'no-store',
+  });
+  if (!res.ok) {
+    throw new Error('Failed to fetch orders');
+  }
+  return res.json();
+};
+
 const MyAccountPage = () => {
   const customerSession = useAuthStore((state) => state.customer);
   const employeeSession = useAuthStore((state) => state.employee);
-  const [user, setUser] = useState<any>(null); // Replace `any` with a union type if you want stricter typing
+  const [user, setUser] = useState<any>(null);
+  const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-
-    useEffect(() => {
+  useEffect(() => {
     const fetchUser = async () => {
       try {
         if (customerSession?.customerId) {
-          const data = await getCustomerById(customerSession.customerId.toString());
-          setUser({ ...data, type: 'customer' });
+          const customer = await getCustomerById(customerSession.customerId.toString());
+          const orderData = await getOrdersForCustomer();
+          setUser({ ...customer, type: 'customer' });
+          setOrders(orderData);
         } else if (employeeSession?.employeeId) {
-          const data = await getEmployeeById(employeeSession.employeeId.toString());
-          setUser({ ...data, type: 'employee' });
+          const employee = await getEmployeeById(employeeSession.employeeId.toString());
+          setUser({ ...employee, type: 'employee' });
         }
       } catch (err) {
         console.error(err);
@@ -61,7 +73,6 @@ const MyAccountPage = () => {
   if (!user) {
     return <p className="p-4 text-center text-red-500">Failed to load account information.</p>;
   }
-
 
   return (
     <div className="px-4 py-8 lg:px-16 lg:py-12 bg-gray-100 dark:bg-gray-800">
@@ -90,19 +101,17 @@ const MyAccountPage = () => {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Birthday</label>
-              <p className="text-gray-800 dark:text-white">
-                {new Date(user.birthday).toLocaleDateString()}
-              </p>
+              <p className="text-gray-800 dark:text-white">{new Date(user.birthday).toLocaleDateString()}</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Gender</label>
               <p className="text-gray-800 dark:text-white">{user.gender}</p>
             </div>
             {user.type === 'employee' && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Position</label>
-              <p className="text-gray-800 dark:text-white">{user.position}</p>
-            </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Position</label>
+                <p className="text-gray-800 dark:text-white">{user.position}</p>
+              </div>
             )}
           </div>
         </div>
@@ -119,20 +128,33 @@ const MyAccountPage = () => {
         </div>
 
         {/* Order History */}
-         {user.type === 'customer' && (
-        <div className="mt-8 bg-white dark:bg-gray-900 p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">Order History</h2>
-          <div className="border-t border-gray-200 dark:border-gray-700 py-4">
-            <div className="flex justify-between items-center">
-              <p className="text-gray-800 dark:text-white">Order</p>
-              <p className="text-gray-800 dark:text-white">$XX.XX</p>
-            </div>
-            <p className="text-gray-500 dark:text-gray-400">Date: MM/DD/YYYY</p>
-            <p className="text-gray-500 dark:text-gray-400">Status: Shipped</p>
+        {user.type === 'customer' && (
+          <div className="mt-8 bg-white dark:bg-gray-900 p-6 rounded-lg shadow-md">
+            <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">Order History</h2>
+            {orders.length === 0 ? (
+              <p className="text-gray-600 dark:text-gray-400">You have no orders.</p>
+            ) : (
+              <div className="space-y-4">
+                {orders.map((order) => (
+                  <div key={order.orderId} className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                    <div className="flex justify-between items-center">
+                      <p className="text-gray-800 dark:text-white font-medium">Order #{order.orderId}</p>
+                      <p className="text-gray-800 dark:text-white font-semibold">
+                        ${order.totalCost ? order.totalCost.toFixed(2) : '0.00'}
+                      </p>
+                    </div>
+                    <p className="text-gray-500 dark:text-gray-400">
+                      Date: {new Date(order.orderDate).toLocaleDateString()}
+                    </p>
+                    <p className="text-gray-500 dark:text-gray-400">Status: {order.status}</p>
+                    <p className="text-gray-500 dark:text-gray-400">Shipping Address: {order.shippingAddress}</p>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-        </div>
-          )}
-      </div> 
+        )}
+      </div>
     </div>
   );
 };
