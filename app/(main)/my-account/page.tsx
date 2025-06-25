@@ -74,13 +74,6 @@ const MyAccountPage = () => {
     return <p className="p-4 text-center text-red-500">Failed to load account information.</p>;
   }
 
-<<<<<<< HEAD
-  console.log("Customer: ", customerSession);
-  console.log("Employee: ", employeeSession);
-  console.log("User: ", user);
-
-=======
->>>>>>> Kiet_Dev
   return (
     <div className="px-4 py-8 lg:px-16 lg:py-12 bg-gray-100 dark:bg-gray-800">
       <div className="max-w-4xl mx-auto">
