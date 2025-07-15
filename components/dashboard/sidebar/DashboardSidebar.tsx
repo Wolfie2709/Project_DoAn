@@ -1,7 +1,9 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import React from "react";
+import React from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { cn } from '@/lib/utils';
 import {
   Home,
   ClipboardList,
@@ -10,62 +12,74 @@ import {
   Book,
   Users,
   Images,
+  Percent,
   Star,
-} from "lucide-react";
-import { usePathname } from "next/navigation";
-import { cn } from "@/lib/utils";
+  Database, // ✅ THÊM ICON BACKUP
+} from 'lucide-react';
 
 const DashboardSidebar = () => {
   const pathname = usePathname();
 
   const dashboardLinks = [
     {
-      link: "/dashboard",
-      label: "Home",
+      link: '/dashboard',
+      label: 'Home',
       icon: <Home size={20} />,
-      isActive: pathname === "/dashboard",
+      isActive: pathname === '/dashboard',
     },
     {
-      link: "/dashboard/orders",
-      label: "Orders",
+      link: '/dashboard/orders',
+      label: 'Orders',
       icon: <ClipboardList size={20} />,
-      isActive: pathname.includes("/dashboard/orders"),
+      isActive: pathname.includes('/dashboard/orders'),
     },
     {
-      link: "/dashboard/products",
-      label: "Products",
+      link: '/dashboard/products',
+      label: 'Products',
       icon: <Box size={20} />,
-      isActive: pathname.includes("/dashboard/products"),
+      isActive: pathname.includes('/dashboard/products'),
     },
     {
-      link: "/dashboard/categories",
-      label: "Categories",
+      link: '/dashboard/categories',
+      label: 'Categories',
       icon: <Layers size={20} />,
-      isActive: pathname.includes("/dashboard/categories"),
+      isActive: pathname.includes('/dashboard/categories'),
     },
     {
-      link: "/dashboard/customers",
-      label: "Customers",
+      link: '/dashboard/customers',
+      label: 'Customers',
       icon: <Images size={20} />,
-      isActive: pathname.includes("/dashboard/banners"),
+      isActive: pathname.includes('/dashboard/customers'),
     },
     {
-      link: "/dashboard/brands",
-      label: "Brands",
+      link: '/dashboard/brands',
+      label: 'Brands',
       icon: <Book size={20} />,
-      isActive: pathname.includes("/dashboard/brands"),
+      isActive: pathname.includes('/dashboard/brands'),
     },
     {
-      link: "/dashboard/employees",
-      label: "Employees",
+      link: '/dashboard/discounts',
+      label: 'Discounts',
+      icon: <Percent size={20} />,
+      isActive: pathname.includes('/dashboard/discounts'),
+    },
+    {
+      link: '/dashboard/employees',
+      label: 'Employees',
       icon: <Users size={20} />,
-      isActive: pathname.includes("/dashboard/employees"),
+      isActive: pathname.includes('/dashboard/employees'),
     },
     {
-      link: "/dashboard/reviews",
-      label: "Reviews",
+      link: '/dashboard/reviews',
+      label: 'Reviews',
       icon: <Star size={20} />,
-      isActive: pathname.includes("/dashboard/reviews"),
+      isActive: pathname.includes('/dashboard/reviews'),
+    },
+    {
+      link: '/dashboard/backup',
+      label: 'Backup',
+      icon: <Database size={20} />, // ✅ ICON DATABASE
+      isActive: pathname.includes('/dashboard/backup'), // ✅ ĐÁNH DẤU ACTIVE
     },
   ];
 
@@ -78,8 +92,8 @@ const DashboardSidebar = () => {
               <Link
                 href={link.link}
                 className={cn(
-                  "flex items-center text-lg w-full gap-2 p-2 rounded-md transition-colors duration-300 hover:bg-gray-200 dark:hover:bg-gray-800",
-                  link.isActive && "bg-slate-300 dark:bg-slate-700"
+                  'flex items-center text-lg w-full gap-2 p-2 rounded-md transition-colors duration-300 hover:bg-gray-200 dark:hover:bg-gray-800',
+                  link.isActive && 'bg-slate-300 dark:bg-slate-700'
                 )}
               >
                 {link.icon}

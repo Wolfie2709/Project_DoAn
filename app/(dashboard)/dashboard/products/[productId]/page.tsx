@@ -48,6 +48,10 @@ const ViewProductPage = () => {
   if (error) return <div>Error: {error}</div>;
   if (!product) return <div>Product not found</div>;
 
+  const finalPrice = product.discount
+    ? product.price * (1 - product.discount / 100)
+    : product.price;
+
   return (
     <div className="bg-white dark:bg-gray-800 min-h-screen max-w-screen-xl w-full mx-auto px-4 py-12 m-2 rounded-md">
       <div className="max-w-4xl mx-auto">
@@ -88,14 +92,25 @@ const ViewProductPage = () => {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Price
                 </label>
-                <p className="text-gray-800 dark:text-white">${product.price.toFixed(2)}</p>
+                {product.discount && product.discount > 0 ? (
+                  <div className="space-y-1">
+                    <p className="text-red-500 line-through">${product.price.toFixed(2)}</p>
+                    <p className="text-green-600 dark:text-green-400 font-semibold">
+                      ${finalPrice.toFixed(2)} (after {product.discount}% off)
+                    </p>
+                  </div>
+                ) : (
+                  <p className="text-gray-800 dark:text-white">${product.price.toFixed(2)}</p>
+                )}
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Discount
-                </label>
-                <p className="text-gray-800 dark:text-white">{product.discount ?? 0}%</p>
-              </div>
+              {product.discount !== undefined && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Discount
+                  </label>
+                  <p className="text-gray-800 dark:text-white">{product.discount}%</p>
+                </div>
+              )}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Stock

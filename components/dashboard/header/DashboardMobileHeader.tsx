@@ -71,8 +71,8 @@ const DashboardMobileHeader = () => {
     },
     {
     link: "/dashboard/reviews",
-    label: "Reviews", // 👈 mới thêm
-    icon: <Book size={20} />, // hoặc đổi sang icon khác như: <Star size={20} />
+    label: "Reviews", 
+    icon: <Book size={20} />,
     isActive: pathname.includes("dashboard/reviews"),
   },
   ];

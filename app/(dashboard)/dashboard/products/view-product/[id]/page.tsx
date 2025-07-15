@@ -3,14 +3,14 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
-import Link from "next/link"; // 👈 THÊM Link
-import AddToCartBtn from "@/components/buttons/AddToCartBtn";
+import Link from "next/link";
 
 type Product = {
   productId: number;
   productName: string;
   description: string;
   price: number;
+  discount?: number;
   images: { imageUrl: string }[];
   stock: number;
   brand?: { brandName: string };
@@ -41,6 +41,10 @@ const ViewProductPage = () => {
 
   if (!product) return <div>⏳ Loading...</div>;
 
+  const finalPrice = product.discount
+    ? product.price * (1 - product.discount / 100)
+    : product.price;
+
   return (
     <div className="max-w-screen-lg mx-auto p-4">
       {/* 👇 Nút quay lại */}
@@ -69,12 +73,30 @@ const ViewProductPage = () => {
             </div>
           )}
         </div>
-        <div className="md:w-1/2">
-          <p className="mb-2 text-gray-600">Category: {product.category?.categoryName || "N/A"}</p>
-          <p className="mb-2 text-gray-600">Brand: {product.brand?.brandName || "N/A"}</p>
-          <p className="mb-4">{product.description}</p>
-          <p className="text-2xl font-bold mb-4">${product.price.toFixed(2)}</p>
-          <p className="mb-4">Stock: {product.stock}</p>
+
+        <div className="md:w-1/2 space-y-4">
+          <p className="text-gray-600">Category: {product.category?.categoryName || "N/A"}</p>
+          <p className="text-gray-600">Brand: {product.brand?.brandName || "N/A"}</p>
+          <p>{product.description}</p>
+
+          {/* 💰 Giá gốc và giá sau discount */}
+          <div className="text-2xl font-bold text-gray-800">
+            {product.discount && product.discount > 0 ? (
+              <div>
+                <span className="line-through text-red-500 mr-2">
+                  ${product.price.toFixed(2)}
+                </span>
+                <span className="text-green-600">
+                  ${finalPrice.toFixed(2)}{" "}
+                  <span className="text-sm text-gray-500">({product.discount}% off)</span>
+                </span>
+              </div>
+            ) : (
+              <span>${product.price.toFixed(2)}</span>
+            )}
+          </div>
+
+          <p className="text-gray-700">Stock: {product.stock}</p>
         </div>
       </div>
     </div>

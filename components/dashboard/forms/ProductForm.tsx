@@ -162,11 +162,6 @@ const ProductForm: React.FC<ProductFormProps> = ({ onAdd }) => {
             {errors.stock && <span className="text-red-500">{errors.stock.message}</span>}
           </div>
 
-          <div>
-            <Label htmlFor="discount">Discount (%)</Label>
-            <Input id="discount" type="number" {...register("discount", { valueAsNumber: true })} />
-            {errors.discount && <span className="text-red-500">{errors.discount.message}</span>}
-          </div>
 
           <div>
             <Label htmlFor="category">Category</Label>
