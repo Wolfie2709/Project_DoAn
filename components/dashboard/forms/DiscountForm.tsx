@@ -34,6 +34,7 @@ const DiscountForm = () => {
   const router = useRouter();
 
   const [products, setProducts] = useState<Product[]>([]);
+  const [selectedProductId, setSelectedProductId] = useState<string>('');
   const [response, setResponse] = useState<Response | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -47,7 +48,6 @@ const DiscountForm = () => {
     resolver: zodResolver(formSchema),
   });
 
-  // Load token / session
   useEffect(() => {
     try {
       const stored = sessionStorage.getItem('food-storage');
@@ -60,7 +60,6 @@ const DiscountForm = () => {
     }
   }, [router]);
 
-  // Load products
   useEffect(() => {
     fetch('https://localhost:7240/api/Products')
       .then((res) => {
@@ -82,7 +81,7 @@ const DiscountForm = () => {
       endDate: new Date(data.endDate).toISOString(),
       productId: Number(data.productId),
       discount: parseFloat(data.discount),
-      addedBy: Number(response.employee?.employeeId ?? 0), // 👈 Phải là int
+      addedBy: Number(response.employee?.employeeId ?? 0),
     };
 
     try {
@@ -97,7 +96,8 @@ const DiscountForm = () => {
 
       if (res.ok) {
         alert('Discount added successfully');
-        reset(); // reset form
+        reset();
+        setSelectedProductId('');
         router.push('/dashboard/discounts');
       } else {
         const errText = await res.text();
@@ -118,45 +118,45 @@ const DiscountForm = () => {
         Add Discount
       </h2>
       <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Event Name */}
         <div className="space-y-2">
           <Label htmlFor="eventName">Event Name</Label>
           <Input id="eventName" {...register('eventName')} className={errors.eventName ? 'border-red-500' : ''} />
           {errors.eventName && <span className="text-sm text-red-500">{errors.eventName.message}</span>}
         </div>
 
-        {/* Description */}
         <div className="space-y-2">
           <Label htmlFor="description">Description</Label>
           <Input id="description" {...register('description')} className={errors.description ? 'border-red-500' : ''} />
           {errors.description && <span className="text-sm text-red-500">{errors.description.message}</span>}
         </div>
 
-        {/* Start Date */}
         <div className="space-y-2">
           <Label htmlFor="startDate">Start Date</Label>
           <Input type="datetime-local" id="startDate" {...register('startDate')} className={errors.startDate ? 'border-red-500' : ''} />
           {errors.startDate && <span className="text-sm text-red-500">{errors.startDate.message}</span>}
         </div>
 
-        {/* End Date */}
         <div className="space-y-2">
           <Label htmlFor="endDate">End Date</Label>
           <Input type="datetime-local" id="endDate" {...register('endDate')} className={errors.endDate ? 'border-red-500' : ''} />
           {errors.endDate && <span className="text-sm text-red-500">{errors.endDate.message}</span>}
         </div>
 
-        {/* Discount */}
         <div className="space-y-2">
           <Label htmlFor="discount">Discount (%)</Label>
           <Input type="number" id="discount" step="0.01" {...register('discount')} className={errors.discount ? 'border-red-500' : ''} />
           {errors.discount && <span className="text-sm text-red-500">{errors.discount.message}</span>}
         </div>
 
-        {/* Product Select */}
         <div className="space-y-2">
           <Label>Product</Label>
-          <Select onValueChange={(val) => setValue('productId', val)}>
+          <Select
+            value={selectedProductId}
+            onValueChange={(val) => {
+              setValue('productId', val);
+              setSelectedProductId(val);
+            }}
+          >
             <SelectTrigger className={errors.productId ? 'border-red-500' : ''}>
               <SelectValue placeholder="Select a product" />
             </SelectTrigger>
@@ -171,7 +171,6 @@ const DiscountForm = () => {
           {errors.productId && <span className="text-sm text-red-500">{errors.productId.message}</span>}
         </div>
 
-        {/* Submit */}
         <div className="lg:col-span-2 text-right">
           <Button type="submit" disabled={loading} className="bg-blue-500 hover:bg-blue-600 text-white">
             {loading ? 'Adding...' : 'Add Discount'}

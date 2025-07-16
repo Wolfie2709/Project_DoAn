@@ -111,15 +111,9 @@ const DiscountsPage = () => {
   }, [response]);
 
   const softDeleteDiscount = async (id: number) => {
-    if (!response?.accessToken) {
-      alert('Missing access token');
-      return;
-    }
-
-    if (!['Manager', 'Admin'].includes(response.employee.position)) {
-      alert('You are not authorized to soft delete.');
-      return;
-    }
+    if (!response?.accessToken) return alert('Missing access token');
+    if (!['Manager', 'Admin'].includes(response.employee.position))
+      return alert('You are not authorized to soft delete.');
 
     const confirmed = confirm('Are you sure you want to hide this discount?');
     if (!confirmed) return;
@@ -151,6 +145,9 @@ const DiscountsPage = () => {
     setSelectedDiscount(null);
     setIsModalOpen(false);
   };
+
+  const getProductsForDiscount = (discountId: number) =>
+    productsWithDiscount.filter(p => p.eventName === selectedDiscount?.eventName);
 
   return (
     <div className="max-w-screen-xl mx-auto w-full bg-white dark:bg-gray-900 rounded-xl shadow-md p-6 my-6">
@@ -213,43 +210,12 @@ const DiscountsPage = () => {
         </div>
       )}
 
-      {productsWithDiscount.length > 0 && (
-        <div className="mt-10">
-          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-            🛍️ Products With Discounts
-          </h3>
-          <div className="overflow-x-auto rounded-md border dark:border-gray-700">
-            <table className="min-w-full table-auto text-sm text-left">
-              <thead className="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-200 uppercase text-xs">
-                <tr>
-                  <th className="px-4 py-3">Product Name</th>
-                  <th className="px-4 py-3">Original Price</th>
-                  <th className="px-4 py-3">Discount (%)</th>
-                  <th className="px-4 py-3">Final Price</th>
-                  <th className="px-4 py-3">Event</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y dark:divide-gray-700">
-                {productsWithDiscount.map(p => (
-                  <tr key={p.productId} className="bg-white dark:bg-gray-800">
-                    <td className="px-4 py-3">{p.productName}</td>
-                    <td className="px-4 py-3">{p.price.toLocaleString('vi-VN')}₫</td>
-                    <td className="px-4 py-3">{p.discountPercent}%</td>
-                    <td className="px-4 py-3 text-green-600 font-semibold">{p.finalPrice.toLocaleString('vi-VN')}₫</td>
-                    <td className="px-4 py-3">{p.eventName}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
+      {/* MODAL HIỂN THỊ CHI TIẾT DISCOUNT + SẢN PHẨM */}
       {isModalOpen && selectedDiscount && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-lg shadow-lg relative">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-2xl shadow-lg relative overflow-y-auto max-h-[80vh]">
             <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-white">Discount Details</h3>
-            <div className="space-y-2 text-sm text-gray-700 dark:text-gray-200">
+            <div className="space-y-2 text-sm text-gray-700 dark:text-gray-200 mb-4">
               <p><strong>ID:</strong> {selectedDiscount.discountId}</p>
               <p><strong>Event Name:</strong> {selectedDiscount.eventName}</p>
               <p><strong>Description:</strong> {selectedDiscount.description}</p>
@@ -258,6 +224,36 @@ const DiscountsPage = () => {
               <p><strong>Added By:</strong> {selectedDiscount.addedBy}</p>
               <p><strong>Created At:</strong> {new Date(selectedDiscount.createdAt).toLocaleString()}</p>
             </div>
+
+            {/* SẢN PHẨM GIẢM GIÁ */}
+            <h4 className="text-md font-semibold text-gray-800 dark:text-white mt-4 mb-2">
+              📦 Products in this Discount
+            </h4>
+            <table className="min-w-full text-sm border dark:border-gray-600">
+              <thead className="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-200">
+                <tr>
+                  <th className="px-4 py-2">Product</th>
+                  <th className="px-4 py-2">Original Price</th>
+                  <th className="px-4 py-2">Discount</th>
+                  <th className="px-4 py-2">Final Price</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y dark:divide-gray-700">
+                {getProductsForDiscount(selectedDiscount.discountId).map(p => (
+                  <tr key={p.productId} className="bg-white dark:bg-gray-800">
+                    <td className="px-4 py-2">{p.productName}</td>
+                    <td className="px-4 py-2 text-gray-500 line-through">
+                      {p.price.toLocaleString('vi-VN')}₫
+                    </td>
+                    <td className="px-4 py-2">{p.discountPercent}%</td>
+                    <td className="px-4 py-2 font-semibold text-green-600">
+                      {p.finalPrice.toLocaleString('vi-VN')}₫
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
             <div className="mt-4 text-right">
               <Button onClick={closeModal}>Close</Button>
             </div>
